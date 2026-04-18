@@ -20,7 +20,7 @@ namespace IcdFyIt.Core.Model;
 public abstract class DataType
 {
     [XmlAttribute]
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [XmlAttribute]
     public string Name { get; set; } = string.Empty;

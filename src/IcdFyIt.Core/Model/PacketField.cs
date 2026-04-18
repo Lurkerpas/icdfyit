@@ -13,14 +13,21 @@ public class PacketField
 
     public string? Description { get; set; }
 
-    /// <summary>Nullable: reference to a Parameter; may be null if deleted.</summary>
+    [XmlIgnore]
     public Parameter? Parameter { get; set; }
 
-    /// <summary>Whether this field acts as a type indicator within a packet.</summary>
+    /// <summary>GUID reference for XML serialization; resolved post-load.</summary>
+    [XmlAttribute("ParameterRef")]
+    public string? ParameterIdRef
+    {
+        get => Parameter?.Id.ToString();
+        set => _storedParameterIdRef = value;
+    }
+    internal string? _storedParameterIdRef;
+
     [XmlAttribute]
     public bool IsTypeIndicator { get; set; }
 
-    /// <summary>Value compared against this field to identify the enclosing packet type.</summary>
     [XmlAttribute]
     public string? IndicatorValue { get; set; }
 }

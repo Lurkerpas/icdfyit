@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:IcdFyIt.App.ViewModels"
         x:Class="IcdFyIt.App.Views.MainWindow"
-        Title="icdfyit"
+        Title="{Binding Title}"
         Width="1024" Height="768"
         MinWidth="800" MinHeight="600">
 

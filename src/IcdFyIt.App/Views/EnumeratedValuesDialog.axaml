@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="IcdFyIt.App.Views.EnumeratedValuesDialog"
+        Title="{Binding TypeName, StringFormat='Enumerated Values – {0}'}"
+        Width="520" Height="400"
+        MinWidth="320" MinHeight="240"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="8">
+
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                    Spacing="4" Margin="0,0,0,6">
+            <Button Content="Add"    Command="{Binding AddCommand}"/>
+            <Button Content="Remove" Command="{Binding RemoveCommand}"/>
+        </StackPanel>
+
+        <Button DockPanel.Dock="Bottom" Content="Close"
+                HorizontalAlignment="Right" Margin="0,6,0,0"
+                IsDefault="True" Click="OnCloseClicked"/>
+
+        <DataGrid ItemsSource="{Binding Values}"
+                  SelectedItem="{Binding SelectedValue, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="False"
+                  CanUserResizeColumns="True"
+                  CellEditEnded="OnCellEditEnded">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name"
+                                    Binding="{Binding Name, Mode=TwoWay}"
+                                    Width="*"/>
+                <DataGridTextColumn Header="Raw Values (comma-separated)"
+                                    Binding="{Binding RawValuesText, Mode=TwoWay}"
+                                    Width="2*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </DockPanel>
+</Window>

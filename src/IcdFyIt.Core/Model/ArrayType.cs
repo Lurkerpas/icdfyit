@@ -12,11 +12,17 @@ public sealed class ArrayType : DataType
     [XmlIgnore]
     public override BaseType Kind => BaseType.Array;
 
-    /// <summary>
-    /// The element type of this array.
-    /// Nullable: set to null when the referenced type is deleted (ICD-FUN-40).
-    /// </summary>
+    [XmlIgnore]
     public DataType? ElementType { get; set; }
+
+    /// <summary>GUID reference for XML serialization; resolved post-load.</summary>
+    [XmlAttribute("ElementTypeRef")]
+    public string? ElementTypeIdRef
+    {
+        get => ElementType?.Id.ToString();
+        set => _storedElementTypeIdRef = value;
+    }
+    internal string? _storedElementTypeIdRef;
 
     public ArraySizeDescriptor? ArraySize { get; set; }
 }

@@ -11,5 +11,9 @@ public sealed class EnumeratedType : DataType
     [XmlIgnore]
     public override BaseType Kind => BaseType.Enumerated;
 
+    /// <summary>Wire-size of the encoded enumeration value in bits.</summary>
+    [XmlAttribute]
+    public int BitSize { get; set; } = 8;
+
     public List<EnumeratedValue> Values { get; set; } = new();
 }

@@ -5,8 +5,9 @@ using IcdFyIt.Core.Services;
 namespace IcdFyIt.App.ViewModels;
 
 /// <summary>
-/// ViewModel for the main application window.
-/// Coordinates DataModelManager actions and exposes top-level commands (ICD-DES §5.1).
+/// ViewModel for the main application window (ICD-DES §5.1).
+/// File-dialog interactions are injected as delegates from the composition root so the
+/// ViewModel remains View-free (testable).
 /// </summary>
 public partial class MainWindowViewModel : ObservableObject
 {
@@ -19,30 +20,90 @@ public partial class MainWindowViewModel : ObservableObject
         _dirtyTracker = dirtyTracker;
     }
 
-    /// <summary>Displayed in the title bar; includes unsaved indicator when dirty.</summary>
+    // ── Delegates wired from the composition root ──────────────────────────────
+
+    /// <summary>Shows an Open-file-dialog; returns the chosen path or null if cancelled.</summary>
+    public Func<Task<string?>>? OpenFileDialog { get; set; }
+
+    /// <summary>Shows a Save-file-dialog; returns the chosen path or null if cancelled.</summary>
+    public Func<string?, Task<string?>>? SaveFileDialog { get; set; }
+
+    /// <summary>Opens (or focuses) the Data Types window.</summary>
+    public Action? ShowDataTypesWindow { get; set; }
+
+    // ── Title bar ──────────────────────────────────────────────────────────────
+
     [ObservableProperty]
     private string _title = "icdfyit";
 
-    [RelayCommand]
-    private void NewDocument() => throw new NotImplementedException();
+    private void RefreshTitle()
+    {
+        var file = _dataModelManager.CurrentFilePath is { } p
+            ? System.IO.Path.GetFileName(p)
+            : "Untitled";
+        Title = _dirtyTracker.IsDirty
+            ? $"{file}* — icdfyit"
+            : $"{file} — icdfyit";
+    }
+
+    // ── File commands ──────────────────────────────────────────────────────────
 
     [RelayCommand]
-    private void OpenDocument() => throw new NotImplementedException();
+    private void NewDocument()
+    {
+        _dataModelManager.New();
+        RefreshTitle();
+    }
 
     [RelayCommand]
-    private void SaveDocument() => throw new NotImplementedException();
+    private async Task OpenDocument()
+    {
+        var path = await (OpenFileDialog?.Invoke() ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+        _dataModelManager.Open(path);
+        RefreshTitle();
+    }
 
     [RelayCommand]
-    private void SaveDocumentAs() => throw new NotImplementedException();
+    private async Task SaveDocument()
+    {
+        var path = _dataModelManager.CurrentFilePath
+            ?? await (SaveFileDialog?.Invoke(null) ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+        _dataModelManager.Save(path);
+        RefreshTitle();
+    }
 
     [RelayCommand]
-    private void Undo() => throw new NotImplementedException();
+    private async Task SaveDocumentAs()
+    {
+        var path = await (SaveFileDialog?.Invoke(_dataModelManager.CurrentFilePath)
+            ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+        _dataModelManager.Save(path);
+        RefreshTitle();
+    }
+
+    // ── Edit commands ──────────────────────────────────────────────────────────
 
     [RelayCommand]
-    private void Redo() => throw new NotImplementedException();
+    private void Undo()
+    {
+        _dataModelManager.Undo();
+        RefreshTitle();
+    }
 
     [RelayCommand]
-    private void OpenDataTypes() => throw new NotImplementedException();
+    private void Redo()
+    {
+        _dataModelManager.Redo();
+        RefreshTitle();
+    }
+
+    // ── Window navigation ──────────────────────────────────────────────────────
+
+    [RelayCommand]
+    private void OpenDataTypes() => ShowDataTypesWindow?.Invoke();
 
     [RelayCommand]
     private void OpenParameters() => throw new NotImplementedException();
@@ -61,4 +122,8 @@ public partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void RunValidation() => throw new NotImplementedException();
+
+    // ── Dirty notification (called from DataTypesWindow after inline edits) ───
+
+    public void NotifyModelEdited() => RefreshTitle();
 }

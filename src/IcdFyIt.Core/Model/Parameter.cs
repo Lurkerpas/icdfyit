@@ -9,7 +9,7 @@ namespace IcdFyIt.Core.Model;
 public class Parameter
 {
     [XmlAttribute]
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [XmlAttribute]
     public string Name { get; set; } = string.Empty;
@@ -19,7 +19,17 @@ public class Parameter
     public string? LongDescription { get; set; }
 
     /// <summary>Nullable: reference to a DataType; may be null if deleted.</summary>
+    [XmlIgnore]
     public DataType? DataType { get; set; }
+
+    /// <summary>GUID reference for XML serialization; resolved post-load by XmlPersistence.</summary>
+    [XmlAttribute("DataTypeRef")]
+    public string? DataTypeIdRef
+    {
+        get => DataType?.Id.ToString();
+        set => _storedDataTypeIdRef = value;
+    }
+    internal string? _storedDataTypeIdRef;
 
     [XmlAttribute]
     public int NumericId { get; set; }

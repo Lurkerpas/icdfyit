@@ -41,6 +41,7 @@
 
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
         <!--
             Explicit background overrides.  These are evaluated AFTER FluentTheme
             so they have higher precedence for the same selector+property pair,
