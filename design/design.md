@@ -7,26 +7,32 @@ icdfyit is a cross-platform desktop application for authoring Interface Control 
 ## 2. Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Avalonia UI Layer                     │
-│  MainWindow · DataTypesWindow · ParametersWindow        │
-│  ExportWindow · OptionsWindow                           │
-├─────────────────────────────────────────────────────────┤
-│                    ViewModel Layer                       │
-│  Per-window ViewModels · Undo/Redo Manager              │
-│  Shared reactive DataModelService                       │
-├─────────────────────────────────────────────────────────┤
-│                    Domain / Model Layer                  │
-│  DataType · Parameter · PacketType · TemplateSet        │
-├──────────────────────┬──────────────────────────────────┤
-│   Persistence        │       Export Engine               │
-│   XML Serialization  │  Python.NET → Mako Renderer      │
-└──────────────────────┴──────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│                       Avalonia UI Layer                       │
+│  MainWindow · DataTypesWindow · ParametersWindow             │
+│  ExportWindow · OptionsWindow · ValidationDialog             │
+├───────────────────────────────────────────────────────────────┤
+│                       ViewModel Layer                         │
+│  Per-window ViewModels                                       │
+├───────────────────────────────────────────────────────────────┤
+│                       Service Layer                           │
+│  DataModelManager · UndoRedoManager · ModelValidator         │
+│  ChangeNotifier · DirtyTracker                               │
+├───────────────────────────────────────────────────────────────┤
+│                       Domain / Model Layer                    │
+│  DataType · Parameter · PacketType (all with GUID)           │
+├──────────────┬──────────────┬─────────────────────────────────┤
+│  Persistence │ Export Engine │ Infrastructure                  │
+│  XmlPersist  │ MakoRenderer │ OptionsManager · LogManager    │
+│  (GUID refs) │ (Python.NET) │                                │
+└──────────────┴──────────────┴─────────────────────────────────┘
 ```
 
-The application follows the **MVVM** pattern. All windows share a single `DataModelService` that holds the in-memory Data Model and exposes change notifications so updates propagate reactively across all controls and open windows (ICD-IF-140).
+The application follows the **MVVM** pattern. All windows share a common service layer that holds the in-memory Data Model and exposes change notifications so updates propagate reactively across all controls and open windows (ICD-IF-140).
 
 ## 3. Data Model
+
+Every entity (Data Type, Parameter, Packet Type) carries a **GUID**, automatically assigned on creation, used for internal identification and reference serialization (ICD-FUN-41).
 
 ### 3.1 Data Types
 
@@ -47,6 +53,8 @@ Each Data Type has a **name** (unique within the Data Model) and a **base type**
 
 Enumerated values map a symbolic name to a *set* of integer raw values (e.g., name "low" → raw values 1, 2, 3).
 
+Circular references between Data Types (e.g., Structure A → Structure B → Structure A) are forbidden (ICD-FUN-42). This is enforced by validation.
+
 ### 3.2 Parameters
 
 | Field | Type | Notes |
@@ -54,7 +62,7 @@ Enumerated values map a symbolic name to a *set* of integer raw values (e.g., na
 | Name | string | required, unique within Data Model |
 | Short Description | string | optional |
 | Long Description | string | optional |
-| Data Type | Data Type ref | required |
+| Data Type | Data Type ref | required; nullable if referent is deleted |
 | ID | integer | required, unique within Data Model |
 | Mnemonic | string | optional |
 | Kind | enum | see below |
@@ -77,7 +85,7 @@ A Packet Type is either **Telecommand** or **Telemetry**. It has a **name** (uni
 |---|---|---|
 | Name | string | required |
 | Description | string | optional |
-| Parameter | Parameter ref | required (many-to-one) |
+| Parameter | Parameter ref | required (many-to-one); nullable if referent is deleted |
 | Is Type Indicator | bool | if true, Parameter must be of Kind ID and the field carries a hex value |
 | Indicator Value | hex string | present when Is Type Indicator is true |
 
@@ -98,61 +106,99 @@ Each **Template**:
 | File Path | string | absolute or relative path to a Mako template file |
 | Output Name Pattern | string | Mako expression rendered to produce the output file name |
 
+Template Sets are stored in `settings.xml`, separate from the Data Model XML (ICD-DES-81).
+
 ## 4. Component Design
 
 ### 4.1 `DataModel`
 
-Central domain object aggregating all Data Types, Parameters, and Packet Types. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time.
+Central domain object aggregating all Data Types, Parameters, and Packet Types. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time as a variable named `model`.
 
-References between entities (e.g., Parameter → Data Type, Packet Field → Parameter) are nullable. When a referenced entity is deleted, all references to it are set to null (ICD-FUN-51). The UI tolerates null references gracefully, allowing the user to select a replacement later. The **Validate Model** action (ICD-FUN-52) detects null references and other constraint violations.
+References between entities (e.g., Parameter → Data Type, Packet Field → Parameter) are stored as GUID-based nullable references. When a referenced entity is deleted, all references to it are set to null (ICD-FUN-51). The UI tolerates null references gracefully (displaying a placeholder or blank), allowing the user to select a replacement later.
 
-### 4.2 `DataModelService`
+### 4.2 Service Layer
 
-Singleton service owning the current `DataModel` instance. Responsibilities:
+The former monolithic `DataModelService` is decomposed into focused, single-responsibility classes:
 
-- CRUD operations on Data Types, Parameters, Packet Types.
-- Change notification via `IObservable`/`INotifyPropertyChanged` so all bound ViewModels update reactively.
-- Undo/Redo command stack (records add/delete/modify operations as reversible commands). The stack is global across all entity types, with a configurable maximum depth (default: 64, stored in settings).
-- Dirty-tracking flag, set on any mutation and cleared on save. Used by the UI layer to guard against closing with unsaved changes (ICD-IF-180).
-- New / Open / Save workflow (XML serialization). "New" creates an empty Data Model (ICD-FUN-50).
-- Model validation: scans for null references, duplicate names/IDs, and other constraint violations; reports results to the user (ICD-FUN-52).
+#### 4.2.1 `DataModelManager`
 
-### 4.3 XML Persistence
+Singleton owning the current `DataModel` instance. Orchestrates high-level workflows:
+
+- New / Open / Save (delegates serialization to `XmlPersistence`).
+- "New" creates an empty Data Model (ICD-FUN-50).
+- CRUD operations on Data Types, Parameters, Packet Types — each operation is routed through `UndoRedoManager` and `ChangeNotifier`.
+
+#### 4.2.2 `ChangeNotifier`
+
+Centralizes change-notification logic. Exposes `INotifyPropertyChanged` and `ObservableCollection<T>` events consumed by all ViewModels, ensuring reactive propagation across controls and windows (ICD-IF-140).
+
+#### 4.2.3 `DirtyTracker`
+
+Tracks whether the Data Model has been modified since the last save. Set on any mutation, cleared on save. Consumed by the UI to guard against closing with unsaved changes (ICD-IF-180).
+
+#### 4.2.4 `UndoRedoManager`
+
+Implements the **Command** pattern. Every mutating operation (add, delete, modify) is wrapped in a reversible command object pushed onto a global undo stack. Redo is supported via a complementary stack. The maximum depth is configurable (default: 64) and stored in `settings.xml` (ICD-IF-170).
+
+Delete commands capture the list of references that were nulled so that **undo restores both the entity and all its former references** (ICD-FUN-53).
+
+#### 4.2.5 `ModelValidator`
+
+Scans the Data Model for constraint violations (ICD-FUN-52):
+
+- Null references (missing Data Type on Parameter, missing Parameter on Packet Field).
+- Duplicate names or IDs.
+- Circular Data Type references (ICD-FUN-42).
+- Type indicator fields not associated with Kind ID parameters.
+
+Returns a list of human-readable issue descriptions, presented in a validation dialog (ICD-IF-191).
+
+### 4.3 XML Persistence (`XmlPersistence`)
 
 Serialization and deserialization of `DataModel` to/from XML using annotation-driven mapping (ICD-DES-100, ICD-DES-110). Model classes are decorated with `[XmlElement]`, `[XmlAttribute]`, etc., so no hand-written glue code is required. The standard `System.Xml.Serialization` namespace is used.
 
-The XML format includes a **version number** (ICD-DES-91). On load, the application detects older format versions and applies migration logic to bring the model up to the current schema.
+**Reference serialization**: Inter-entity references are serialized as the target entity's GUID string (ICD-DES-92). On deserialization, GUIDs are resolved back to in-memory object references via a lookup dictionary populated during load.
 
-### 4.4 Export Engine
+**Format versioning** (ICD-DES-91): The XML root element carries a `version` attribute.
 
-Orchestrates template rendering (ICD-FUN-90):
+- If the file version is **older** than the current application version, the loader applies sequential migration functions (version N → N+1 → … → current) to transform the XML before deserializing.
+- If the file version is **newer** than the current application version, the application presents an error and refuses to load.
 
-1. User selects a Template Set and an output folder.
-2. For each Template in the set:
-   a. Initialize Python.NET runtime, import Mako.
-   b. Inject the `DataModel` (and any helper utilities) into the Mako template context.
-   c. Render the Output Name Pattern to produce the file name.
-   d. Render the template file content to produce the file body.
-   e. Write the result to `<output folder>/<rendered file name>`.
+### 4.4 Export Engine (`ExportEngine`)
 
-Python.NET is initialized once and kept alive for the application lifetime to avoid repeated startup cost.
+Orchestrates template rendering (ICD-FUN-90). The Python.NET runtime (pythonnet NuGet package) is initialized once on first export and kept alive for the application lifetime to avoid repeated startup cost.
 
-### 4.5 Undo/Redo Manager
+1. Ensure the Python.NET runtime is initialized (one-time: locate Python via system PATH, import Mako, log an error if not found).
+2. User selects a Template Set and an output folder.
+3. For each Template in the set:
+   a. Inject the `DataModel` as the variable `model` (and any helper utilities) into the Mako template context.
+   b. Render the Output Name Pattern to produce the file name.
+   c. Render the template file content to produce the file body.
+   d. Write the result to `<output folder>/<rendered file name>`.
 
-Implements the **Command** pattern. Every mutating operation on the Data Model (add, delete, modify) is wrapped in a reversible command object pushed onto a global undo stack. Redo is supported via a complementary stack. The maximum undo depth is configurable (default: 64) and stored as an option in `settings.xml`. The manager is consumed by `DataModelService` and surfaced through menu/keyboard shortcuts.
+### 4.5 Options Manager
 
-### 4.6 Options Manager
+Persists user options (e.g., default paths, UI preferences, undo depth) and Template Set definitions (ICD-DES-81) to `settings.xml` in the working directory (ICD-FUN-101). Options are loaded at startup. The Options Window provides explicit **Save** and **Cancel** buttons (ICD-FUN-100): Save persists all changes; Cancel discards them. Each option carries a default value and tooltip description.
 
-Persists user options (e.g., default paths, UI preferences, undo depth) and Template Set definitions (ICD-DES-81) to `settings.xml` in the working directory (ICD-FUN-101). Options are loaded at startup and saved when the Options window is closed (ICD-FUN-100). Each option carries a default value and tooltip description.
-
-### 4.7 Error Handling & Logging
+### 4.6 Error Handling & Logging (`LogManager`)
 
 All unhandled exceptions and operational errors (e.g., failed template rendering, corrupt XML on load, unwritable output folder) are caught by a global error handler that:
 
 1. Presents a modal dialog with a human-readable error message and, when available, a stack trace (ICD-IF-190).
 2. Writes the error to the session log file.
 
-The application maintains a log file named `log{date-time}.txt` in the working directory (ICD-IF-200). All significant actions (model load/save, export, CRUD operations) and errors are recorded for post-mortem troubleshooting.
+The application maintains a log file named `log{date-time}.txt` in the working directory (ICD-IF-200). The following significant actions are logged:
+
+- Application startup and shutdown.
+- Data Model new / open / save (with file path).
+- Entity add / delete / modify (with entity type and name).
+- Undo / redo operations.
+- Export start and finish (with template set name and output folder).
+- Option changes (with option name and old/new values).
+- Validation runs and their results.
+- Errors and exceptions (with stack traces).
+
+On startup, log files older than one day are automatically deleted (ICD-IF-201).
 
 ## 5. UI Design
 
@@ -163,7 +209,7 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 - **Menu bar**: New / Open / Save, Validate Model, Exit, Options, Windows (Data Types, Parameters, Export), Help / About.
 - **Content area**: tree-on-left listing Telecommand and Telemetry packet types, detail panel on-right showing the selected packet's field list and metadata. Panels are resizable with splitters.
 - **Packet Type CRUD**: toolbar or context menu to add, delete, and modify Packet Types and their Packet Fields (ICD-IF-61).
-- **Close guard**: When the user attempts to close the application (or start a new/open operation) while unsaved changes exist, a confirmation dialog is shown, offering to save, discard, or cancel (ICD-IF-180).
+- **Close guard**: When the user attempts to close the application (or start a new/open operation) while unsaved changes exist, a confirmation dialog offers Save, Discard, or Cancel (ICD-IF-180).
 - **Help**: opens the project's GitHub page (README) in the default web browser (ICD-IF-52).
 - **About**: presents a modal window with application information; content to be decided later (ICD-IF-51).
 
@@ -193,30 +239,73 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 - Every option has a tooltip showing its description and default value.
 - Path options use text field + "..." file/folder picker button.
 - Dedicated **Template Sets** tab for defining (add, delete, modify) Template Sets and their Templates (ICD-IF-73).
-- Saving occurs on window close.
+- Explicit **Save** and **Cancel** buttons (ICD-FUN-100).
 
-### 5.6 Cross-Window Reactivity
+### 5.6 Validation Dialog
 
-All windows bind to the same `DataModelService`. Avalonia's data-binding and `INotifyPropertyChanged`/`ObservableCollection<T>` ensure that changes propagate reactively across controls and windows — e.g., a Data Type created in the Data Types Window is immediately available in drop-downs in the Parameters Window and elsewhere, with no manual refresh (ICD-IF-140).
+- Modal dialog presenting validation results as a scrollable, selectable list of issue descriptions (ICD-IF-191).
+- The list is copyable to the clipboard.
 
-## 6. Key Design Decisions
+### 5.7 Cross-Window Reactivity
+
+All windows bind to the service layer via `ChangeNotifier`. Avalonia's data-binding and `INotifyPropertyChanged`/`ObservableCollection<T>` ensure that changes propagate reactively across controls and windows — e.g., a Data Type created in the Data Types Window is immediately available in drop-downs in the Parameters Window and elsewhere, with no manual refresh (ICD-IF-140).
+
+## 6. Project Structure
+
+```
+icdfyit.sln
+├── src/
+│   ├── IcdFyIt.Core/              (net8.0 class library)
+│   │   ├── Model/                 DataType, Parameter, PacketType, DataModel
+│   │   ├── Services/              DataModelManager, ChangeNotifier, DirtyTracker,
+│   │   │                          UndoRedoManager, ModelValidator
+│   │   ├── Persistence/           XmlPersistence, migration helpers
+│   │   ├── Export/                ExportEngine (uses pythonnet NuGet package)
+│   │   └── Infrastructure/        OptionsManager, LogManager
+│   └── IcdFyIt.App/              (net8.0 Avalonia application)
+│       ├── ViewModels/            Per-window ViewModels
+│       ├── Views/                 AXAML views + code-behind
+│       ├── Converters/            Value converters
+│       └── App.axaml              Application entry, theme, DI setup
+└── tests/
+    └── IcdFyIt.Core.Tests/       (net8.0 xUnit test project)
+        ├── Model/
+        ├── Services/
+        └── Persistence/
+```
+
+- **IcdFyIt.Core** contains all domain logic, services, and persistence with no UI dependency.
+- **IcdFyIt.App** contains Avalonia views and ViewModels.
+- **IcdFyIt.Core.Tests** contains unit tests for the core library.
+
+Target framework: **net8.0** (LTS).
+
+## 7. Key Design Decisions
 
 | Decision | Rationale |
 |---|---|
-| MVVM with a shared service layer | Natural fit for Avalonia; decouples UI from logic; enables reactive cross-window updates. |
+| MVVM with decomposed service layer | Single-responsibility classes are easier to test and maintain than a monolithic service (ICD-DES-70, ICD-DES-120). |
+| GUID-based entity identity | Stable, unique identifiers decouple reference serialization from mutable names (ICD-FUN-41, ICD-DES-92). |
 | Annotation-driven XML serialization | Eliminates hand-written mapping code (ICD-DES-100, ICD-DES-110). |
-| Command pattern for undo/redo | Clean, extensible approach to reversible operations (ICD-IF-170). |
-| Python.NET long-lived runtime | Avoids repeated interpreter startup; Mako is the mandated engine (ICD-DES-30, ICD-DES-40). |
-| Composition over inheritance | Domain types use contained components (e.g., scalar properties, numeric properties) rather than deep class hierarchies (ICD-DES-150). |
-| Grid controls with CSV I/O | Satisfies spreadsheet-like editing, column hiding, and CSV round-tripping (ICD-IF-92, ICD-IF-150, ICD-IF-160). |
+| Sequential version migration | Each migration function transforms version N to N+1, composable and independently testable (ICD-DES-91). |
+| Command pattern for undo/redo | Clean, extensible; delete commands capture affected references for full restoration (ICD-FUN-53). |
+| Python.NET lazy-initialized runtime | Initialized on first export inside ExportEngine; avoids startup cost if export is not used (ICD-DES-30, ICD-DES-40). |
+| Composition over inheritance | Domain types use contained components rather than deep class hierarchies (ICD-DES-150). |
+| Avalonia DataGrid with CSV I/O | Satisfies spreadsheet-like editing, column hiding, and CSV round-tripping (ICD-IF-92, ICD-IF-150, ICD-IF-160). |
 
-## 7. Technology Summary
+## 8. Technology Summary
 
-| Concern | Technology |
-|---|---|
-| Language | C# (.NET, portable) |
-| GUI Framework | Avalonia (dark theme) |
-| Template Engine | Mako (Python) via Python.NET |
-| Data Persistence | XML (`System.Xml.Serialization`) |
-| Settings Persistence | `settings.xml` in working directory |
-| Target Platforms | Ubuntu 24+, Windows 10+ |
+| Concern | Technology | License |
+|---|---|---|
+| Language / Runtime | C# / .NET 8.0 | MIT |
+| GUI Framework | Avalonia 11.x | MIT |
+| MVVM Toolkit | CommunityToolkit.Mvvm | MIT |
+| DataGrid | Avalonia.Controls.DataGrid | MIT |
+| Python Interop | pythonnet | MIT |
+| Template Engine | Mako (Python package) | MIT |
+| XML Serialization | System.Xml.Serialization (built-in) | MIT |
+| Logging | Serilog | Apache-2.0 |
+| Testing | xUnit + FluentAssertions | Apache-2.0 / Apache-2.0 |
+| Target Platforms | Ubuntu 24+, Windows 10+ | — |
+
+All listed libraries are compatible with AGPL-3.0 (ICD-DES-160).
