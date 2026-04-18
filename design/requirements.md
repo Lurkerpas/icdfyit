@@ -52,6 +52,8 @@ ICD-DAT-257: Parameter of fixed value Kind shall have its value defined using he
 ICD-DAT-258: Parameter Kind can be ID.
 ICD-DAT-259: Parameter Kind can be placeholder. Placeholders are meant to be set and interpreted by custom code.
 ICD-DAT-410: Packet Type can be either Telecommand or Telemetry.
+ICD-DAT-411: Packet Type shall have name. Packet Type names shall be unique within the Data Model.
+ICD-DAT-412: Packet Type shall have optional description.
 ICD-DAT-420: Packet Type shall have an ordered list of Packet Fields.
 ICD-DAT-430: Packet Field shall have name.
 ICD-DAT-440: Packet Field shall have optional description.
@@ -70,7 +72,6 @@ ICD-DAT-650: Template shall have Output Name Pattern.
 
 # Interface requirements
 ICD-IF-10: Software shall be multiwindow, with the main window, and auxiliary windows.
-ICD-IF-11: Window content shall be reactive, with inputs propagating across controls.
 ICD-IF-20: Auxiliary windows shall be non-modal, enabling concurrent work across all windows.
 ICD-IF-30: Windows shall be styled in dark theme.
 ICD-IF-40: Windows shall have their menus merged with the title bar.
@@ -81,7 +82,8 @@ ICD-IF-60: Main Window shall, as its main content, present Packet Types: Telecom
 ICD-IF-70: Option Window shall contain all options, divided across tabs.
 ICD-IF-71: It shall be possible to enter filesystem paths both using a text edit and by launching a picker, using a nearby button labelled "...".
 ICD-IF-72: All options shall have a tooltip with short description of the option and the default value.
-ICD-IF-80: Export Window shall contain list of export templates and commands to export the model.
+ICD-IF-73: Options Window shall have a dedicated tab for defining (add, delete, modify) Template Sets and their Templates.
+ICD-IF-80: Export Window shall allow to select a Template Set, select the output folder, and export the model.
 ICD-IF-90: Parameters Window shall present the parameters with their metadata.
 ICD-IF-91: Parameters Window shall provide the means to filter parameters by various metadata.
 ICD-IF-92: Parameters in the Parameters Window shall be presented on a grid for mass editing, like a spreadsheet.
@@ -90,7 +92,7 @@ ICD-IF-100: Data Types Window shall present the types with their metadata.
 ICD-IF-110: Data Types Window shall provide the means to filter types by various metadata.
 ICD-IF-120: Data Types in the Data Types Window shall be presented on a grid for mass editing, like a spreadsheet.
 ICD-IF-130: Data Types Window shall allow to view, edit, create and delete data types.
-ICD-IF-140: Data shall propagate across windows without the user needing to explicitly refresh anything (e.g., when new Data Type is defined in the Data Types window, it should be immediately available in the Parameters Window for use in Parameters).
+ICD-IF-140: Data shall propagate reactively across controls and windows without the user needing to explicitly refresh anything (e.g., when new Data Type is defined in the Data Types window, it should be immediately available in the Parameters Window for use in Parameters).
 ICD-IF-150: If data is presented in a grid/spreadsheet form, it shall be possible to hide selected columns.
 ICD-IF-160: If data is presented in a grid/spreadsheet form, it shall be possible to import/export it from/to CSV.
 ICD-IF-170: It shall be possible to undo/redo add, delete, modify operations on the Data Model entities. The undo/redo stack shall be global (shared across all entity types), with a configurable maximum depth (default: 64).

@@ -24,7 +24,7 @@ icdfyit is a cross-platform desktop application for authoring Interface Control 
 └──────────────────────┴──────────────────────────────────┘
 ```
 
-The application follows the **MVVM** pattern. All windows share a single `DataModelService` that holds the in-memory Data Model and exposes change notifications so updates propagate reactively across all open windows (ICD-IF-140).
+The application follows the **MVVM** pattern. All windows share a single `DataModelService` that holds the in-memory Data Model and exposes change notifications so updates propagate reactively across all controls and open windows (ICD-IF-140).
 
 ## 3. Data Model
 
@@ -71,7 +71,7 @@ Enumerated values map a symbolic name to a *set* of integer raw values (e.g., na
 
 ### 3.3 Packet Types
 
-A Packet Type is either **Telecommand** or **Telemetry**. It contains an ordered list of Packet Fields:
+A Packet Type is either **Telecommand** or **Telemetry**. It has a **name** (unique within the Data Model) and an optional **description**. It contains an ordered list of Packet Fields:
 
 | Field | Type | Notes |
 |---|---|---|
@@ -166,7 +166,7 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 
 ### 5.4 Export Window
 
-- List of configured Template Sets.
+- Template Set selector (drop-down populated from the sets defined in Options).
 - Output folder selector (text field + "..." picker button).
 - Export button triggers the Export Engine for the selected set.
 
@@ -175,11 +175,12 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 - Tabbed layout. Each tab groups related options.
 - Every option has a tooltip showing its description and default value.
 - Path options use text field + "..." file/folder picker button.
+- Dedicated **Template Sets** tab for defining (add, delete, modify) Template Sets and their Templates (ICD-IF-73).
 - Saving occurs on window close.
 
 ### 5.6 Cross-Window Reactivity
 
-All windows bind to the same `DataModelService`. Avalonia's data-binding and `INotifyPropertyChanged`/`ObservableCollection<T>` ensure that a Data Type created in the Data Types Window is immediately available in drop-downs in the Parameters Window and elsewhere, with no manual refresh (ICD-IF-140).
+All windows bind to the same `DataModelService`. Avalonia's data-binding and `INotifyPropertyChanged`/`ObservableCollection<T>` ensure that changes propagate reactively across controls and windows — e.g., a Data Type created in the Data Types Window is immediately available in drop-downs in the Parameters Window and elsewhere, with no manual refresh (ICD-IF-140).
 
 ## 6. Key Design Decisions
 
