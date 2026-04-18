@@ -19,7 +19,7 @@ public class DataModelTests
     [Fact(Skip = "Not yet implemented")]
     public void DataType_AssignedGuid_OnCreation()
     {
-        var dt = new DataType();
+        var dt = new SignedIntegerType();
 
         dt.Id.Should().NotBe(Guid.Empty);
     }

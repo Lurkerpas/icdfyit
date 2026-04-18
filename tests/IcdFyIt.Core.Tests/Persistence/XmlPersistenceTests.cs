@@ -13,7 +13,7 @@ public class XmlPersistenceTests
     public void SaveThenLoad_ProducesEquivalentModel()
     {
         var model = new DataModel();
-        model.DataTypes.Add(new DataType { Name = "MyType", BaseType = BaseType.SignedInteger });
+        model.DataTypes.Add(new SignedIntegerType { Name = "MyType" });
         var path = Path.Combine(Path.GetTempPath(), $"icdfyit_test_{Guid.NewGuid():N}.xml");
 
         try

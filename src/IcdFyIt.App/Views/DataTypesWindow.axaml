@@ -19,7 +19,7 @@
                   CanUserSortColumns="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name"      Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="Base Type" Binding="{Binding BaseType}" Width="150" />
+                <DataGridTextColumn Header="Base Type" Binding="{Binding Kind}" Width="150" />
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

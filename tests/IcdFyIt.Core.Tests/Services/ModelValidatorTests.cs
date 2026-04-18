@@ -23,8 +23,8 @@ public class ModelValidatorTests
     public void Validate_DuplicateDataTypeName_ReturnsIssue()
     {
         var model = new DataModel();
-        model.DataTypes.Add(new DataType { Name = "Foo" });
-        model.DataTypes.Add(new DataType { Name = "Foo" });
+        model.DataTypes.Add(new SignedIntegerType { Name = "Foo" });
+        model.DataTypes.Add(new SignedIntegerType { Name = "Foo" });
 
         var issues = _sut.Validate(model);
 

@@ -3,10 +3,21 @@ using System.Xml.Serialization;
 namespace IcdFyIt.Core.Model;
 
 /// <summary>
-/// A Data Type entity. Base type determines which optional component properties are populated.
-/// All entities carry a GUID (ICD-FUN-41). Circular references are forbidden (ICD-FUN-42).
+/// Abstract base for all Data Type entities (ICD-DAT-50, ICD-FUN-41).
+/// Each concrete subclass represents exactly one <see cref="BaseType"/>.
+/// Circular references are forbidden (ICD-FUN-42).
+/// <see cref="System.Xml.Serialization.XmlIncludeAttribute"/> entries let
+/// <see cref="System.Xml.Serialization.XmlSerializer"/> round-trip the polymorphic hierarchy.
 /// </summary>
-public class DataType
+[XmlInclude(typeof(SignedIntegerType))]
+[XmlInclude(typeof(UnsignedIntegerType))]
+[XmlInclude(typeof(FloatType))]
+[XmlInclude(typeof(BooleanType))]
+[XmlInclude(typeof(BitStringType))]
+[XmlInclude(typeof(EnumeratedType))]
+[XmlInclude(typeof(StructureType))]
+[XmlInclude(typeof(ArrayType))]
+public abstract class DataType
 {
     [XmlAttribute]
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -14,22 +25,11 @@ public class DataType
     [XmlAttribute]
     public string Name { get; set; } = string.Empty;
 
-    [XmlAttribute]
-    public BaseType BaseType { get; set; }
-
-    // Scalar types: SignedInteger, UnsignedInteger, Float, Boolean, BitString (ICD-DAT-101)
-    public ScalarProperties? Scalar { get; set; }
-
-    // Numeric types: SignedInteger, UnsignedInteger, Float (ICD-DAT-102)
-    public NumericProperties? Numeric { get; set; }
-
-    // Enumerated (ICD-DAT-60, ICD-DAT-61)
-    public List<EnumeratedValue>? EnumeratedValues { get; set; }
-
-    // Structure (ICD-DAT-80)
-    public List<StructureField>? StructureFields { get; set; }
-
-    // Array (ICD-DAT-90, ICD-DAT-91)
-    public DataType? ArrayElementType { get; set; }
-    public ArraySizeDescriptor? ArraySize { get; set; }
+    /// <summary>
+    /// Returns the fixed <see cref="BaseType"/> value for this concrete class.
+    /// Used by the UI for display without run-time type checks.
+    /// Not serialised — the concrete XML element name carries the type information.
+    /// </summary>
+    [XmlIgnore]
+    public abstract BaseType Kind { get; }
 }

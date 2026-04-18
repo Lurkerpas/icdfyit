@@ -3,7 +3,61 @@
              x:Class="IcdFyIt.App.App"
              RequestedThemeVariant="Dark">
 
+    <!--
+          Editor / page background  #1E1E1E
+          Sidebar / activity bar    #252526
+          Panel / toolbar           #2D2D30
+          Input / dropdown          #3C3C3C
+          Border                    #3E3E42
+          Primary text              #CCCCCC
+          Dimmed text               #858585
+          Action blue (accent)      #007ACC
+          Selection highlight       #094771
+    -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+                    <!-- Page / editor background — replaces Fluent dark default #000000 -->
+                    <Color x:Key="SystemAltHighColor">#1E1E1E</Color>
+                    <Color x:Key="SystemAltMediumHighColor">#CC1E1E1E</Color>
+                    <Color x:Key="SystemAltMediumColor">#991E1E1E</Color>
+                    <Color x:Key="SystemAltMediumLowColor">#661E1E1E</Color>
+                    <Color x:Key="SystemAltLowColor">#331E1E1E</Color>
+                    <!-- Chrome surfaces (darkest → lightest) -->
+                    <Color x:Key="SystemChromeLowColor">#1E1E1E</Color>
+                    <Color x:Key="SystemChromeMediumLowColor">#252526</Color>
+                    <Color x:Key="SystemChromeMediumColor">#2D2D30</Color>
+                    <Color x:Key="SystemChromeHighColor">#3E3E42</Color>
+                    <Color x:Key="SystemAccentColor">#007ACC</Color>
+                    <!-- Text — keep bright; only secondary text uses dimmed shades -->
+                    <Color x:Key="SystemBaseMediumHighColor">#CCCCCC</Color>
+                    <Color x:Key="SystemBaseMediumColor">#A0A0A0</Color>
+                    <Color x:Key="SystemBaseMediumLowColor">#858585</Color>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
+        <!--
+            Explicit background overrides.  These are evaluated AFTER FluentTheme
+            so they have higher precedence for the same selector+property pair,
+            guaranteeing the shades regardless of how FluentTheme brushes
+            are internally referenced (StaticResource vs DynamicResource).
+        -->
+        <Styles>
+            <Style Selector="Window">
+                <Setter Property="Background" Value="#1E1E1E"/>
+            </Style>
+            <Style Selector="Menu">
+                <Setter Property="Background" Value="#2D2D30"/>
+            </Style>
+            <Style Selector="TabControl">
+                <Setter Property="Background" Value="#252526"/>
+            </Style>
+        </Styles>
     </Application.Styles>
 </Application>
+
