@@ -104,6 +104,8 @@ Each **Template**:
 
 Central domain object aggregating all Data Types, Parameters, and Packet Types. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time.
 
+References between entities (e.g., Parameter → Data Type, Packet Field → Parameter) are nullable. When a referenced entity is deleted, all references to it are set to null (ICD-FUN-51). The UI tolerates null references gracefully, allowing the user to select a replacement later. The **Validate Model** action (ICD-FUN-52) detects null references and other constraint violations.
+
 ### 4.2 `DataModelService`
 
 Singleton service owning the current `DataModel` instance. Responsibilities:
@@ -112,11 +114,14 @@ Singleton service owning the current `DataModel` instance. Responsibilities:
 - Change notification via `IObservable`/`INotifyPropertyChanged` so all bound ViewModels update reactively.
 - Undo/Redo command stack (records add/delete/modify operations as reversible commands). The stack is global across all entity types, with a configurable maximum depth (default: 64, stored in settings).
 - Dirty-tracking flag, set on any mutation and cleared on save. Used by the UI layer to guard against closing with unsaved changes (ICD-IF-180).
-- New / Open / Save workflow (XML serialization).
+- New / Open / Save workflow (XML serialization). "New" creates an empty Data Model (ICD-FUN-50).
+- Model validation: scans for null references, duplicate names/IDs, and other constraint violations; reports results to the user (ICD-FUN-52).
 
 ### 4.3 XML Persistence
 
 Serialization and deserialization of `DataModel` to/from XML using annotation-driven mapping (ICD-DES-100, ICD-DES-110). Model classes are decorated with `[XmlElement]`, `[XmlAttribute]`, etc., so no hand-written glue code is required. The standard `System.Xml.Serialization` namespace is used.
+
+The XML format includes a **version number** (ICD-DES-91). On load, the application detects older format versions and applies migration logic to bring the model up to the current schema.
 
 ### 4.4 Export Engine
 
@@ -138,7 +143,16 @@ Implements the **Command** pattern. Every mutating operation on the Data Model (
 
 ### 4.6 Options Manager
 
-Persists user options (e.g., default paths, UI preferences, undo depth) to `settings.xml` in the working directory (ICD-FUN-101). Options are loaded at startup and saved when the Options window is closed (ICD-FUN-100). Each option carries a default value and tooltip description.
+Persists user options (e.g., default paths, UI preferences, undo depth) and Template Set definitions (ICD-DES-81) to `settings.xml` in the working directory (ICD-FUN-101). Options are loaded at startup and saved when the Options window is closed (ICD-FUN-100). Each option carries a default value and tooltip description.
+
+### 4.7 Error Handling & Logging
+
+All unhandled exceptions and operational errors (e.g., failed template rendering, corrupt XML on load, unwritable output folder) are caught by a global error handler that:
+
+1. Presents a modal dialog with a human-readable error message and, when available, a stack trace (ICD-IF-190).
+2. Writes the error to the session log file.
+
+The application maintains a log file named `log{date-time}.txt` in the working directory (ICD-IF-200). All significant actions (model load/save, export, CRUD operations) and errors are recorded for post-mortem troubleshooting.
 
 ## 5. UI Design
 
@@ -146,9 +160,12 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 
 ### 5.1 Main Window
 
-- **Menu bar**: New / Open / Save, Exit, Options, Windows (Data Types, Parameters, Export), Help / About.
+- **Menu bar**: New / Open / Save, Validate Model, Exit, Options, Windows (Data Types, Parameters, Export), Help / About.
 - **Content area**: tree-on-left listing Telecommand and Telemetry packet types, detail panel on-right showing the selected packet's field list and metadata. Panels are resizable with splitters.
+- **Packet Type CRUD**: toolbar or context menu to add, delete, and modify Packet Types and their Packet Fields (ICD-IF-61).
 - **Close guard**: When the user attempts to close the application (or start a new/open operation) while unsaved changes exist, a confirmation dialog is shown, offering to save, discard, or cancel (ICD-IF-180).
+- **Help**: opens the project's GitHub page (README) in the default web browser (ICD-IF-52).
+- **About**: presents a modal window with application information; content to be decided later (ICD-IF-51).
 
 ### 5.2 Data Types Window
 

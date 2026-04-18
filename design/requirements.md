@@ -3,7 +3,9 @@ ICD-FUN-10: Software shall allow to define (add, delete, modify) Data Types.
 ICD-FUN-20: Software shall allow to define (add, delete, modify) Parameters.
 ICD-FUN-30: Software shall allow to define (add, delete, modify) Packet Types.
 ICD-FUN-40: Data Types, Parameters and Packet Types shall be a part of a single consistent, integrated Data Model.
-ICD-FUN-50: Software shall allow to open, edit and save Data Models.
+ICD-FUN-50: Software shall allow to create new, open, edit and save Data Models.
+ICD-FUN-51: When a referenced entity (Data Type or Parameter) is deleted, references to it shall be set to null. The application shall not crash due to null references, and the user shall be able to select a different reference later.
+ICD-FUN-52: Software shall provide a menu action to validate the Data Model for correctness (e.g., detecting null references, duplicate names, or other constraint violations).
 ICD-FUN-60: Software shall allow to define (add, delete, modify) Template Sets.
 ICD-FUN-70: Software shall allow to export (render) Data Model via Template Sets for use in documents or code.
 ICD-FUN-80: Software shall allow to select the output folder for exporting Data Model via a Template Set.
@@ -77,8 +79,11 @@ ICD-IF-30: Windows shall be styled in dark theme.
 ICD-IF-40: Windows shall have their menus merged with the title bar.
 ICD-IF-41: Window title bars shall begin with an Icon.
 ICD-IF-42: Unless stated otherwise, windows shall have consistent layout patterns with a tree view on the left, and details on the right, within resizeable panels, and with scrollbars if necessary.
-ICD-IF-50: Main Window shall have menu for: creating, loading and saving model, exiting application, showing options, showing other windows, showing help and about. 
+ICD-IF-50: Main Window shall have menu for: creating, loading and saving model, validating model, exiting application, showing options, showing other windows, showing help and about.
+ICD-IF-51: About shall present a modal window with application information (content to be decided later).
+ICD-IF-52: Help shall open the project's GitHub page (README) in the default web browser.
 ICD-IF-60: Main Window shall, as its main content, present Packet Types: Telecommands and Telemetries.
+ICD-IF-61: Main Window shall allow to view, edit, create and delete Packet Types and their Packet Fields.
 ICD-IF-70: Option Window shall contain all options, divided across tabs.
 ICD-IF-71: It shall be possible to enter filesystem paths both using a text edit and by launching a picker, using a nearby button labelled "...".
 ICD-IF-72: All options shall have a tooltip with short description of the option and the default value.
@@ -97,6 +102,8 @@ ICD-IF-150: If data is presented in a grid/spreadsheet form, it shall be possibl
 ICD-IF-160: If data is presented in a grid/spreadsheet form, it shall be possible to import/export it from/to CSV.
 ICD-IF-170: It shall be possible to undo/redo add, delete, modify operations on the Data Model entities. The undo/redo stack shall be global (shared across all entity types), with a configurable maximum depth (default: 64).
 ICD-IF-180: Application shall notify the user if it is about to be closed, but there are unsaved changes.
+ICD-IF-190: Errors shall be presented to the user in a modal window with a human-readable message and, if available, a stack trace.
+ICD-IF-200: Application shall maintain a log file named log{date-time}.txt in the working directory, recording all actions and errors for post-mortem troubleshooting.
 
 # Design requirements
 ICD-DES-10: Software shall be written in portable .NET C#.
@@ -107,7 +114,9 @@ ICD-DES-50: Software shall be compatible with Linux systems, with Ubuntu 24 as t
 ICD-DES-60: Software shall be compatible with Windows systems, with Windows 10 as the baseline.
 ICD-DES-70: Software shall be designed in a modular, extendable manner.
 ICD-DES-80: Software shall use templates for producing output artifacts.
+ICD-DES-81: Template Sets shall be stored in the settings.xml file, separate from the Data Model XML.
 ICD-DES-90: Software shall use XML for storage of Data Models.
+ICD-DES-91: Data Model XML format shall include a version number. The application shall detect older format versions on load and handle migration.
 ICD-DES-100: Data Model serialization shall be automatic, based on annotations.
 ICD-DES-110: Glue code shall be avoided whenever possible, prioritizing automation via annotations and reflection.
 ICD-DES-120: Code shall be human readable, with small functions, readable names and low cyclomatic complexity.
