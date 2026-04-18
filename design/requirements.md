@@ -1,17 +1,17 @@
 #  Functional requirements
 ICD-FUN-10: Software shall allow to define (add, delete, modify) Data Types. 
 ICD-FUN-20: Software shall allow to define (add, delete, modify) Parameters.
-ICD-FUN-30: Sofware shall allow to define (add, delete, modify) Packet Types.
+ICD-FUN-30: Software shall allow to define (add, delete, modify) Packet Types.
 ICD-FUN-40: Data Types, Parameters and Packet Types shall be a part of a single consistent, integrated Data Model.
 ICD-FUN-50: Software shall allow to open, edit and save Data Models.
-ICD-FUN-60: Software shall allow define (add, delete, modify) Template Sets.
+ICD-FUN-60: Software shall allow to define (add, delete, modify) Template Sets.
 ICD-FUN-70: Software shall allow to export (render) Data Model via Template Sets for use in documents or code.
 ICD-FUN-80: Software shall allow to select the output folder for exporting Data Model via a Template Set.
 ICD-FUN-90: When exporting, Software shall render each template in the following manner:
 - Data Model shall be injected into Mako templating engine.
 - File Name shall be rendered using templating engine, from the Output Name Pattern.
 - File Content shall be rendered using templating engine, from the template content.
-- File Content shall be saved under the File Name located in the user-selected 
+- File Content shall be saved under the File Name located in the user-selected output folder.
 ICD-FUN-100: Options shall be persisted upon closure of the Options window.
 
 # Data requirements
@@ -25,7 +25,7 @@ ICD-DAT-61: Enumerated shall have a list of values, each with associated name an
 ICD-DAT-70: Boolean shall be a base type.
 ICD-DAT-80: Structure shall be a base type. Structure is an ordered list of fields that have Name and Data Type.
 ICD-DAT-90: Array shall be a base type. Array has size, which is Unsigned Integer, and element type, which is Data Type. 
-ICD-DAT-91: Array size shall have endianess, bit size, and inclusive range.
+ICD-DAT-91: Array size shall have endianness, bit size, and inclusive range.
 ICD-DAT-100: Bit String shall be a base type.
 ICD-DAT-110: Scalar Data Types shall have endianness.
 ICD-DAT-120: Scalar Data Types shall have bit size.
@@ -37,7 +37,7 @@ ICD-DAT-211: Parameter shall have optional short description.
 ICD-DAT-212: Parameter shall have optional long description.
 ICD-DAT-220: Parameter shall have Data Type.
 ICD-DAT-230: Parameter shall have numeric ID.
-ICD-DAT-240: Paramater shall have optional mnemonic.
+ICD-DAT-240: Parameter shall have optional mnemonic.
 ICD-DAT-250: Parameter shall have kind.
 ICD-DAT-251: Parameter Kind can be software setting.
 ICD-DAT-252: Parameter Kind can be software acquisition.
@@ -55,7 +55,7 @@ ICD-DAT-440: Packet Field shall have optional description.
 ICD-DAT-450: Packet Field shall be associated with Parameter (more than one Packet Field can be associated with the same Parameter).
 ICD-DAT-460: Packet Field can be set as Packet Type indicator.
 ICD-DAT-461: Packet Field set as a Packet Type indicator shall be associated with Parameter of Kind ID.
-ICD-DAT-462: Packet Field set as a Packet Type indicator shall be have its value defined using hexadecimal string.
+ICD-DAT-462: Packet Field set as a Packet Type indicator shall have its value defined using hexadecimal string.
 ICD-DAT-600: Template Set shall have a name.
 ICD-DAT-601: Template Set shall have a description.
 ICD-DAT-610: Template Set shall consist of a set of Templates.
@@ -71,8 +71,8 @@ ICD-IF-11: Window content shall be reactive, with inputs propagating across cont
 ICD-IF-20: Auxiliary windows shall be non-modal, enabling concurrent work across all windows.
 ICD-IF-30: Windows shall be styled in dark theme.
 ICD-IF-40: Windows shall have their menus merged with the title bar.
-ICD-IF-41: Window tile bars shall begin with an Icon.
-ICD-IF-42: Windows shall have consistent layout patters, typically with a tree view on the left, and details on the right, within resizeable panels, and with scrollbars if necessary.
+ICD-IF-41: Window title bars shall begin with an Icon.
+ICD-IF-42: Windows shall have consistent layout patterns, typically with a tree view on the left, and details on the right, within resizeable panels, and with scrollbars if necessary.
 ICD-IF-50: Main Window shall have menu for: creating, loading and saving model, exiting application, showing options, showing other windows, showing help and about. 
 ICD-IF-60: Main Window shall, as its main content, present Packet Types: Telecommands and Telemetries.
 ICD-IF-70: Option Window shall contain all options, divided across tabs.
@@ -85,12 +85,13 @@ ICD-IF-92: Parameters in the Parameters Window shall be presented on a grid for 
 ICD-IF-93: Parameters Window shall allow to view, edit, create and delete parameters.
 ICD-IF-100: Data Types Window shall present the types with their metadata.
 ICD-IF-110: Data Types Window shall provide the means to filter types by various metadata.
-ICD-IF-120: Data Types in the Data Types Window shall be presented on a grid for mass editing, like a spreasheet.
+ICD-IF-120: Data Types in the Data Types Window shall be presented on a grid for mass editing, like a spreadsheet.
 ICD-IF-130: Data Types Window shall allow to view, edit, create and delete data types.
-ICD-IF-140: Data shall propagate across windows without the user needing to explicitly refresh anything (e.g., when new Data Type is deined in the Data Types window, it should be immedietely available in the Parameters Window for use in Parameters).
+ICD-IF-140: Data shall propagate across windows without the user needing to explicitly refresh anything (e.g., when new Data Type is defined in the Data Types window, it should be immediately available in the Parameters Window for use in Parameters).
 ICD-IF-150: If data is presented in a grid/spreadsheet form, it shall be possible to hide selected columns.
 ICD-IF-160: If data is presented in a grid/spreadsheet form, it shall be possible to import/export it from/to CSV.
 ICD-IF-170: It shall be possible to undo/redo add, delete, modify operations on the Data Model entities.
+ICD-IF-180: Application shall notify the user if it is about to be closed, but there are unsaved changes.
 
 # Design requirements
 ICD-DES-10: Software shall be written in portable .NET C#.

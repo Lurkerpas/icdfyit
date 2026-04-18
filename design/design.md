@@ -109,6 +109,7 @@ Singleton service owning the current `DataModel` instance. Responsibilities:
 - CRUD operations on Data Types, Parameters, Packet Types.
 - Change notification via `IObservable`/`INotifyPropertyChanged` so all bound ViewModels update reactively.
 - Undo/Redo command stack (records add/delete/modify operations as reversible commands).
+- Dirty-tracking flag, set on any mutation and cleared on save. Used by the UI layer to guard against closing with unsaved changes (ICD-IF-180).
 - New / Open / Save workflow (XML serialization).
 
 ### 4.3 XML Persistence
@@ -145,6 +146,7 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 
 - **Menu bar**: New / Open / Save, Exit, Options, Windows (Data Types, Parameters, Export), Help / About.
 - **Content area**: tree-on-left listing Telecommand and Telemetry packet types, detail panel on-right showing the selected packet's field list and metadata. Panels are resizable with splitters.
+- **Close guard**: When the user attempts to close the application (or start a new/open operation) while unsaved changes exist, a confirmation dialog is shown, offering to save, discard, or cancel (ICD-IF-180).
 
 ### 5.2 Data Types Window
 
