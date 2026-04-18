@@ -30,7 +30,7 @@ The application follows the **MVVM** pattern. All windows share a single `DataMo
 
 ### 3.1 Data Types
 
-Each Data Type has a **name** and a **base type** discriminator. Properties that apply depend on the base type:
+Each Data Type has a **name** (unique within the Data Model) and a **base type** discriminator. Properties that apply depend on the base type:
 
 | Base Type | Additional Properties |
 |---|---|
@@ -43,17 +43,19 @@ Each Data Type has a **name** and a **base type** discriminator. Properties that
 | Structure | ordered list of fields (name, Data Type ref) |
 | Array | element Data Type ref, size descriptor (endianness, bit size, range) |
 
-*Scalar* types (integer, float, boolean, bit string) carry endianness and bit size. *Numeric* types (integer, float) additionally carry range, optional unit string, and optional calibration formula string.
+*Scalar* types are: Signed Integer, Unsigned Integer, Float, Boolean, and Bit String (ICD-DAT-101). They carry endianness and bit size. *Numeric* types are a subset of scalar: Signed Integer, Unsigned Integer, and Float (ICD-DAT-102). They additionally carry range, optional unit string, and optional calibration formula string.
+
+Enumerated values map a symbolic name to a *set* of integer raw values (e.g., name "low" → raw values 1, 2, 3).
 
 ### 3.2 Parameters
 
 | Field | Type | Notes |
 |---|---|---|
-| Name | string | required |
+| Name | string | required, unique within Data Model |
 | Short Description | string | optional |
 | Long Description | string | optional |
 | Data Type | Data Type ref | required |
-| ID | integer | required, unique |
+| ID | integer | required, unique within Data Model |
 | Mnemonic | string | optional |
 | Kind | enum | see below |
 
@@ -108,7 +110,7 @@ Singleton service owning the current `DataModel` instance. Responsibilities:
 
 - CRUD operations on Data Types, Parameters, Packet Types.
 - Change notification via `IObservable`/`INotifyPropertyChanged` so all bound ViewModels update reactively.
-- Undo/Redo command stack (records add/delete/modify operations as reversible commands).
+- Undo/Redo command stack (records add/delete/modify operations as reversible commands). The stack is global across all entity types, with a configurable maximum depth (default: 64, stored in settings).
 - Dirty-tracking flag, set on any mutation and cleared on save. Used by the UI layer to guard against closing with unsaved changes (ICD-IF-180).
 - New / Open / Save workflow (XML serialization).
 
@@ -132,11 +134,11 @@ Python.NET is initialized once and kept alive for the application lifetime to av
 
 ### 4.5 Undo/Redo Manager
 
-Implements the **Command** pattern. Every mutating operation on the Data Model (add, delete, modify) is wrapped in a reversible command object pushed onto an undo stack. Redo is supported via a complementary stack. The manager is consumed by `DataModelService` and surfaced through menu/keyboard shortcuts.
+Implements the **Command** pattern. Every mutating operation on the Data Model (add, delete, modify) is wrapped in a reversible command object pushed onto a global undo stack. Redo is supported via a complementary stack. The maximum undo depth is configurable (default: 64) and stored as an option in `settings.xml`. The manager is consumed by `DataModelService` and surfaced through menu/keyboard shortcuts.
 
 ### 4.6 Options Manager
 
-Persists user options (e.g., default paths, UI preferences) to a settings file on disk. Options are loaded at startup and saved when the Options window is closed (ICD-FUN-100). Each option carries a default value and tooltip description.
+Persists user options (e.g., default paths, UI preferences, undo depth) to `settings.xml` in the working directory (ICD-FUN-101). Options are loaded at startup and saved when the Options window is closed (ICD-FUN-100). Each option carries a default value and tooltip description.
 
 ## 5. UI Design
 
@@ -198,4 +200,5 @@ All windows bind to the same `DataModelService`. Avalonia's data-binding and `IN
 | GUI Framework | Avalonia (dark theme) |
 | Template Engine | Mako (Python) via Python.NET |
 | Data Persistence | XML (`System.Xml.Serialization`) |
+| Settings Persistence | `settings.xml` in working directory |
 | Target Platforms | Ubuntu 24+, Windows 10+ |

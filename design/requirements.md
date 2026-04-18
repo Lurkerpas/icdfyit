@@ -13,30 +13,33 @@ ICD-FUN-90: When exporting, Software shall render each template in the following
 - File Content shall be rendered using templating engine, from the template content.
 - File Content shall be saved under the File Name located in the user-selected output folder.
 ICD-FUN-100: Options shall be persisted upon closure of the Options window.
+ICD-FUN-101: Options shall be stored in a settings.xml file located in the working directory.
 
 # Data requirements
-ICD-DAT-10: Data Type shall have name.
+ICD-DAT-10: Data Type shall have name. Data Type names shall be unique within the Data Model.
 ICD-DAT-20: Data Type shall have base type.
 ICD-DAT-30: Signed Integer shall be a base type.
 ICD-DAT-40: Unsigned Integer shall be a base type.
 ICD-DAT-50: Float shall be a base type.
 ICD-DAT-60: Enumerated shall be a base type.
-ICD-DAT-61: Enumerated shall have a list of values, each with associated name and set of numeric raw values.
+ICD-DAT-61: Enumerated shall have a list of values, each with associated name and a set of integer raw values (e.g., name "low" can map to raw values 1, 2 and 3).
 ICD-DAT-70: Boolean shall be a base type.
 ICD-DAT-80: Structure shall be a base type. Structure is an ordered list of fields that have Name and Data Type.
 ICD-DAT-90: Array shall be a base type. Array has size, which is Unsigned Integer, and element type, which is Data Type. 
 ICD-DAT-91: Array size shall have endianness, bit size, and inclusive range.
 ICD-DAT-100: Bit String shall be a base type.
+ICD-DAT-101: Scalar Data Types are: Signed Integer, Unsigned Integer, Float, Boolean, and Bit String.
+ICD-DAT-102: Numeric Data Types are: Signed Integer, Unsigned Integer, and Float.
 ICD-DAT-110: Scalar Data Types shall have endianness.
 ICD-DAT-120: Scalar Data Types shall have bit size.
 ICD-DAT-130: Numeric Data Types shall have inclusive range. 
 ICD-DAT-140: Numeric Data Types shall have a possibility to define unit (saved as string).
 ICD-DAT-150: Numeric Data Types shall have a possibility to define a calibration curve (saved as string formula).
-ICD-DAT-210: Parameter shall have name.
+ICD-DAT-210: Parameter shall have name. Parameter names shall be unique within the Data Model.
 ICD-DAT-211: Parameter shall have optional short description.
 ICD-DAT-212: Parameter shall have optional long description.
 ICD-DAT-220: Parameter shall have Data Type.
-ICD-DAT-230: Parameter shall have numeric ID.
+ICD-DAT-230: Parameter shall have numeric ID. Parameter IDs shall be unique within the Data Model.
 ICD-DAT-240: Parameter shall have optional mnemonic.
 ICD-DAT-250: Parameter shall have kind.
 ICD-DAT-251: Parameter Kind can be software setting.
@@ -72,7 +75,7 @@ ICD-IF-20: Auxiliary windows shall be non-modal, enabling concurrent work across
 ICD-IF-30: Windows shall be styled in dark theme.
 ICD-IF-40: Windows shall have their menus merged with the title bar.
 ICD-IF-41: Window title bars shall begin with an Icon.
-ICD-IF-42: Windows shall have consistent layout patterns, typically with a tree view on the left, and details on the right, within resizeable panels, and with scrollbars if necessary.
+ICD-IF-42: Unless stated otherwise, windows shall have consistent layout patterns with a tree view on the left, and details on the right, within resizeable panels, and with scrollbars if necessary.
 ICD-IF-50: Main Window shall have menu for: creating, loading and saving model, exiting application, showing options, showing other windows, showing help and about. 
 ICD-IF-60: Main Window shall, as its main content, present Packet Types: Telecommands and Telemetries.
 ICD-IF-70: Option Window shall contain all options, divided across tabs.
@@ -90,7 +93,7 @@ ICD-IF-130: Data Types Window shall allow to view, edit, create and delete data 
 ICD-IF-140: Data shall propagate across windows without the user needing to explicitly refresh anything (e.g., when new Data Type is defined in the Data Types window, it should be immediately available in the Parameters Window for use in Parameters).
 ICD-IF-150: If data is presented in a grid/spreadsheet form, it shall be possible to hide selected columns.
 ICD-IF-160: If data is presented in a grid/spreadsheet form, it shall be possible to import/export it from/to CSV.
-ICD-IF-170: It shall be possible to undo/redo add, delete, modify operations on the Data Model entities.
+ICD-IF-170: It shall be possible to undo/redo add, delete, modify operations on the Data Model entities. The undo/redo stack shall be global (shared across all entity types), with a configurable maximum depth (default: 64).
 ICD-IF-180: Application shall notify the user if it is about to be closed, but there are unsaved changes.
 
 # Design requirements
