@@ -123,15 +123,20 @@
                 <DataGridTemplateColumn Header="Endianness" Width="115">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
+                            <TextBlock Text="{Binding Endianness, TargetNullValue='—'}"
+                                       Opacity="{Binding IsScalarApplicable,
+                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
+                                       Padding="8,2" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
                             <ComboBox ItemsSource="{Binding AllEndiannesses}"
                                       SelectedValueBinding="{Binding Value}"
-                                      SelectedValue="{Binding Endianness, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      IsEnabled="{Binding IsScalarApplicable}"
-                                      Opacity="{Binding IsScalarApplicable,
-                                                Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
+                                      SelectedValue="{Binding Endianness, Mode=TwoWay}"
                                       HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Center"
-                                      MaxDropDownHeight="220">
+                                      MaxDropDownHeight="220"
+                                      SelectionChanged="OnEndiannessSelectionChanged">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Label}" Foreground="#CCCCCC"/>
@@ -139,7 +144,7 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <!-- Bit Size — scalar types and Enumerated -->

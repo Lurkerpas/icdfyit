@@ -11,7 +11,7 @@ namespace IcdFyIt.App.ViewModels;
 /// </summary>
 public partial class StructureFieldsDialogViewModel : ObservableObject
 {
-    private readonly StructureType          _type;
+    private readonly StructureType           _type;
     private readonly IReadOnlyList<DataType> _availableTypes;
 
     public StructureFieldsDialogViewModel(StructureType type, IReadOnlyList<DataType> availableTypes)
@@ -19,36 +19,24 @@ public partial class StructureFieldsDialogViewModel : ObservableObject
         _type           = type;
         _availableTypes = availableTypes;
         Fields = new ObservableCollection<StructureFieldRowViewModel>(
-            type.Fields.Select(f => new StructureFieldRowViewModel(f, availableTypes)));
+            type.Fields.Select(f => new StructureFieldRowViewModel(f, availableTypes, RemoveField)));
     }
 
     public string TypeName => _type.Name;
 
     public ObservableCollection<StructureFieldRowViewModel> Fields { get; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanRemove))]
-    [NotifyCanExecuteChangedFor(nameof(RemoveCommand))]
-    private StructureFieldRowViewModel? _selectedField;
-
-    public bool CanRemove => SelectedField is not null;
-
     [RelayCommand]
     private void Add()
     {
         var f   = new StructureField { Name = "NewField" };
         _type.Fields.Add(f);
-        var row = new StructureFieldRowViewModel(f, _availableTypes);
-        Fields.Add(row);
-        SelectedField = row;
+        Fields.Add(new StructureFieldRowViewModel(f, _availableTypes, RemoveField));
     }
 
-    [RelayCommand(CanExecute = nameof(CanRemove))]
-    private void Remove()
+    private void RemoveField(StructureFieldRowViewModel row)
     {
-        if (SelectedField is null) return;
-        _type.Fields.Remove(SelectedField.Model);
-        Fields.Remove(SelectedField);
-        SelectedField = null;
+        _type.Fields.Remove(row.Model);
+        Fields.Remove(row);
     }
 }

@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -44,6 +45,20 @@ public partial class DataTypesWindow : Window
     private void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
     {
         if (DataContext is DataTypesWindowViewModel vm) vm.MarkEdited();
+    }
+
+    /// <summary>
+    /// Commits the Endianness cell immediately after a ComboBox selection.
+    /// The dropdown is pre-opened (IsDropDownOpen=True) so selection is a single click.
+    /// </summary>
+    private void OnEndiannessSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.AddedItems.Count == 0) return;
+        Dispatcher.UIThread.Post(() =>
+        {
+            TypesGrid.CommitEdit();
+            if (DataContext is DataTypesWindowViewModel vm) vm.MarkEdited();
+        });
     }
 
     /// <summary>
