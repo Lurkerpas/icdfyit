@@ -38,7 +38,7 @@ public partial class DataTypesWindowViewModel : ObservableObject
         _mainVm           = mainVm;
 
         foreach (var dt in _changeNotifier.DataTypes)
-            _rows.Add(new DataTypeRowViewModel(dt));
+            _rows.Add(CreateRow(dt));
 
         _changeNotifier.DataTypes.CollectionChanged += OnDataTypesCollectionChanged;
         RefreshFilteredRows();
@@ -209,13 +209,20 @@ public partial class DataTypesWindowViewModel : ObservableObject
 
     // ── Private ────────────────────────────────────────────────────────────────
 
+    private DataTypeRowViewModel CreateRow(DataType dt)
+    {
+        var row = new DataTypeRowViewModel(dt);
+        row.OnEdited = MarkEdited;
+        return row;
+    }
+
     private void OnDataTypesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
                 foreach (DataType dt in e.NewItems!)
-                    _rows.Add(new DataTypeRowViewModel(dt));
+                    _rows.Add(CreateRow(dt));
                 break;
             case NotifyCollectionChangedAction.Remove:
                 foreach (DataType dt in e.OldItems!)
@@ -227,7 +234,7 @@ public partial class DataTypesWindowViewModel : ObservableObject
             case NotifyCollectionChangedAction.Reset:
                 _rows.Clear();
                 foreach (var dt in _changeNotifier.DataTypes)
-                    _rows.Add(new DataTypeRowViewModel(dt));
+                    _rows.Add(CreateRow(dt));
                 break;
         }
         RefreshFilteredRows();

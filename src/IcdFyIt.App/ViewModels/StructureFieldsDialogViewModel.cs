@@ -19,7 +19,7 @@ public partial class StructureFieldsDialogViewModel : ObservableObject
         _type           = type;
         _availableTypes = availableTypes;
         Fields = new ObservableCollection<StructureFieldRowViewModel>(
-            type.Fields.Select(f => new StructureFieldRowViewModel(f, availableTypes, RemoveField)));
+            type.Fields.Select(f => new StructureFieldRowViewModel(f, availableTypes, AddField, RemoveField)));
     }
 
     public string TypeName => _type.Name;
@@ -27,11 +27,13 @@ public partial class StructureFieldsDialogViewModel : ObservableObject
     public ObservableCollection<StructureFieldRowViewModel> Fields { get; }
 
     [RelayCommand]
-    private void Add()
+    private void Add() => AddField();
+
+    private void AddField()
     {
         var f   = new StructureField { Name = "NewField" };
         _type.Fields.Add(f);
-        Fields.Add(new StructureFieldRowViewModel(f, _availableTypes, RemoveField));
+        Fields.Add(new StructureFieldRowViewModel(f, _availableTypes, AddField, RemoveField));
     }
 
     private void RemoveField(StructureFieldRowViewModel row)

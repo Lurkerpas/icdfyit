@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
-using Avalonia.Threading;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -48,20 +47,6 @@ public partial class DataTypesWindow : Window
     }
 
     /// <summary>
-    /// Commits the Endianness cell immediately after a ComboBox selection.
-    /// The dropdown is pre-opened (IsDropDownOpen=True) so selection is a single click.
-    /// </summary>
-    private void OnEndiannessSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (e.AddedItems.Count == 0) return;
-        Dispatcher.UIThread.Post(() =>
-        {
-            TypesGrid.CommitEdit();
-            if (DataContext is DataTypesWindowViewModel vm) vm.MarkEdited();
-        });
-    }
-
-    /// <summary>
     /// Cancels attempts to edit cells that are not applicable to the selected row's type
     /// (e.g. Range columns for an Enumerated type).
     /// </summary>
@@ -71,7 +56,6 @@ public partial class DataTypesWindow : Window
         var header = e.Column.Header?.ToString();
         bool applicable = header switch
         {
-            "Endianness"                                            => row.IsScalarApplicable,
             "Bit Size"                                              => row.IsBitSizeApplicable,
             "Range Min" or "Range Max" or "Unit" or "Calibration"  => row.IsNumericApplicable,
             _                                                       => true

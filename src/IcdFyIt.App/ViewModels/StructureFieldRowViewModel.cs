@@ -12,16 +12,21 @@ public partial class StructureFieldRowViewModel : ObservableObject
     /// <summary>All available data types for the AutoCompleteBox drop-down.</summary>
     public IReadOnlyList<DataType> AvailableTypes { get; }
 
+    /// <summary>Per-row add command that delegates back to the parent dialog VM.</summary>
+    public ICommand AddCommand { get; }
+
     /// <summary>Per-row remove command that delegates back to the parent dialog VM.</summary>
     public ICommand RemoveCommand { get; }
 
     public StructureFieldRowViewModel(
         StructureField field,
         IReadOnlyList<DataType> availableTypes,
+        Action onAdd,
         Action<StructureFieldRowViewModel> onRemove)
     {
         Model          = field;
         AvailableTypes = availableTypes;
+        AddCommand     = new RelayCommand(onAdd);
         RemoveCommand  = new RelayCommand(() => onRemove(this));
     }
 

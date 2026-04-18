@@ -34,6 +34,38 @@ public partial class DataTypeRowViewModel : ObservableObject
         new(IcdFyIt.Core.Model.Endianness.BigEndian, "Big endian")
     ];
 
+    /// <summary>Invoked after any property that modifies the underlying model is changed directly
+    /// (i.e. outside DataGrid edit-mode), so the window can mark the model dirty.</summary>
+    public Action? OnEdited { get; set; }
+
+    /// <summary>Two-way binding target for the Little-endian RadioButton.</summary>
+    public bool IsLittleEndian
+    {
+        get => Endianness == IcdFyIt.Core.Model.Endianness.LittleEndian;
+        set
+        {
+            if (!value || !IsScalarApplicable) return;
+            Endianness = IcdFyIt.Core.Model.Endianness.LittleEndian;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsBigEndian));
+            OnEdited?.Invoke();
+        }
+    }
+
+    /// <summary>Two-way binding target for the Big-endian RadioButton.</summary>
+    public bool IsBigEndian
+    {
+        get => Endianness == IcdFyIt.Core.Model.Endianness.BigEndian;
+        set
+        {
+            if (!value || !IsScalarApplicable) return;
+            Endianness = IcdFyIt.Core.Model.Endianness.BigEndian;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsLittleEndian));
+            OnEdited?.Invoke();
+        }
+    }
+
     public Endianness? Endianness
     {
         get => Model switch

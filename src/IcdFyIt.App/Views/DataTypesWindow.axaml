@@ -119,32 +119,22 @@
                                     Binding="{Binding Kind}"
                                     Width="130" IsReadOnly="True"/>
 
-                <!-- Endianness — scalar types only; grayed out + non-editable for others -->
-                <DataGridTemplateColumn Header="Endianness" Width="115">
+                <!-- Endianness — inline RadioButtons; no popup so safe on X11 -->
+                <DataGridTemplateColumn Header="Endianness" Width="115" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Endianness, TargetNullValue='—'}"
-                                       Opacity="{Binding IsScalarApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        IsEnabled="{Binding IsScalarApplicable}"
+                                        Opacity="{Binding IsScalarApplicable,
+                                                  Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
+                                        Margin="6,0">
+                                <RadioButton Content="LE" IsChecked="{Binding IsLittleEndian, Mode=TwoWay}"
+                                             Margin="0,0,8,0" ToolTip.Tip="Little endian"/>
+                                <RadioButton Content="BE" IsChecked="{Binding IsBigEndian, Mode=TwoWay}"
+                                             ToolTip.Tip="Big endian"/>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox ItemsSource="{Binding AllEndiannesses}"
-                                      SelectedValueBinding="{Binding Value}"
-                                      SelectedValue="{Binding Endianness, Mode=TwoWay}"
-                                      HorizontalAlignment="Stretch"
-                                      MaxDropDownHeight="220"
-                                      SelectionChanged="OnEndiannessSelectionChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Label}" Foreground="#CCCCCC"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <!-- Bit Size — scalar types and Enumerated -->
