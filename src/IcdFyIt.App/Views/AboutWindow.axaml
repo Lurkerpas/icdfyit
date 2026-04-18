@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:IcdFyIt.App.ViewModels"
+        x:Class="IcdFyIt.App.Views.AboutWindow"
+        Title="About icdfyit"
+        Width="380" Height="220"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+    <StackPanel Spacing="8" Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <TextBlock Text="{Binding ApplicationName}" FontSize="20" FontWeight="Bold"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding Version, StringFormat='Version {0}'}"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding License, StringFormat='License: {0}'}"
+                   HorizontalAlignment="Center" />
+        <Button Content="Close" HorizontalAlignment="Center"
+                Margin="0,12,0,0" Click="OnCloseClicked" />
+    </StackPanel>
+</Window>

@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:IcdFyIt.App.ViewModels"
+        x:Class="IcdFyIt.App.Views.MainWindow"
+        Title="icdfyit"
+        Width="1024" Height="768"
+        MinWidth="800" MinHeight="600">
+
+    <Design.DataContext>
+        <!-- design-time stub; real VM wired in code-behind -->
+    </Design.DataContext>
+
+    <DockPanel>
+        <!-- Menu bar (ICD-IF-10 to ICD-IF-52) -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New"     Command="{Binding NewDocumentCommand}" />
+                <MenuItem Header="_Open…"   Command="{Binding OpenDocumentCommand}" />
+                <Separator />
+                <MenuItem Header="_Save"    Command="{Binding SaveDocumentCommand}" />
+                <MenuItem Header="Save _As…" Command="{Binding SaveDocumentAsCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo"    Command="{Binding UndoCommand}" />
+                <MenuItem Header="_Redo"    Command="{Binding RedoCommand}" />
+                <Separator />
+                <MenuItem Header="_Validate" Command="{Binding RunValidationCommand}" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Data Types…"  Command="{Binding OpenDataTypesCommand}" />
+                <MenuItem Header="_Parameters…"  Command="{Binding OpenParametersCommand}" />
+                <MenuItem Header="_Export…"      Command="{Binding OpenExportWindowCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="_Options…" Command="{Binding OpenOptionsCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About"   Command="{Binding OpenAboutCommand}" />
+                <MenuItem Header="Open _Help" Command="{Binding OpenHelpCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Packet Types list (ICD-IF-61) -->
+        <TextBlock DockPanel.Dock="Bottom" Text="Ready" Margin="4,2" />
+
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Text="Open a document or create a new one." />
+    </DockPanel>
+</Window>

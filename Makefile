@@ -1,0 +1,40 @@
+SOLUTION    := icdfyit.sln
+APP_PROJECT := src/IcdFyIt.App/IcdFyIt.App.csproj
+DOCS_DIR    := docs
+
+.PHONY: all build run test docs clean help
+
+all: build
+
+## Build the entire solution (Debug configuration)
+build:
+	dotnet build $(SOLUTION)
+
+## Run the application
+run:
+	dotnet run --project $(APP_PROJECT)
+
+## Execute the test suite
+test:
+	dotnet test $(SOLUTION)
+
+## Generate HTML documentation into $(DOCS_DIR)/
+docs:
+	doxygen Doxyfile
+
+## Remove build artefacts and generated documentation
+clean:
+	dotnet clean $(SOLUTION)
+	rm -rf $(DOCS_DIR)
+
+## Print available targets
+help:
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  build   Build the entire solution (default)"
+	@echo "  run     Run the application"
+	@echo "  test    Execute the test suite"
+	@echo "  docs    Generate Doxygen HTML documentation into $(DOCS_DIR)/"
+	@echo "  clean   Clean build outputs and generated docs"
+	@echo "  help    Show this message"

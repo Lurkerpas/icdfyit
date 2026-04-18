@@ -1,0 +1,53 @@
+# Doxygen configuration for icdfyit
+# Generate with: make docs  (or: doxygen Doxyfile)
+# Output:        docs/html/index.html
+
+#---------------------------------------------------------------------------
+# Project
+#---------------------------------------------------------------------------
+PROJECT_NAME           = "icdfyit"
+PROJECT_BRIEF          = "Cross-platform ICD authoring tool"
+PROJECT_NUMBER         =
+OUTPUT_DIRECTORY       = docs
+
+#---------------------------------------------------------------------------
+# Input
+#---------------------------------------------------------------------------
+INPUT                  = src/
+RECURSIVE              = YES
+FILE_PATTERNS          = *.cs
+# Exclude generated build artefacts
+EXCLUDE_PATTERNS       = */bin/* \
+                         */obj/*
+
+#---------------------------------------------------------------------------
+# Extraction
+#---------------------------------------------------------------------------
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+#---------------------------------------------------------------------------
+# C# / Java-like language optimisations
+# OPTIMIZE_OUTPUT_JAVA helps Doxygen parse C# syntax and /// XML doc comments
+#---------------------------------------------------------------------------
+OPTIMIZE_OUTPUT_JAVA   = YES
+JAVADOC_AUTOBRIEF      = YES
+
+#---------------------------------------------------------------------------
+# Output formats
+#---------------------------------------------------------------------------
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+
+#---------------------------------------------------------------------------
+# Source browsing
+#---------------------------------------------------------------------------
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+
+#---------------------------------------------------------------------------
+# Diagrams (set HAVE_DOT = YES if Graphviz is installed for class diagrams)
+#---------------------------------------------------------------------------
+HAVE_DOT               = YES
