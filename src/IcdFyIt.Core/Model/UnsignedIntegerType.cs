@@ -11,7 +11,7 @@ public sealed class UnsignedIntegerType : DataType
     [XmlIgnore]
     public override BaseType Kind => BaseType.UnsignedInteger;
 
-    public ScalarProperties Scalar { get; set; } = new();
+    public ScalarProperties Scalar { get; set; } = new() { Endianness = Endianness.LittleEndian, BitSize = 16 };
 
     public NumericProperties? Numeric { get; set; }
 }

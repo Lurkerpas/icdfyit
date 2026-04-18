@@ -11,5 +11,5 @@ public sealed class BitStringType : DataType
     [XmlIgnore]
     public override BaseType Kind => BaseType.BitString;
 
-    public ScalarProperties Scalar { get; set; } = new();
+    public ScalarProperties Scalar { get; set; } = new() { Endianness = Endianness.LittleEndian, BitSize = 16 };
 }

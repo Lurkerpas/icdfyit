@@ -11,5 +11,5 @@ public sealed class BooleanType : DataType
     [XmlIgnore]
     public override BaseType Kind => BaseType.Boolean;
 
-    public ScalarProperties Scalar { get; set; } = new();
+    public ScalarProperties Scalar { get; set; } = new() { Endianness = Endianness.LittleEndian, BitSize = 8 };
 }

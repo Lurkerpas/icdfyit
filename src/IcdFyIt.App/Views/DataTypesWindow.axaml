@@ -21,7 +21,7 @@
                         <MenuItem Header="Add…"      Command="{Binding AddCommand}"/>
                         <MenuItem Header="Duplicate" Command="{Binding DuplicateCommand}"/>
                         <MenuItem Header="Remove"    Command="{Binding RemoveCommand}"/>
-                        <Separator/>
+                        <Separator IsVisible="{Binding CanEditValues}"/>
                         <MenuItem Header="Edit Values…" Command="{Binding EditValuesCommand}"
                                   IsVisible="{Binding CanEditValues}"/>
                     </MenuItem>
@@ -95,7 +95,7 @@
                     <MenuItem Header="Add…"         Command="{Binding AddCommand}"/>
                     <MenuItem Header="Duplicate"    Command="{Binding DuplicateCommand}"/>
                     <MenuItem Header="Remove"       Command="{Binding RemoveCommand}"/>
-                    <Separator/>
+                    <Separator IsVisible="{Binding CanEditValues}"/>
                     <MenuItem Header="Edit Values…" Command="{Binding EditValuesCommand}"
                               IsVisible="{Binding CanEditValues}"/>
                 </ContextMenu>
@@ -117,24 +117,27 @@
                 <DataGridTemplateColumn Header="Endianness" Width="115">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Endianness, TargetNullValue='—'}"
-                                       Opacity="{Binding IsScalarApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
+                            <ComboBox ItemsSource="{Binding AllEndiannesses}"
+                                      SelectedValueBinding="{Binding Value}"
+                                      SelectedValue="{Binding Endianness, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEnabled="{Binding IsScalarApplicable}"
+                                      Opacity="{Binding IsScalarApplicable,
+                                                Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Center"
+                                      MaxDropDownHeight="220">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}" Foreground="#CCCCCC"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox ItemsSource="{Binding AllEndiannesses}"
-                                      SelectedItem="{Binding Endianness, Mode=TwoWay}"
-                                      SelectionChanged="OnEndiannessSelectionChanged"
-                                      HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <!-- Bit Size — scalar types and Enumerated -->
-                <DataGridTemplateColumn Header="Bit Size" Width="80">
+                <DataGridTemplateColumn Header="Bit Size" Width="95">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding BitSize, TargetNullValue='—'}"
@@ -152,7 +155,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- Range Min — numeric types only -->
-                <DataGridTemplateColumn Header="Range Min" Width="90">
+                <DataGridTemplateColumn Header="Range Min" Width="120">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding RangeMin, TargetNullValue='—'}"
@@ -170,7 +173,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- Range Max — numeric types only -->
-                <DataGridTemplateColumn Header="Range Max" Width="90">
+                <DataGridTemplateColumn Header="Range Max" Width="120">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding RangeMax, TargetNullValue='—'}"

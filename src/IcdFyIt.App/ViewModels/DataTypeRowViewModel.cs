@@ -10,6 +10,8 @@ namespace IcdFyIt.App.ViewModels;
 /// </summary>
 public partial class DataTypeRowViewModel : ObservableObject
 {
+    public sealed record EndiannessOption(Endianness Value, string Label);
+
     public DataType Model { get; }
 
     public DataTypeRowViewModel(DataType model) => Model = model;
@@ -26,15 +28,32 @@ public partial class DataTypeRowViewModel : ObservableObject
 
     // ── Scalar columns (SignedInteger, UnsignedInteger, Float, Boolean, BitString) ──
 
-    public IReadOnlyList<Endianness> AllEndiannesses { get; } = Enum.GetValues<Endianness>();
+    public IReadOnlyList<EndiannessOption> AllEndiannesses { get; } =
+    [
+        new(IcdFyIt.Core.Model.Endianness.LittleEndian, "Little endian"),
+        new(IcdFyIt.Core.Model.Endianness.BigEndian, "Big endian")
+    ];
 
     public Endianness? Endianness
     {
-        get => GetScalar()?.Endianness;
+        get => Model switch
+        {
+            EnumeratedType et => et.Endianness,
+            _                 => GetScalar()?.Endianness
+        };
         set
         {
+            if (!value.HasValue) return;
+
+            if (Model is EnumeratedType et)
+            {
+                et.Endianness = value.Value;
+                OnPropertyChanged();
+                return;
+            }
+
             var s = GetScalar();
-            if (s is null || !value.HasValue) return;
+            if (s is null) return;
             s.Endianness = value.Value;
             OnPropertyChanged();
         }
@@ -120,8 +139,8 @@ public partial class DataTypeRowViewModel : ObservableObject
 
     // ── Applicability flags (used to disable N/A cells) ───────────────────────
 
-    /// <summary>True when this type has scalar properties (Endianness).</summary>
-    public bool IsScalarApplicable => GetScalar() is not null;
+    /// <summary>True when this type has endianness (all scalar types plus Enumerated).</summary>
+    public bool IsScalarApplicable => GetScalar() is not null || Model is EnumeratedType;
 
     /// <summary>True when this type has a bit size (all scalar types plus Enumerated).</summary>
     public bool IsBitSizeApplicable => GetScalar() is not null || Model is EnumeratedType;

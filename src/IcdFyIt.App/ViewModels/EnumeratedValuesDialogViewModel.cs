@@ -25,6 +25,7 @@ public partial class EnumeratedValuesDialogViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanRemove))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveCommand))]
     private EnumeratedValue? _selectedValue;
 
     public bool CanRemove => SelectedValue is not null;

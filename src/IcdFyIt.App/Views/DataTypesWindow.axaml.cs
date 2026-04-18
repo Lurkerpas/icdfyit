@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.ViewModels;
@@ -45,20 +44,6 @@ public partial class DataTypesWindow : Window
     private void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
     {
         if (DataContext is DataTypesWindowViewModel vm) vm.MarkEdited();
-    }
-
-    /// <summary>
-    /// Commits the DataGrid cell edit immediately when the Endianness ComboBox changes.
-    /// Without this, Avalonia's DataGridTemplateColumn doesn't auto-commit on ComboBox selection.
-    /// </summary>
-    private void OnEndiannessSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        // Post to avoid reentrancy during the selection-change notification.
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            TypesGrid.CommitEdit();
-            if (DataContext is DataTypesWindowViewModel vm) vm.MarkEdited();
-        });
     }
 
     /// <summary>
