@@ -128,7 +128,9 @@ public partial class DataTypeRowViewModel : ObservableObject
     /// <summary>Brief summary shown in the "Details" column for complex types.</summary>
     public string? Summary => Model switch
     {
-        EnumeratedType et => $"{et.Values.Count} value(s)",
+        EnumeratedType et => et.Values.Count == 0
+                                 ? "(no values)"
+                                 : string.Join(", ", et.Values.Select(v => v.Name)),
         StructureType  st => $"{st.Fields.Count} field(s)",
         ArrayType      at => $"[{at.ElementType?.Name ?? "?"}]",
         _                 => null

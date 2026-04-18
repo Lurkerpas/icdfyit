@@ -227,9 +227,16 @@
                 </DataGridTemplateColumn>
 
                 <!-- Details — complex types summary, read-only -->
-                <DataGridTextColumn Header="Details"
-                                    Binding="{Binding Summary}"
-                                    Width="120" IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="Details" Width="120" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Summary}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Padding="8,2" VerticalAlignment="Center"
+                                       ToolTip.Tip="{Binding Summary}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
             </DataGrid.Columns>
         </DataGrid>
