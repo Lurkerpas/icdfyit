@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="IcdFyIt.App.Views.StructureFieldsDialog"
+        Title="{Binding TypeName, StringFormat='Structure Fields – {0}'}"
+        Width="560" Height="420"
+        MinWidth="360" MinHeight="260"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="8">
+
+        <Button DockPanel.Dock="Bottom" Content="Close"
+                HorizontalAlignment="Right" Margin="0,6,0,0"
+                IsDefault="True" Click="OnCloseClicked"/>
+
+        <DataGrid ItemsSource="{Binding Fields}"
+                  SelectedItem="{Binding SelectedField, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="False"
+                  CanUserResizeColumns="True"
+                  CellEditEnded="OnCellEditEnded">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add"    Command="{Binding AddCommand}"/>
+                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+
+                <!-- Field name — editable text column -->
+                <DataGridTextColumn Header="Name"
+                                    Binding="{Binding Name, Mode=TwoWay}"
+                                    Width="*"/>
+
+                <!-- Data type — always-visible AutoCompleteBox with name filtering -->
+                <DataGridTemplateColumn Header="Data Type" Width="2*" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <AutoCompleteBox ItemsSource="{Binding AvailableTypes}"
+                                             SelectedItem="{Binding DataType, Mode=TwoWay}"
+                                             FilterMode="ContainsCaseSensitive"
+                                             MinimumPrefixLength="0"
+                                             HorizontalAlignment="Stretch"
+                                             VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </DockPanel>
+</Window>

@@ -98,6 +98,19 @@ public partial class App : Application
                 await dialog.ShowDialog(owner);
             };
 
+            // Wire Structure Fields pop-up dialog.
+            dataTypesVm.RequestEditStructureFields = async (st) =>
+            {
+                Window owner = (dataTypesWindow is { IsVisible: true })
+                    ? (Window)dataTypesWindow
+                    : (Window)mainWindow;
+                var dialog = new StructureFieldsDialog
+                {
+                    DataContext = new StructureFieldsDialogViewModel(st, changeNotifier.DataTypes.ToList())
+                };
+                await dialog.ShowDialog(owner);
+            };
+
             mainVm.ShowDataTypesWindow = () =>
             {
                 if (dataTypesWindow is { IsVisible: true })

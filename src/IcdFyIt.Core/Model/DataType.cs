@@ -32,4 +32,6 @@ public abstract class DataType
     /// </summary>
     [XmlIgnore]
     public abstract BaseType Kind { get; }
+
+    public override string ToString() => Name;
 }

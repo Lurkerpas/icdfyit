@@ -24,6 +24,9 @@
                         <Separator IsVisible="{Binding CanEditValues}"/>
                         <MenuItem Header="Edit Values…" Command="{Binding EditValuesCommand}"
                                   IsVisible="{Binding CanEditValues}"/>
+                        <Separator IsVisible="{Binding CanEditFields}"/>
+                        <MenuItem Header="Edit Fields…" Command="{Binding EditStructureFieldsCommand}"
+                                  IsVisible="{Binding CanEditFields}"/>
                     </MenuItem>
 
                     <!-- Column visibility toggles -->
@@ -98,6 +101,9 @@
                     <Separator IsVisible="{Binding CanEditValues}"/>
                     <MenuItem Header="Edit Values…" Command="{Binding EditValuesCommand}"
                               IsVisible="{Binding CanEditValues}"/>
+                    <Separator IsVisible="{Binding CanEditFields}"/>
+                    <MenuItem Header="Edit Fields…" Command="{Binding EditStructureFieldsCommand}"
+                              IsVisible="{Binding CanEditFields}"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
 

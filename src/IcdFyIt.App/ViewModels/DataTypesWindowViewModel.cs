@@ -51,6 +51,8 @@ public partial class DataTypesWindowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanEditValues))]
+    [NotifyPropertyChangedFor(nameof(CanEditFields))]
+    [NotifyCanExecuteChangedFor(nameof(EditStructureFieldsCommand))]
     private DataTypeRowViewModel? _selectedRow;
 
     partial void OnSelectedRowChanged(DataTypeRowViewModel? value) { }
@@ -177,6 +179,22 @@ public partial class DataTypesWindowViewModel : ObservableObject
     {
         if (SelectedRow?.Model is not EnumeratedType et) return;
         await (RequestEditEnumeratedValues?.Invoke(et) ?? Task.CompletedTask);
+        SelectedRow.RefreshSummary();
+        MarkEdited();
+    }
+
+    // ── Edit structure fields (pop-up dialog) ──────────────────────────────────
+
+    /// <summary>Wired by App.axaml.cs to open the <see cref="Views.StructureFieldsDialog"/>.</summary>
+    public Func<StructureType, Task>? RequestEditStructureFields { get; set; }
+
+    public bool CanEditFields => SelectedRow?.Model is StructureType;
+
+    [RelayCommand(CanExecute = nameof(CanEditFields))]
+    private async Task EditStructureFields()
+    {
+        if (SelectedRow?.Model is not StructureType st) return;
+        await (RequestEditStructureFields?.Invoke(st) ?? Task.CompletedTask);
         SelectedRow.RefreshSummary();
         MarkEdited();
     }
