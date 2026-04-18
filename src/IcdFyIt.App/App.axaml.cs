@@ -111,6 +111,19 @@ public partial class App : Application
                 await dialog.ShowDialog(owner);
             };
 
+            // Wire Array Type pop-up dialog.
+            dataTypesVm.RequestEditArrayType = async (at) =>
+            {
+                Window owner = (dataTypesWindow is { IsVisible: true })
+                    ? (Window)dataTypesWindow
+                    : (Window)mainWindow;
+                var dialog = new ArrayTypeDialog
+                {
+                    DataContext = new ArrayTypeDialogViewModel(at, changeNotifier.DataTypes.ToList())
+                };
+                await dialog.ShowDialog(owner);
+            };
+
             mainVm.ShowDataTypesWindow = () =>
             {
                 if (dataTypesWindow is { IsVisible: true })

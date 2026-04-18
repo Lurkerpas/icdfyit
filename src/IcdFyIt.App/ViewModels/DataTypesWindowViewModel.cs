@@ -52,7 +52,9 @@ public partial class DataTypesWindowViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanEditValues))]
     [NotifyPropertyChangedFor(nameof(CanEditFields))]
+    [NotifyPropertyChangedFor(nameof(CanEditArray))]
     [NotifyCanExecuteChangedFor(nameof(EditStructureFieldsCommand))]
+    [NotifyCanExecuteChangedFor(nameof(EditArrayCommand))]
     private DataTypeRowViewModel? _selectedRow;
 
     partial void OnSelectedRowChanged(DataTypeRowViewModel? value) { }
@@ -199,7 +201,32 @@ public partial class DataTypesWindowViewModel : ObservableObject
         MarkEdited();
     }
 
+    // ── Edit array type (pop-up dialog) ──────────────────────────────────────
+
+    /// <summary>Wired by App.axaml.cs to open the <see cref="Views.ArrayTypeDialog"/>.</summary>
+    public Func<ArrayType, Task>? RequestEditArrayType { get; set; }
+
+    public bool CanEditArray => SelectedRow?.Model is ArrayType;
+
+    [RelayCommand(CanExecute = nameof(CanEditArray))]
+    private async Task EditArray()
+    {
+        if (SelectedRow?.Model is not ArrayType at) return;
+        await (RequestEditArrayType?.Invoke(at) ?? Task.CompletedTask);
+        SelectedRow.RefreshSummary();
+        MarkEdited();
+    }
+
     // ── Called by code-behind on inline cell edits ────────────────────────────
+
+    /// <summary>Forces re-evaluation of all context-menu visibility properties.
+    /// Called by the view when the context menu opens.</summary>
+    public void ForceCanEditNotify()
+    {
+        OnPropertyChanged(nameof(CanEditValues));
+        OnPropertyChanged(nameof(CanEditFields));
+        OnPropertyChanged(nameof(CanEditArray));
+    }
 
     public void MarkEdited()
     {

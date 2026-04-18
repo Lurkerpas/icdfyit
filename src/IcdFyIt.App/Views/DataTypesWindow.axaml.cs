@@ -10,6 +10,11 @@ public partial class DataTypesWindow : Window
     public DataTypesWindow()
     {
         InitializeComponent();
+
+        // Avalonia disconnects ContextMenu bindings while the popup is closed,
+        // so IsVisible values become stale. Force a refresh when it opens.
+        TypesGrid.ContextMenu!.Opened += (_, _) =>
+            (DataContext as DataTypesWindowViewModel)?.ForceCanEditNotify();
     }
 
     protected override void OnDataContextChanged(EventArgs e)

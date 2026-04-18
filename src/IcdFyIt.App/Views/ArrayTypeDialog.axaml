@@ -1,0 +1,70 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="IcdFyIt.App.Views.ArrayTypeDialog"
+        Title="{Binding TypeName, StringFormat='Array Type – {0}'}"
+        Width="400" Height="280"
+        MinWidth="320" MinHeight="240"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="12">
+
+        <Button DockPanel.Dock="Bottom" Content="Close"
+                HorizontalAlignment="Right" Margin="0,10,0,0"
+                IsDefault="True" Click="OnCloseClicked"/>
+
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="160,*"
+              VerticalAlignment="Top">
+
+            <!-- Element Type -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Element Type:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <AutoCompleteBox Grid.Row="0" Grid.Column="1"
+                             ItemsSource="{Binding AvailableTypes}"
+                             SelectedItem="{Binding ElementType, Mode=TwoWay}"
+                             FilterMode="Contains"
+                             MinimumPrefixLength="0"
+                             PlaceholderText="(none)"
+                             Margin="0,4,0,4"/>
+
+            <!-- Separator -->
+            <Separator Grid.Row="1" Grid.ColumnSpan="2" Margin="0,6"/>
+
+            <!-- Size: Endianness -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Size Field Endianness:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal"
+                        VerticalAlignment="Center" Margin="0,4,0,4">
+                <RadioButton Content="LE"
+                             IsChecked="{Binding SizeIsLittleEndian, Mode=TwoWay}"
+                             Margin="0,0,12,0" ToolTip.Tip="Little endian"/>
+                <RadioButton Content="BE"
+                             IsChecked="{Binding SizeIsBigEndian, Mode=TwoWay}"
+                             ToolTip.Tip="Big endian"/>
+            </StackPanel>
+
+            <!-- Size: Bit Size -->
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Size Field Bit Size:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox Grid.Row="3" Grid.Column="1"
+                     Text="{Binding SizeBitSize, Mode=TwoWay}"
+                     Margin="0,4,0,4"/>
+
+            <!-- Size: Min -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Array Min Length:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox Grid.Row="4" Grid.Column="1"
+                     Text="{Binding SizeMin, Mode=TwoWay}"
+                     Margin="0,4,0,4"/>
+
+            <!-- Size: Max -->
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Array Max Length:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox Grid.Row="5" Grid.Column="1"
+                     Text="{Binding SizeMax, Mode=TwoWay}"
+                     Margin="0,4,0,4"/>
+
+        </Grid>
+
+    </DockPanel>
+</Window>
