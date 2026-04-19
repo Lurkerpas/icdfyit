@@ -23,6 +23,8 @@ public class ModelValidator
         CheckNullPacketFieldParameters(model, issues);
         CheckTypeIndicatorKinds(model, issues);
         CheckCircularDataTypeRefs(model, issues);
+        CheckDuplicateHeaderTypeNames(model, issues);
+        CheckHeaderTypeIdNullDataTypes(model, issues);
 
         return issues;
     }
@@ -112,5 +114,21 @@ public class ModelValidator
             if (HasCircularRef(origin, child, visited)) return true;
         }
         return false;
+    }
+
+    private static void CheckDuplicateHeaderTypeNames(DataModel model, List<ValidationIssue> issues)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var ht in model.HeaderTypes)
+            if (!seen.Add(ht.Name))
+                issues.Add(new ValidationIssue($"Duplicate header type name: \"{ht.Name}\""));
+    }
+
+    private static void CheckHeaderTypeIdNullDataTypes(DataModel model, List<ValidationIssue> issues)
+    {
+        foreach (var ht in model.HeaderTypes)
+            foreach (var id in ht.Ids.Where(id => id.DataType is null))
+                issues.Add(new ValidationIssue(
+                    $"Header type \"{ht.Name}\" ID entry \"{id.Name}\" has no data type assigned"));
     }
 }

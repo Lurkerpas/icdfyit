@@ -67,6 +67,9 @@ public class DataModelManager
         _model.PacketTypes.Clear();
         _model.PacketTypes.AddRange(_changeNotifier.PacketTypes);
 
+        _model.HeaderTypes.Clear();
+        _model.HeaderTypes.AddRange(_changeNotifier.HeaderTypes);
+
         _persistence.Save(_model, filePath);
         CurrentFilePath = filePath;
         _dirtyTracker.MarkClean();
@@ -174,6 +177,46 @@ public class DataModelManager
             });
         _undoRedoManager.Push(new AddEntityCommand<PacketType>(
             copy, _model.PacketTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker));
+        return copy;
+    }
+
+    // ── HeaderType CRUD ────────────────────────────────────────────────────────
+
+    public HeaderType AddHeaderType(string name)
+    {
+        var ht = new HeaderType { Name = name };
+        _undoRedoManager.Push(new AddEntityCommand<HeaderType>(
+            ht, _model.HeaderTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker));
+        return ht;
+    }
+
+    public void RemoveHeaderType(HeaderType headerType)
+    {
+        foreach (var pt in _model.PacketTypes.Where(pt => pt.HeaderType == headerType))
+            pt.HeaderType = null;
+        _undoRedoManager.Push(new AddEntityCommand<HeaderType>(
+            headerType, _model.HeaderTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker) { IsRemove = true });
+    }
+
+    public HeaderType DuplicateHeaderType(HeaderType source)
+    {
+        var copy = new HeaderType
+        {
+            Name        = $"Copy of {source.Name}",
+            Description = source.Description,
+        };
+        foreach (var id in source.Ids)
+            copy.Ids.Add(new HeaderTypeId
+            {
+                Name        = id.Name,
+                Description = id.Description,
+                DataType    = id.DataType,
+            });
+        _undoRedoManager.Push(new AddEntityCommand<HeaderType>(
+            copy, _model.HeaderTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker));
         return copy;
     }

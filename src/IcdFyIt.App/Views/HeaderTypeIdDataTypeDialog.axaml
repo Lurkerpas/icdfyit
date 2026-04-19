@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="IcdFyIt.App.Views.HeaderTypeIdDataTypeDialog"
+        Title="{Binding EntryName, StringFormat='Set Data Type \u2013 {0}'}"
+        Width="380" Height="130"
+        MinWidth="300" MinHeight="110"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="12">
+
+        <Button DockPanel.Dock="Bottom" Content="Close"
+                HorizontalAlignment="Right" Margin="0,10,0,0"
+                IsDefault="True" Click="OnCloseClicked"/>
+
+        <Grid RowDefinitions="Auto" ColumnDefinitions="120,*" VerticalAlignment="Top">
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Data Type:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <AutoCompleteBox Grid.Row="0" Grid.Column="1"
+                             ItemsSource="{Binding AvailableTypes}"
+                             SelectedItem="{Binding SelectedDataType, Mode=TwoWay}"
+                             FilterMode="Contains"
+                             MinimumPrefixLength="0"
+                             PlaceholderText="(none)"
+                             Margin="0,4,0,4"/>
+
+        </Grid>
+
+    </DockPanel>
+</Window>

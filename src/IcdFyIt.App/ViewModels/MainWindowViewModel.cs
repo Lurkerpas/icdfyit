@@ -58,6 +58,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Opens (or focuses) the Parameters window.</summary>
     public Action? ShowParametersWindow { get; set; }
 
+    /// <summary>Opens (or focuses) the Header Types window.</summary>
+    public Action? ShowHeaderTypesWindow { get; set; }
+
     /// <summary>Shows the About window as a modal dialog.</summary>
     public Func<Task>? ShowAboutWindowDialog { get; set; }
 
@@ -249,6 +252,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenParameters() => ShowParametersWindow?.Invoke();
+
+    [RelayCommand]
+    private void OpenHeaderTypes() => ShowHeaderTypesWindow?.Invoke();
 
     [RelayCommand]
     private void OpenExportWindow() { /* export not yet implemented */ }

@@ -70,6 +70,16 @@ public class XmlPersistence
         foreach (var pt in model.PacketTypes)
             foreach (var f in pt.Fields)
                 f.Parameter = Resolve(f._storedParameterIdRef, paramById);
+
+        // HeaderTypeId → DataType
+        foreach (var ht in model.HeaderTypes)
+            foreach (var htId in ht.Ids)
+                htId.DataType = Resolve(htId._storedDataTypeIdRef, typeById);
+
+        // PacketType → HeaderType
+        var headerTypeById = model.HeaderTypes.ToDictionary(ht => ht.Id);
+        foreach (var pt in model.PacketTypes)
+            pt.HeaderType = Resolve(pt._storedHeaderTypeIdRef, headerTypeById);
     }
 
     private static T? Resolve<T>(string? guidStr, Dictionary<Guid, T> map)

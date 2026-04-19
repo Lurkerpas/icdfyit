@@ -18,4 +18,6 @@ public class DataModel
     public List<Parameter> Parameters { get; set; } = new();
 
     public List<PacketType> PacketTypes { get; set; } = new();
+
+    public List<HeaderType> HeaderTypes { get; set; } = new();
 }

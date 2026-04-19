@@ -30,11 +30,12 @@ public partial class App : Application
             dataModelManager.New();
 
             // ── ViewModels ─────────────────────────────────────────────────────
-            var mainVm       = new MainWindowViewModel(dataModelManager, changeNotifier, dirtyTracker, optionsManager);
-            var dataTypesVm  = new DataTypesWindowViewModel(dataModelManager, changeNotifier,
-                                                            dirtyTracker, mainVm);
-            var parametersVm = new ParametersWindowViewModel(dataModelManager, changeNotifier,
-                                                             dirtyTracker, mainVm);
+            var mainVm         = new MainWindowViewModel(dataModelManager, changeNotifier, dirtyTracker, optionsManager);
+            var dataTypesVm    = new DataTypesWindowViewModel(dataModelManager, changeNotifier,
+                                                              dirtyTracker, mainVm);
+            var parametersVm   = new ParametersWindowViewModel(dataModelManager, changeNotifier,
+                                                               dirtyTracker, mainVm);
+            var headerTypesVm  = new HeaderTypesWindowViewModel(dataModelManager, changeNotifier, mainVm);
 
             // ── Main window ────────────────────────────────────────────────────
             var mainWindow = new MainWindow();
@@ -205,6 +206,34 @@ public partial class App : Application
                 parametersWindow = new ParametersWindow();
                 parametersWindow.DataContext = parametersVm;
                 parametersWindow.Show(mainWindow);
+            };
+
+            // ── Header Types window lifecycle ──────────────────────────────────
+            HeaderTypesWindow? headerTypesWindow = null;
+
+            headerTypesVm.RequestEditIdDataType = async (entry) =>
+            {
+                Window owner = (headerTypesWindow is { IsVisible: true })
+                    ? (Window)headerTypesWindow
+                    : (Window)mainWindow;
+                var dialog = new HeaderTypeIdDataTypeDialog
+                {
+                    DataContext = new HeaderTypeIdDataTypeDialogViewModel(
+                        entry, changeNotifier.DataTypes.ToList())
+                };
+                await dialog.ShowDialog(owner);
+            };
+
+            mainVm.ShowHeaderTypesWindow = () =>
+            {
+                if (headerTypesWindow is { IsVisible: true })
+                {
+                    headerTypesWindow.Activate();
+                    return;
+                }
+                headerTypesWindow = new HeaderTypesWindow();
+                headerTypesWindow.DataContext = headerTypesVm;
+                headerTypesWindow.Show(mainWindow);
             };
         }
 

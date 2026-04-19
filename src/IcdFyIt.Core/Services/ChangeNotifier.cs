@@ -13,6 +13,7 @@ public class ChangeNotifier
     public ObservableCollection<DataType> DataTypes { get; } = new();
     public ObservableCollection<Parameter> Parameters { get; } = new();
     public ObservableCollection<PacketType> PacketTypes { get; } = new();
+    public ObservableCollection<HeaderType> HeaderTypes { get; } = new();
 
     /// <summary>Replaces all observable collections from the supplied model (called after New/Open).</summary>
     public void ReloadFrom(DataModel model)
@@ -25,6 +26,9 @@ public class ChangeNotifier
 
         PacketTypes.Clear();
         foreach (var pt in model.PacketTypes) PacketTypes.Add(pt);
+
+        HeaderTypes.Clear();
+        foreach (var ht in model.HeaderTypes) HeaderTypes.Add(ht);
     }
 
     public void NotifyAdded(DataType dataType) => DataTypes.Add(dataType);
@@ -35,4 +39,7 @@ public class ChangeNotifier
 
     public void NotifyAdded(PacketType packetType) => PacketTypes.Add(packetType);
     public void NotifyRemoved(PacketType packetType) => PacketTypes.Remove(packetType);
+
+    public void NotifyAdded(HeaderType headerType) => HeaderTypes.Add(headerType);
+    public void NotifyRemoved(HeaderType headerType) => HeaderTypes.Remove(headerType);
 }

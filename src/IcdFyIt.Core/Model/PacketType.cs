@@ -18,5 +18,18 @@ public class PacketType
     [XmlAttribute]
     public PacketTypeKind Kind { get; set; }
 
+    /// <summary>Nullable: reference to a Header Type; may be null if deleted (ICD-DAT-413).</summary>
+    [XmlIgnore]
+    public HeaderType? HeaderType { get; set; }
+
+    /// <summary>GUID reference for XML serialization; resolved post-load by XmlPersistence.</summary>
+    [XmlAttribute("HeaderTypeRef")]
+    public string? HeaderTypeIdRef
+    {
+        get => HeaderType?.Id.ToString();
+        set => _storedHeaderTypeIdRef = value;
+    }
+    internal string? _storedHeaderTypeIdRef;
+
     public List<PacketField> Fields { get; set; } = new();
 }
