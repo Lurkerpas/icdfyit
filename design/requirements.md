@@ -3,10 +3,10 @@ ICD-FUN-10: Software shall allow to define (add, delete, modify) Data Types.
 ICD-FUN-20: Software shall allow to define (add, delete, modify) Parameters.
 ICD-FUN-30: Software shall allow to define (add, delete, modify) Packet Types.
 ICD-FUN-40: Data Types, Parameters and Packet Types shall be a part of a single consistent, integrated Data Model.
-ICD-FUN-41: All entities (Data Types, Parameters, Packet Types) shall have a GUID, automatically assigned on creation, used for internal identification and reference serialization.
+ICD-FUN-41: All entities (Data Types, Parameters, Packet Types, Header Types) shall have a GUID, automatically assigned on creation, used for internal identification and reference serialization.
 ICD-FUN-42: Circular references between Data Types (e.g., Structure A referencing Structure B which references Structure A) shall be forbidden. Validation shall detect and report circular references.
 ICD-FUN-50: Software shall allow to create new, open, edit and save Data Models.
-ICD-FUN-51: When a referenced entity (Data Type or Parameter) is deleted, references to it shall be set to null. The application shall not crash due to null references, and the user shall be able to select a different reference later.
+ICD-FUN-51: When a referenced entity (e.g., Data Type, Parameter or Header Type) is deleted, references to it shall be set to null. The application shall not crash due to null references, and the user shall be able to select a different reference later.
 ICD-FUN-53: Undoing a deletion shall restore the deleted entity and all references that were set to null as a result of the deletion.
 ICD-FUN-52: Software shall provide a menu action to validate the Data Model for correctness (e.g., detecting null references, duplicate names, circular references, or other constraint violations).
 ICD-FUN-60: Software shall allow to define (add, delete, modify) Template Sets.
@@ -19,6 +19,7 @@ ICD-FUN-90: When exporting, Software shall render each template in the following
 - File Content shall be saved under the File Name located in the user-selected output folder.
 ICD-FUN-100: Options Window shall have Save and Cancel buttons. Save persists options; Cancel discards changes made since the window was opened.
 ICD-FUN-101: Options shall be stored in a settings.xml file located in the working directory.
+ICD-FUN-110: Software shall allow to define (add, delete, modify) Header Types.
 
 # Data requirements
 ICD-DAT-10: Data Type shall have name. Data Type names shall be unique within the Data Model.
@@ -59,6 +60,8 @@ ICD-DAT-259: Parameter Kind can be placeholder. Placeholders are meant to be set
 ICD-DAT-410: Packet Type can be either Telecommand or Telemetry.
 ICD-DAT-411: Packet Type shall have name. Packet Type names shall be unique within the Data Model.
 ICD-DAT-412: Packet Type shall have optional description.
+ICD-DAT-413: Packet Type shall be associated with a Header Type.
+ICD-DAT-414: Packet Type shall define fixed values for all IDs defined in the associated Header Type.
 ICD-DAT-420: Packet Type shall have an ordered list of Packet Fields.
 ICD-DAT-430: Packet Field shall have name.
 ICD-DAT-440: Packet Field shall have optional description.
@@ -74,6 +77,9 @@ ICD-DAT-621: Template file shall be a mako template to be rendered by Mako templ
 ICD-DAT-630: Template shall have a name.
 ICD-DAT-640: Template shall have a description.
 ICD-DAT-650: Template shall have Output Name Pattern.
+ICD-DAT-710: Header Type shall have a name.
+ICD-DAT-720: Header Type shall have a description.
+ICD-DAT-730: Header Type shall have an odered list of IDs, each with associated name, description and Data Type of kind ID.
 
 # Interface requirements
 ICD-IF-10: Software shall be multiwindow, with the main window, and auxiliary windows.
@@ -109,6 +115,8 @@ ICD-IF-190: Errors shall be presented to the user in a modal window with a human
 ICD-IF-191: Validation results shall be presented as a list of issues in a dialog. The list shall be selectable and copyable to the clipboard.
 ICD-IF-200: Application shall maintain a log file named log{date-time}.txt in the working directory, recording all actions and errors for post-mortem troubleshooting.
 ICD-IF-201: Log files older than one day shall be automatically deleted on application startup.
+ICD-IF-210: Header Types Window shall allow to view, edit, create and delete Header Types.
+ICD-IF-220: Header Types Window shall present Header Types with their metadata.
 
 # Design requirements
 ICD-DES-10: Software shall be written in portable .NET C#.

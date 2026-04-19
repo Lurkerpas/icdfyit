@@ -10,7 +10,8 @@ icdfyit is a cross-platform desktop application for authoring Interface Control 
 ┌───────────────────────────────────────────────────────────────┐
 │                       Avalonia UI Layer                       │
 │  MainWindow · DataTypesWindow · ParametersWindow             │
-│  ExportWindow · OptionsWindow · ValidationDialog             │
+│  HeaderTypesWindow · ExportWindow · OptionsWindow            │
+│  ValidationDialog                                            │
 ├───────────────────────────────────────────────────────────────┤
 │                       ViewModel Layer                         │
 │  Per-window ViewModels                                       │
@@ -20,7 +21,7 @@ icdfyit is a cross-platform desktop application for authoring Interface Control 
 │  ChangeNotifier · DirtyTracker                               │
 ├───────────────────────────────────────────────────────────────┤
 │                       Domain / Model Layer                    │
-│  DataType · Parameter · PacketType (all with GUID)           │
+│  DataType · Parameter · PacketType · HeaderType (all GUIDs)  │
 ├──────────────┬──────────────┬─────────────────────────────────┤
 │  Persistence │ Export Engine │ Infrastructure                  │
 │  XmlPersist  │ MakoRenderer │ OptionsManager · LogManager    │
@@ -32,7 +33,7 @@ The application follows the **MVVM** pattern. All windows share a common service
 
 ## 3. Data Model
 
-Every entity (Data Type, Parameter, Packet Type) carries a **GUID**, automatically assigned on creation, used for internal identification and reference serialization (ICD-FUN-41).
+Every entity (Data Type, Parameter, Packet Type, Header Type) carries a **GUID**, automatically assigned on creation, used for internal identification and reference serialization (ICD-FUN-41).
 
 ### 3.1 Data Types
 
@@ -79,7 +80,9 @@ Circular references between Data Types (e.g., Structure A → Structure B → St
 
 ### 3.3 Packet Types
 
-A Packet Type is either **Telecommand** or **Telemetry**. It has a **name** (unique within the Data Model) and an optional **description**. It contains an ordered list of Packet Fields:
+A Packet Type is either **Telecommand** or **Telemetry**. It has a **name** (unique within the Data Model), an optional **description**, and is associated with a **Header Type** (nullable if the referent is deleted). For each ID defined in the associated Header Type the Packet Type stores a **fixed hex value** (ICD-DAT-413, ICD-DAT-414).
+
+It contains an ordered list of Packet Fields:
 
 | Field | Type | Notes |
 |---|---|---|
@@ -89,7 +92,27 @@ A Packet Type is either **Telecommand** or **Telemetry**. It has a **name** (uni
 | Is Type Indicator | bool | if true, Parameter must be of Kind ID and the field carries a hex value |
 | Indicator Value | hex string | present when Is Type Indicator is true |
 
-### 3.4 Template Sets
+### 3.4 Header Types
+
+A Header Type describes the common header structure shared by Packet Types. It has a **name** (unique within the Data Model) and a **description**, and carries an ordered list of IDs:
+
+| Field | Type | Notes |
+|---|---|---|
+| Name | string | required, unique within Data Model |
+| Description | string | required |
+| IDs | ordered list | see below |
+
+Each **ID entry** in the list has:
+
+| Field | Type | Notes |
+|---|---|---|
+| Name | string | required |
+| Description | string | optional |
+| Data Type | Data Type ref | required; must be of kind ID; nullable if referent deleted |
+
+When a Header Type is deleted, all Packet Type references to it are set to null (ICD-FUN-51). The associated per-ID fixed values on the Packet Type are discarded at that point.
+
+### 3.5 Template Sets
 
 | Field | Type | Notes |
 |---|---|---|
@@ -112,9 +135,9 @@ Template Sets are stored in `settings.xml`, separate from the Data Model XML (IC
 
 ### 4.1 `DataModel`
 
-Central domain object aggregating all Data Types, Parameters, and Packet Types. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time as a variable named `model`.
+Central domain object aggregating all Data Types, Parameters, Packet Types, and Header Types. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time as a variable named `model`.
 
-References between entities (e.g., Parameter → Data Type, Packet Field → Parameter) are stored as GUID-based nullable references. When a referenced entity is deleted, all references to it are set to null (ICD-FUN-51). The UI tolerates null references gracefully (displaying a placeholder or blank), allowing the user to select a replacement later.
+References between entities (e.g., Parameter → Data Type, Packet Field → Parameter, Packet Type → Header Type, Header Type ID → Data Type) are stored as GUID-based nullable references. When a referenced entity is deleted, all references to it are set to null (ICD-FUN-51). The UI tolerates null references gracefully (displaying a placeholder or blank), allowing the user to select a replacement later.
 
 ### 4.2 Service Layer
 
@@ -126,7 +149,7 @@ Singleton owning the current `DataModel` instance. Orchestrates high-level workf
 
 - New / Open / Save (delegates serialization to `XmlPersistence`).
 - "New" creates an empty Data Model (ICD-FUN-50).
-- CRUD operations on Data Types, Parameters, Packet Types — each operation is routed through `UndoRedoManager` and `ChangeNotifier`.
+- CRUD operations on Data Types, Parameters, Packet Types, and Header Types — each operation is routed through `UndoRedoManager` and `ChangeNotifier`.
 
 #### 4.2.2 `ChangeNotifier`
 
@@ -146,10 +169,11 @@ Delete commands capture the list of references that were nulled so that **undo r
 
 Scans the Data Model for constraint violations (ICD-FUN-52):
 
-- Null references (missing Data Type on Parameter, missing Parameter on Packet Field).
+- Null references (missing Data Type on Parameter, missing Parameter on Packet Field, missing Data Type on Header Type ID entry).
 - Duplicate names or IDs.
 - Circular Data Type references (ICD-FUN-42).
 - Type indicator fields not associated with Kind ID parameters.
+- Header Type ID entries referencing a Data Type that is not of kind ID.
 
 Returns a list of human-readable issue descriptions, presented in a validation dialog (ICD-IF-191).
 
@@ -206,7 +230,7 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 
 ### 5.1 Main Window
 
-- **Menu bar**: New / Open / Save, Validate Model, Exit, Options, Windows (Data Types, Parameters, Export), Help / About.
+- **Menu bar**: New / Open / Save, Validate Model, Exit, Options, Windows (Data Types, Parameters, Header Types, Export), Help / About.
 - **Content area**: tree-on-left listing Telecommand and Telemetry packet types, detail panel on-right showing the selected packet's field list and metadata. Panels are resizable with splitters.
 - **Packet Type CRUD**: toolbar or context menu to add, delete, and modify Packet Types and their Packet Fields (ICD-IF-61).
 - **Close guard**: When the user attempts to close the application (or start a new/open operation) while unsaved changes exist, a confirmation dialog offers Save, Discard, or Cancel (ICD-IF-180).
@@ -227,13 +251,21 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 - Column visibility toggle, CSV import/export.
 - Toolbar or context menu for add/delete.
 
-### 5.4 Export Window
+### 5.4 Header Types Window
+
+- Grid/spreadsheet view of all Header Types (ICD-IF-220).
+- Each row shows the Header Type name and description.
+- A detail panel (or expandable row) lists the ordered ID entries for the selected Header Type, showing each entry's name, description, and Data Type reference (ICD-IF-210).
+- Toolbar or context menu for add/delete of Header Types and their ID entries (ICD-IF-210).
+- Column visibility toggle and CSV import/export per ICD-IF-150 and ICD-IF-160.
+
+### 5.5 Export Window
 
 - Template Set selector (drop-down populated from the sets defined in Options).
 - Output folder selector (text field + "..." picker button).
 - Export button triggers the Export Engine for the selected set.
 
-### 5.5 Options Window
+### 5.6 Options Window
 
 - Tabbed layout. Each tab groups related options.
 - Every option has a tooltip showing its description and default value.
@@ -241,12 +273,12 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 - Dedicated **Template Sets** tab for defining (add, delete, modify) Template Sets and their Templates (ICD-IF-73).
 - Explicit **Save** and **Cancel** buttons (ICD-FUN-100).
 
-### 5.6 Validation Dialog
+### 5.7 Validation Dialog
 
 - Modal dialog presenting validation results as a scrollable, selectable list of issue descriptions (ICD-IF-191).
 - The list is copyable to the clipboard.
 
-### 5.7 Cross-Window Reactivity
+### 5.8 Cross-Window Reactivity
 
 All windows bind to the service layer via `ChangeNotifier`. Avalonia's data-binding and `INotifyPropertyChanged`/`ObservableCollection<T>` ensure that changes propagate reactively across controls and windows — e.g., a Data Type created in the Data Types Window is immediately available in drop-downs in the Parameters Window and elsewhere, with no manual refresh (ICD-IF-140).
 
@@ -256,7 +288,7 @@ All windows bind to the service layer via `ChangeNotifier`. Avalonia's data-bind
 icdfyit.sln
 ├── src/
 │   ├── IcdFyIt.Core/              (net8.0 class library)
-│   │   ├── Model/                 DataType, Parameter, PacketType, DataModel
+│   │   ├── Model/                 DataType, Parameter, PacketType, HeaderType, DataModel
 │   │   ├── Services/              DataModelManager, ChangeNotifier, DirtyTracker,
 │   │   │                          UndoRedoManager, ModelValidator
 │   │   ├── Persistence/           XmlPersistence, migration helpers
