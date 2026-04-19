@@ -32,4 +32,9 @@ public class PacketType
     internal string? _storedHeaderTypeIdRef;
 
     public List<PacketField> Fields { get; set; } = new();
+
+    /// <summary>Fixed hex values for each Header Type ID (ICD-DAT-414).</summary>
+    [XmlArray("HeaderIdValues")]
+    [XmlArrayItem("Entry")]
+    public List<HeaderIdValue> HeaderIdValues { get; set; } = new();
 }

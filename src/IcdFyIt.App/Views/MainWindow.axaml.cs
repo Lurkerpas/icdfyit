@@ -12,25 +12,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        // Wire ListBox cross-deselection so only one packet type is selected at a time.
-        TcList.SelectionChanged += (_, _) =>
+        // Wire TreeView selection so only packet-type leaf nodes update SelectedPacketType.
+        PacketTypeTree.SelectionChanged += (_, _) =>
         {
-            if (TcList.SelectedItem is PacketTypeNodeViewModel node)
-            {
-                TmList.SelectedItem = null;
-                if (DataContext is MainWindowViewModel vm)
-                    vm.SelectedPacketType = node;
-            }
-        };
-
-        TmList.SelectionChanged += (_, _) =>
-        {
-            if (TmList.SelectedItem is PacketTypeNodeViewModel node)
-            {
-                TcList.SelectedItem = null;
-                if (DataContext is MainWindowViewModel vm)
-                    vm.SelectedPacketType = node;
-            }
+            if (DataContext is not MainWindowViewModel vm) return;
+            vm.SelectedPacketType = PacketTypeTree.SelectedItem as PacketTypeNodeViewModel;
         };
     }
 

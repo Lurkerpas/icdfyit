@@ -37,6 +37,12 @@ public partial class MainWindowViewModel : ObservableObject
         foreach (var path in _options.RecentFiles)
             RecentFiles.Add(new RecentFileItemViewModel(path, OpenRecentFile));
 
+        PacketTypeGroups = new ObservableCollection<PacketTypeGroupNode>
+        {
+            new PacketTypeGroupNode("Telecommands", Telecommands),
+            new PacketTypeGroupNode("Telemetries",  Telemetries),
+        };
+
         // Initialise tree collections from whatever is already in the notifier.
         foreach (var pt in _changeNotifier.PacketTypes)
             PlaceNode(CreateNode(pt));
@@ -79,15 +85,24 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Shows the Validation-results dialog.</summary>
     public Func<IReadOnlyList<ValidationIssue>, Task>? ShowValidationDialog { get; set; }
 
+    /// <summary>
+    /// Shows the Header Type selection dialog for the given Packet Type.
+    /// The delegate is responsible for showing the UI; after it returns the
+    /// <see cref="PacketType.HeaderType"/> is expected to have been updated.
+    /// </summary>
+    public Func<PacketType, IReadOnlyList<HeaderType>, Task>? RequestSelectHeaderType { get; set; }
+
     // ── Packet-type tree collections ──────────────────────────────────────────
 
-    public ObservableCollection<PacketTypeNodeViewModel>  Telecommands { get; } = new();
-    public ObservableCollection<PacketTypeNodeViewModel>  Telemetries  { get; } = new();
-    public ObservableCollection<RecentFileItemViewModel>  RecentFiles  { get; } = new();
+    public ObservableCollection<PacketTypeNodeViewModel>  Telecommands     { get; } = new();
+    public ObservableCollection<PacketTypeNodeViewModel>  Telemetries      { get; } = new();
+    public ObservableCollection<RecentFileItemViewModel>  RecentFiles      { get; } = new();
+    public ObservableCollection<PacketTypeGroupNode>      PacketTypeGroups { get; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(RemovePacketTypeCommand))]
     [NotifyCanExecuteChangedFor(nameof(DuplicatePacketTypeCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SelectHeaderTypeCommand))]
     private PacketTypeNodeViewModel? _selectedPacketType;
 
     public bool CanActOnSelected => SelectedPacketType is not null;
@@ -242,6 +257,16 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (SelectedPacketType is null) return;
         _dataModelManager.DuplicatePacketType(SelectedPacketType.Model);
+        MarkEdited();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanActOnSelected))]
+    private async Task SelectHeaderType()
+    {
+        if (SelectedPacketType is null) return;
+        if (RequestSelectHeaderType is not null)
+            await RequestSelectHeaderType(SelectedPacketType.Model, _changeNotifier.HeaderTypes.ToList());
+        SelectedPacketType.RefreshHeaderType();
         MarkEdited();
     }
 

@@ -23,6 +23,9 @@ public partial class PacketTypeNodeViewModel : ObservableObject
 
         Fields = new ObservableCollection<PacketFieldRowViewModel>(
             packetType.Fields.Select(f => MakeRow(f)));
+
+        // Populate Header ID value rows (HeaderType is already resolved when reloading).
+        RefreshHeaderType();
     }
 
     public PacketType Model => _packetType;
@@ -42,6 +45,31 @@ public partial class PacketTypeNodeViewModel : ObservableObject
     }
 
     public string Kind => _packetType.Kind.ToString();
+
+    // ── Header Type association ───────────────────────────────────────────────
+
+    /// <summary>Display name of the associated Header Type, or "—" when none.</summary>
+    public string HeaderTypeName => _packetType.HeaderType?.Name ?? "—";
+
+    /// <summary>True when a Header Type is currently associated.</summary>
+    public bool HasHeaderType => _packetType.HeaderType is not null;
+
+    /// <summary>Editable fixed values for each Header Type ID.</summary>
+    public ObservableCollection<HeaderIdValueRowViewModel> HeaderIdValueRows { get; } = new();
+
+    /// <summary>
+    /// Rebuilds <see cref="HeaderIdValueRows"/> from the currently associated Header Type.
+    /// Must be called after <see cref="PacketType.HeaderType"/> is assigned or changed.
+    /// </summary>
+    public void RefreshHeaderType()
+    {
+        OnPropertyChanged(nameof(HeaderTypeName));
+        OnPropertyChanged(nameof(HasHeaderType));
+        HeaderIdValueRows.Clear();
+        if (_packetType.HeaderType is null) return;
+        foreach (var hid in _packetType.HeaderType.Ids)
+            HeaderIdValueRows.Add(new HeaderIdValueRowViewModel(_packetType, hid) { OnEdited = OnEdited });
+    }
 
     // ── Fields collection (detail panel) ─────────────────────────────────────
 

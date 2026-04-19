@@ -235,6 +235,15 @@ public partial class App : Application
                 headerTypesWindow.DataContext = headerTypesVm;
                 headerTypesWindow.Show(mainWindow);
             };
+
+            mainVm.RequestSelectHeaderType = async (packetType, availableTypes) =>
+            {
+                var dialog = new SelectHeaderTypeDialog
+                {
+                    DataContext = new SelectHeaderTypeDialogViewModel(packetType, availableTypes)
+                };
+                await dialog.ShowDialog(mainWindow);
+            };
         }
 
         base.OnFrameworkInitializationCompleted();
