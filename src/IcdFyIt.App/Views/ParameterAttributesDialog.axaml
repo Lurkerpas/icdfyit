@@ -1,0 +1,45 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="IcdFyIt.App.Views.ParameterAttributesDialog"
+        Title="{Binding ParameterName, StringFormat='Parameter Attributes \u2013 {0}'}"
+        Width="380" Height="220"
+        MinWidth="320" MinHeight="200"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="12">
+
+        <Button DockPanel.Dock="Bottom" Content="Close"
+                HorizontalAlignment="Right" Margin="0,10,0,0"
+                IsDefault="True" Click="OnCloseClicked"/>
+
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="140,*"
+              VerticalAlignment="Top">
+
+            <!-- Kind -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Kind:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <ComboBox  Grid.Row="0" Grid.Column="1"
+                       ItemsSource="{Binding AllKinds}"
+                       SelectedItem="{Binding SelectedKind, Mode=TwoWay}"
+                       HorizontalAlignment="Stretch"
+                       Margin="0,4,0,4"/>
+
+            <!-- Separator -->
+            <Separator Grid.Row="1" Grid.ColumnSpan="2" Margin="0,6"/>
+
+            <!-- Data Type -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Data Type:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <AutoCompleteBox Grid.Row="2" Grid.Column="1"
+                             ItemsSource="{Binding AvailableTypes}"
+                             SelectedItem="{Binding DataType, Mode=TwoWay}"
+                             FilterMode="Contains"
+                             MinimumPrefixLength="0"
+                             PlaceholderText="(none)"
+                             Margin="0,4,0,4"/>
+
+        </Grid>
+
+    </DockPanel>
+</Window>

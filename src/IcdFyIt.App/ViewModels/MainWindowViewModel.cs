@@ -31,6 +31,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Opens (or focuses) the Data Types window.</summary>
     public Action? ShowDataTypesWindow { get; set; }
 
+    /// <summary>Opens (or focuses) the Parameters window.</summary>
+    public Action? ShowParametersWindow { get; set; }
+
     // ── Title bar ──────────────────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -106,7 +109,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void OpenDataTypes() => ShowDataTypesWindow?.Invoke();
 
     [RelayCommand]
-    private void OpenParameters() => throw new NotImplementedException();
+    private void OpenParameters() => ShowParametersWindow?.Invoke();
 
     [RelayCommand]
     private void OpenExportWindow() => throw new NotImplementedException();

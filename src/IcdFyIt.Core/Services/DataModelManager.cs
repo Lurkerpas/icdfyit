@@ -116,6 +116,26 @@ public class DataModelManager
             _dirtyTracker) { IsRemove = true });
     }
 
+    public Parameter DuplicateParameter(Parameter source)
+    {
+        var copy = new Parameter
+        {
+            Name             = $"Copy of {source.Name}",
+            Kind             = source.Kind,
+            DataType         = source.DataType,
+            NumericId        = source.NumericId,
+            Mnemonic         = source.Mnemonic,
+            ShortDescription = source.ShortDescription,
+            LongDescription  = source.LongDescription,
+            Formula          = source.Formula,
+            HexValue         = source.HexValue,
+        };
+        _undoRedoManager.Push(new AddEntityCommand<Parameter>(
+            copy, _model.Parameters, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker));
+        return copy;
+    }
+
     // ── PacketType CRUD ────────────────────────────────────────────────────────
 
     public PacketType AddPacketType(string name)

@@ -31,6 +31,8 @@ public partial class App : Application
             var mainVm        = new MainWindowViewModel(dataModelManager, dirtyTracker);
             var dataTypesVm   = new DataTypesWindowViewModel(dataModelManager, changeNotifier,
                                                              dirtyTracker, mainVm);
+            var parametersVm  = new ParametersWindowViewModel(dataModelManager, changeNotifier,
+                                                              dirtyTracker, mainVm);
 
             // ── Main window ────────────────────────────────────────────────────
             var mainWindow = new MainWindow();
@@ -74,6 +76,9 @@ public partial class App : Application
 
             // ── Data Types window lifecycle ────────────────────────────────────
             DataTypesWindow? dataTypesWindow = null;
+
+            // ── Parameters window lifecycle ────────────────────────────────────
+            ParametersWindow? parametersWindow = null;
 
             // Wire Add dialog: shown attached to the DataTypes window (or mainWindow as fallback).
             dataTypesVm.RequestAddDataType = async () =>
@@ -134,6 +139,41 @@ public partial class App : Application
                 dataTypesWindow = new DataTypesWindow();
                 dataTypesWindow.DataContext = dataTypesVm;
                 dataTypesWindow.Show(mainWindow);
+            };
+
+            // Wire Add Parameter dialog.
+            parametersVm.RequestAddParameter = async () =>
+            {
+                Window owner = (parametersWindow is { IsVisible: true })
+                    ? (Window)parametersWindow
+                    : (Window)mainWindow;
+                var dialog = new AddParameterDialog();
+                return await dialog.ShowDialog<string?>(owner);
+            };
+
+            // Wire Parameter Attributes pop-up dialog.
+            parametersVm.RequestEditAttributes = async (p) =>
+            {
+                Window owner = (parametersWindow is { IsVisible: true })
+                    ? (Window)parametersWindow
+                    : (Window)mainWindow;
+                var dialog = new ParameterAttributesDialog
+                {
+                    DataContext = new ParameterAttributesDialogViewModel(p, changeNotifier.DataTypes.ToList())
+                };
+                await dialog.ShowDialog(owner);
+            };
+
+            mainVm.ShowParametersWindow = () =>
+            {
+                if (parametersWindow is { IsVisible: true })
+                {
+                    parametersWindow.Activate();
+                    return;
+                }
+                parametersWindow = new ParametersWindow();
+                parametersWindow.DataContext = parametersVm;
+                parametersWindow.Show(mainWindow);
             };
         }
 
