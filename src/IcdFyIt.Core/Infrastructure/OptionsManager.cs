@@ -1,3 +1,5 @@
+using System.Xml.Serialization;
+
 namespace IcdFyIt.Core.Infrastructure;
 
 /// <summary>
@@ -11,9 +13,28 @@ public class OptionsManager
         "icdfyit",
         "settings.xml");
 
+    private static readonly XmlSerializer Serializer = new(typeof(AppOptions));
+
     /// <summary>Loads options from disk; returns defaults if file does not exist.</summary>
-    public AppOptions Load() => throw new NotImplementedException();
+    public AppOptions Load()
+    {
+        if (!File.Exists(SettingsPath)) return new AppOptions();
+        try
+        {
+            using var stream = File.OpenRead(SettingsPath);
+            return (AppOptions?)Serializer.Deserialize(stream) ?? new AppOptions();
+        }
+        catch
+        {
+            return new AppOptions();
+        }
+    }
 
     /// <summary>Persists options to disk (ICD-FUN-100).</summary>
-    public void Save(AppOptions options) => throw new NotImplementedException();
+    public void Save(AppOptions options)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
+        using var stream = new FileStream(SettingsPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        Serializer.Serialize(stream, options);
+    }
 }

@@ -31,6 +31,9 @@ public class DataModelManager
     /// <summary>The current file path, or null when the document has never been saved.</summary>
     public string? CurrentFilePath { get; private set; }
 
+    /// <summary>Read-only view of the live data model (used by validation).</summary>
+    public DataModel CurrentModel => _model;
+
     // ── Lifecycle ──────────────────────────────────────────────────────────────
 
     /// <summary>Discards the current model and starts a new empty one (ICD-FUN-10).</summary>
@@ -138,9 +141,9 @@ public class DataModelManager
 
     // ── PacketType CRUD ────────────────────────────────────────────────────────
 
-    public PacketType AddPacketType(string name)
+    public PacketType AddPacketType(string name, PacketTypeKind kind = PacketTypeKind.Telecommand)
     {
-        var pt = new PacketType { Name = name };
+        var pt = new PacketType { Name = name, Kind = kind };
         _undoRedoManager.Push(new AddEntityCommand<PacketType>(
             pt, _model.PacketTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker));
@@ -151,6 +154,29 @@ public class DataModelManager
         => _undoRedoManager.Push(new AddEntityCommand<PacketType>(
             packetType, _model.PacketTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker) { IsRemove = true });
+
+    public PacketType DuplicatePacketType(PacketType source)
+    {
+        var copy = new PacketType
+        {
+            Name        = $"Copy of {source.Name}",
+            Kind        = source.Kind,
+            Description = source.Description,
+        };
+        foreach (var f in source.Fields)
+            copy.Fields.Add(new PacketField
+            {
+                Name            = f.Name,
+                Description     = f.Description,
+                Parameter       = f.Parameter,
+                IsTypeIndicator = f.IsTypeIndicator,
+                IndicatorValue  = f.IndicatorValue,
+            });
+        _undoRedoManager.Push(new AddEntityCommand<PacketType>(
+            copy, _model.PacketTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker));
+        return copy;
+    }
 
     // ── Undo / Redo ────────────────────────────────────────────────────────────
 

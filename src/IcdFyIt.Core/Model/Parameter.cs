@@ -41,8 +41,10 @@ public class Parameter
     public ParameterKind Kind { get; set; }
 
     /// <summary>Python formula string; only meaningful when Kind == SyntheticValue.</summary>
-    public string? Formula { get; set; }
+    public string? Formula { get; set; } = string.Empty;
 
     /// <summary>Hex string value; only meaningful when Kind == FixedValue.</summary>
     public string? HexValue { get; set; }
+
+    public override string ToString() => Name;
 }

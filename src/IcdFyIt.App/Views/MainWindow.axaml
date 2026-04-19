@@ -1,30 +1,43 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:IcdFyIt.App.ViewModels"
+        xmlns:conv="using:Avalonia.Data.Converters"
         x:Class="IcdFyIt.App.Views.MainWindow"
         Title="{Binding Title}"
         Width="1024" Height="768"
         MinWidth="800" MinHeight="600">
 
-    <Design.DataContext>
-        <!-- design-time stub; real VM wired in code-behind -->
-    </Design.DataContext>
-
     <DockPanel>
         <!-- Menu bar (ICD-IF-10 to ICD-IF-52) -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New"     Command="{Binding NewDocumentCommand}" />
-                <MenuItem Header="_Open…"   Command="{Binding OpenDocumentCommand}" />
+                <MenuItem Header="_New"      Command="{Binding NewDocumentCommand}" />
+                <MenuItem Header="_Open…"    Command="{Binding OpenDocumentCommand}" />
+                <MenuItem Header="Re_open"   ItemsSource="{Binding RecentFiles}">
+                    <MenuItem.ItemContainerTheme>
+                        <ControlTheme TargetType="MenuItem"
+                                      BasedOn="{StaticResource {x:Type MenuItem}}">
+                            <Setter Property="Header"  Value="{Binding Header}" />
+                            <Setter Property="Command" Value="{Binding OpenCommand}" />
+                        </ControlTheme>
+                    </MenuItem.ItemContainerTheme>
+                </MenuItem>
                 <Separator />
-                <MenuItem Header="_Save"    Command="{Binding SaveDocumentCommand}" />
+                <MenuItem Header="_Save"     Command="{Binding SaveDocumentCommand}" />
                 <MenuItem Header="Save _As…" Command="{Binding SaveDocumentAsCommand}" />
             </MenuItem>
             <MenuItem Header="_Edit">
-                <MenuItem Header="_Undo"    Command="{Binding UndoCommand}" />
-                <MenuItem Header="_Redo"    Command="{Binding RedoCommand}" />
+                <MenuItem Header="_Undo"     Command="{Binding UndoCommand}" />
+                <MenuItem Header="_Redo"     Command="{Binding RedoCommand}" />
                 <Separator />
-                <MenuItem Header="_Validate" Command="{Binding RunValidationCommand}" />
+                <MenuItem Header="Add _Telecommand…" Command="{Binding AddTelecommandCommand}" />
+                <MenuItem Header="Add T_elemetry…"   Command="{Binding AddTelemetryCommand}" />
+                <MenuItem Header="_Duplicate"         Command="{Binding DuplicatePacketTypeCommand}" />
+                <MenuItem Header="Remo_ve"            Command="{Binding RemovePacketTypeCommand}" />
+                <Separator />
+                <MenuItem Header="Add _Field"        Command="{Binding AddFieldCommand}" />
+                <Separator />
+                <MenuItem Header="_Validate…"        Command="{Binding RunValidationCommand}" />
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="_Data Types…"  Command="{Binding OpenDataTypesCommand}" />
@@ -35,15 +48,229 @@
                 <MenuItem Header="_Options…" Command="{Binding OpenOptionsCommand}" />
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_About"   Command="{Binding OpenAboutCommand}" />
-                <MenuItem Header="Open _Help" Command="{Binding OpenHelpCommand}" />
+                <MenuItem Header="_About"      Command="{Binding OpenAboutCommand}" />
+                <MenuItem Header="Open _Help"  Command="{Binding OpenHelpCommand}" />
             </MenuItem>
         </Menu>
 
-        <!-- Packet Types list (ICD-IF-61) -->
-        <TextBlock DockPanel.Dock="Bottom" Text="Ready" Margin="4,2" />
+        <!-- Status bar -->
+        <Border DockPanel.Dock="Bottom" Background="#2D2D30" Padding="6,2">
+            <TextBlock Text="Ready" Foreground="#CCCCCC" FontSize="11" />
+        </Border>
 
-        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                   Text="Open a document or create a new one." />
+        <!-- Main content: tree | splitter | detail -->
+        <Grid ColumnDefinitions="220,4,*">
+
+            <!-- ── Left: packet-type tree (ICD-IF-60, ICD-IF-61) ──────────── -->
+            <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto,*">
+
+                <!-- TC section header -->
+                <DockPanel Grid.Row="0" Background="#3F3F46" LastChildFill="True">
+                    <Button DockPanel.Dock="Right" Content="+" Margin="2"
+                            Command="{Binding AddTelecommandCommand}"
+                            ToolTip.Tip="Add Telecommand" />
+                    <TextBlock Text="Telecommands" Padding="6,4"
+                               VerticalAlignment="Center"
+                               Foreground="#CCCCCC" FontWeight="SemiBold" />
+                </DockPanel>
+
+                <!-- TC list -->
+                <ListBox Grid.Row="1" x:Name="TcList"
+                         ItemsSource="{Binding Telecommands}"
+                         Background="#252526">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add Telecommand…"
+                                      Command="{Binding AddTelecommandCommand}" />
+                            <MenuItem Header="Duplicate"
+                                      Command="{Binding DuplicatePacketTypeCommand}" />
+                            <Separator />
+                            <MenuItem Header="Remove"
+                                      Command="{Binding RemovePacketTypeCommand}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:PacketTypeNodeViewModel}">
+                            <TextBlock Text="{Binding Name}" Padding="2" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- TM section header -->
+                <DockPanel Grid.Row="2" Background="#3F3F46" LastChildFill="True">
+                    <Button DockPanel.Dock="Right" Content="+" Margin="2"
+                            Command="{Binding AddTelemetryCommand}"
+                            ToolTip.Tip="Add Telemetry" />
+                    <TextBlock Text="Telemetries" Padding="6,4"
+                               VerticalAlignment="Center"
+                               Foreground="#CCCCCC" FontWeight="SemiBold" />
+                </DockPanel>
+
+                <!-- TM list -->
+                <ListBox Grid.Row="3" x:Name="TmList"
+                         ItemsSource="{Binding Telemetries}"
+                         Background="#252526">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add Telemetry…"
+                                      Command="{Binding AddTelemetryCommand}" />
+                            <MenuItem Header="Duplicate"
+                                      Command="{Binding DuplicatePacketTypeCommand}" />
+                            <Separator />
+                            <MenuItem Header="Remove"
+                                      Command="{Binding RemovePacketTypeCommand}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:PacketTypeNodeViewModel}">
+                            <TextBlock Text="{Binding Name}" Padding="2" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+            </Grid>
+
+            <!-- Splitter -->
+            <GridSplitter Grid.Column="1"
+                          ResizeDirection="Columns"
+                          Background="#555"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch" />
+
+            <!-- ── Right: detail panel ─────────────────────────────────────── -->
+            <Grid Grid.Column="2">
+
+                <!-- Empty state -->
+                <TextBlock Text="← Select a packet type to view its details."
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="#858585"
+                           IsVisible="{Binding SelectedPacketType,
+                               Converter={x:Static ObjectConverters.IsNull}}" />
+
+                <!-- Detail content  (shown when a packet type is selected) -->
+                <ScrollViewer IsVisible="{Binding SelectedPacketType,
+                                  Converter={x:Static ObjectConverters.IsNotNull}}"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="14" Spacing="8">
+
+                        <!-- ─ Metadata ────────────────────────────────────── -->
+                        <TextBlock Text="Packet Type"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   Foreground="#CCCCCC" />
+
+                        <Grid ColumnDefinitions="90,*"
+                              RowDefinitions="Auto,Auto,Auto"
+                              RowSpacing="6">
+
+                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Text="Name:" VerticalAlignment="Center" />
+                            <TextBox   Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding SelectedPacketType.Name}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                       Text="Description:" VerticalAlignment="Top"
+                                       Margin="0,4,0,0" />
+                            <TextBox   Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding SelectedPacketType.Description}"
+                                       AcceptsReturn="True" MinHeight="54"
+                                       TextWrapping="Wrap" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Text="Kind:" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="2" Grid.Column="1"
+                                       Text="{Binding SelectedPacketType.Kind}"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+
+                        <Separator Margin="0,4" />
+
+                        <!-- ─ Fields ──────────────────────────────────────── -->
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right"
+                                    Content="+ Add Field"
+                                    Command="{Binding AddFieldCommand}" />
+                            <TextBlock Text="Fields"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </DockPanel>
+
+                        <!-- Column header labels -->
+                        <Grid ColumnDefinitions="22,110,160,2*,70,90" Margin="0,2,0,0">
+                            <TextBlock Grid.Column="1" Text="Name"
+                                       Foreground="#858585" FontSize="11" />
+                            <TextBlock Grid.Column="2" Text="Description"
+                                       Foreground="#858585" FontSize="11" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="3" Text="Parameter"
+                                       Foreground="#858585" FontSize="11" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="4" Text="Type Ind."
+                                       Foreground="#858585" FontSize="11" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="5" Text="Ind. Value"
+                                       Foreground="#858585" FontSize="11" Margin="4,0,0,0" />
+                        </Grid>
+
+                        <!-- Field rows (ItemsControl avoids DataGrid/AutoCompleteBox X11 crash) -->
+                        <ItemsControl ItemsSource="{Binding SelectedPacketType.Fields}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:PacketFieldRowViewModel}">
+                                    <Border Padding="0,1">
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Add Field"
+                                                          Command="{Binding AddCommand}" />
+                                                <MenuItem Header="Remove"
+                                                          Command="{Binding RemoveCommand}" />
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <Grid ColumnDefinitions="22,110,160,2*,70,90">
+
+                                            <!-- Grip -->
+                                            <Border Grid.Column="0" Background="Transparent"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="⋮" Foreground="#858585" />
+                                            </Border>
+
+                                            <!-- Name -->
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Name}"
+                                                     BorderThickness="0,0,0,1"
+                                                     Padding="3,2" />
+
+                                            <!-- Description -->
+                                            <TextBox Grid.Column="2"
+                                                     Text="{Binding Description}"
+                                                     BorderThickness="0,0,0,1"
+                                                     Padding="3,2" Margin="2,0,0,0" />
+
+                                            <!-- Parameter AutoCompleteBox -->
+                                            <AutoCompleteBox Grid.Column="3"
+                                                             ItemsSource="{Binding AvailableParameters}"
+                                                             SelectedItem="{Binding Parameter}"
+                                                             FilterMode="ContainsOrdinal"
+                                                             Margin="2,0,0,0" />
+
+                                            <!-- IsTypeIndicator -->
+                                            <CheckBox Grid.Column="4"
+                                                      IsChecked="{Binding IsTypeIndicator}"
+                                                      HorizontalAlignment="Center"
+                                                      Margin="4,0" />
+
+                                            <!-- IndicatorValue (visible only when type-indicator) -->
+                                            <TextBox Grid.Column="5"
+                                                     Text="{Binding IndicatorValue}"
+                                                     IsVisible="{Binding ShowIndicatorValue}"
+                                                     BorderThickness="0,0,0,1"
+                                                     Padding="3,2" Margin="2,0,0,0" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+            </Grid>
+        </Grid>
     </DockPanel>
 </Window>

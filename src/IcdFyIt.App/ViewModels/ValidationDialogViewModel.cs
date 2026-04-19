@@ -18,7 +18,5 @@ public partial class ValidationDialogViewModel : ObservableObject
 
     public ObservableCollection<ValidationIssue> Issues { get; }
 
-    /// <summary>Copies all issue messages to the clipboard, one per line.</summary>
-    [RelayCommand]
-    private void CopyToClipboard() => throw new NotImplementedException();
+    // CopyToClipboard is handled in ValidationDialog code-behind (requires IClipboard from TopLevel).
 }

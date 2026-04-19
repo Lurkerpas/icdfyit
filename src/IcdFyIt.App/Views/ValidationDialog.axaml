@@ -9,7 +9,7 @@
     <DockPanel Margin="8">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
                     HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
-            <Button Content="Copy to clipboard" Command="{Binding CopyToClipboardCommand}" />
+            <!-- Copy to clipboard: not yet implemented (Avalonia 12 clipboard API TBD) -->
             <Button Content="Close" Click="OnCloseClicked" />
         </StackPanel>
 

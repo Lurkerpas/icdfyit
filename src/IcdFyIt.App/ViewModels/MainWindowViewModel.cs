@@ -1,23 +1,47 @@
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using IcdFyIt.Core.Infrastructure;
+using IcdFyIt.Core.Model;
 using IcdFyIt.Core.Services;
 
 namespace IcdFyIt.App.ViewModels;
 
 /// <summary>
 /// ViewModel for the main application window (ICD-DES §5.1).
-/// File-dialog interactions are injected as delegates from the composition root so the
-/// ViewModel remains View-free (testable).
+/// File-dialog interactions and modal-dialog delegates are injected from the
+/// composition root so the ViewModel remains View-free (testable).
 /// </summary>
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly DataModelManager _dataModelManager;
-    private readonly DirtyTracker _dirtyTracker;
+    private readonly ChangeNotifier   _changeNotifier;
+    private readonly DirtyTracker     _dirtyTracker;
+    private readonly OptionsManager   _optionsManager;
+    private readonly AppOptions       _options;
 
-    public MainWindowViewModel(DataModelManager dataModelManager, DirtyTracker dirtyTracker)
+    public MainWindowViewModel(
+        DataModelManager dataModelManager,
+        ChangeNotifier   changeNotifier,
+        DirtyTracker     dirtyTracker,
+        OptionsManager   optionsManager)
     {
         _dataModelManager = dataModelManager;
-        _dirtyTracker = dirtyTracker;
+        _changeNotifier   = changeNotifier;
+        _dirtyTracker     = dirtyTracker;
+        _optionsManager   = optionsManager;
+        _options          = optionsManager.Load();
+
+        foreach (var path in _options.RecentFiles)
+            RecentFiles.Add(new RecentFileItemViewModel(path, OpenRecentFile));
+
+        // Initialise tree collections from whatever is already in the notifier.
+        foreach (var pt in _changeNotifier.PacketTypes)
+            PlaceNode(CreateNode(pt));
+
+        _changeNotifier.PacketTypes.CollectionChanged += OnPacketTypesChanged;
     }
 
     // ── Delegates wired from the composition root ──────────────────────────────
@@ -34,10 +58,43 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Opens (or focuses) the Parameters window.</summary>
     public Action? ShowParametersWindow { get; set; }
 
+    /// <summary>Shows the About window as a modal dialog.</summary>
+    public Func<Task>? ShowAboutWindowDialog { get; set; }
+
+    /// <summary>
+    /// Shows the Add Packet Type name dialog.
+    /// Returns the trimmed name, or null when cancelled.
+    /// </summary>
+    public Func<Task<string?>>? RequestAddPacketTypeName { get; set; }
+
+    /// <summary>
+    /// Shows the unsaved-changes guard dialog (ICD-IF-180).
+    /// Returns "save", "discard", or null (cancel).
+    /// </summary>
+    public Func<Task<string?>>? RequestConfirmDiscardChanges { get; set; }
+
+    /// <summary>Shows the Validation-results dialog.</summary>
+    public Func<IReadOnlyList<ValidationIssue>, Task>? ShowValidationDialog { get; set; }
+
+    // ── Packet-type tree collections ──────────────────────────────────────────
+
+    public ObservableCollection<PacketTypeNodeViewModel>  Telecommands { get; } = new();
+    public ObservableCollection<PacketTypeNodeViewModel>  Telemetries  { get; } = new();
+    public ObservableCollection<RecentFileItemViewModel>  RecentFiles  { get; } = new();
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RemovePacketTypeCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DuplicatePacketTypeCommand))]
+    private PacketTypeNodeViewModel? _selectedPacketType;
+
+    public bool CanActOnSelected => SelectedPacketType is not null;
+
     // ── Title bar ──────────────────────────────────────────────────────────────
 
     [ObservableProperty]
     private string _title = "icdfyit";
+
+    public bool IsDirty => _dirtyTracker.IsDirty;
 
     private void RefreshTitle()
     {
@@ -49,11 +106,29 @@ public partial class MainWindowViewModel : ObservableObject
             : $"{file} — icdfyit";
     }
 
+    // ── Unsaved-changes guard (used by New/Open and the close guard) ──────────
+
+    /// <summary>
+    /// Returns true when it is safe to proceed (user saved or discarded).
+    /// Returns false when user cancelled.
+    /// </summary>
+    private async Task<bool> GuardUnsavedChanges()
+    {
+        if (!_dirtyTracker.IsDirty) return true;
+        if (RequestConfirmDiscardChanges is null) return true;
+
+        var result = await RequestConfirmDiscardChanges();
+        if (result is null) return false;           // cancel
+        if (result == "save") await SaveDocumentCore();
+        return true;
+    }
+
     // ── File commands ──────────────────────────────────────────────────────────
 
     [RelayCommand]
-    private void NewDocument()
+    private async Task NewDocument()
     {
+        if (!await GuardUnsavedChanges()) return;
         _dataModelManager.New();
         RefreshTitle();
     }
@@ -61,27 +136,52 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenDocument()
     {
+        if (!await GuardUnsavedChanges()) return;
         var path = await (OpenFileDialog?.Invoke() ?? Task.FromResult<string?>(null));
         if (path is null) return;
         _dataModelManager.Open(path);
+        RecordRecentFile(path);
         RefreshTitle();
     }
 
-    [RelayCommand]
-    private async Task SaveDocument()
+    private async Task OpenRecentFile(string path)
     {
-        var path = _dataModelManager.CurrentFilePath
-            ?? await (SaveFileDialog?.Invoke(null) ?? Task.FromResult<string?>(null));
-        if (path is null) return;
-        _dataModelManager.Save(path);
+        if (!await GuardUnsavedChanges()) return;
+        _dataModelManager.Open(path);
+        RecordRecentFile(path);
         RefreshTitle();
     }
+
+    private void RecordRecentFile(string path)
+    {
+        _options.RecentFiles.Remove(path);
+        _options.RecentFiles.Insert(0, path);
+        if (_options.RecentFiles.Count > 32)
+            _options.RecentFiles.RemoveRange(32, _options.RecentFiles.Count - 32);
+        _optionsManager.Save(_options);
+
+        RecentFiles.Clear();
+        foreach (var p in _options.RecentFiles)
+            RecentFiles.Add(new RecentFileItemViewModel(p, OpenRecentFile));
+    }
+
+    [RelayCommand]
+    private async Task SaveDocument() => await SaveDocumentCore();
 
     [RelayCommand]
     private async Task SaveDocumentAs()
     {
         var path = await (SaveFileDialog?.Invoke(_dataModelManager.CurrentFilePath)
             ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+        _dataModelManager.Save(path);
+        RefreshTitle();
+    }
+
+    private async Task SaveDocumentCore()
+    {
+        var path = _dataModelManager.CurrentFilePath
+            ?? await (SaveFileDialog?.Invoke(null) ?? Task.FromResult<string?>(null));
         if (path is null) return;
         _dataModelManager.Save(path);
         RefreshTitle();
@@ -103,6 +203,45 @@ public partial class MainWindowViewModel : ObservableObject
         RefreshTitle();
     }
 
+    // ── Packet-type CRUD (ICD-IF-61) ──────────────────────────────────────────
+
+    [RelayCommand]
+    private async Task AddTelecommand()
+    {
+        var name = await (RequestAddPacketTypeName?.Invoke() ?? Task.FromResult<string?>(null));
+        if (string.IsNullOrWhiteSpace(name)) return;
+        _dataModelManager.AddPacketType(name, PacketTypeKind.Telecommand);
+        MarkEdited();
+    }
+
+    [RelayCommand]
+    private async Task AddTelemetry()
+    {
+        var name = await (RequestAddPacketTypeName?.Invoke() ?? Task.FromResult<string?>(null));
+        if (string.IsNullOrWhiteSpace(name)) return;
+        _dataModelManager.AddPacketType(name, PacketTypeKind.Telemetry);
+        MarkEdited();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanActOnSelected))]
+    private void RemovePacketType()
+    {
+        if (SelectedPacketType is null) return;
+        _dataModelManager.RemovePacketType(SelectedPacketType.Model);
+        MarkEdited();
+    }
+
+    [RelayCommand]
+    private void AddField() => SelectedPacketType?.AddField();
+
+    [RelayCommand(CanExecute = nameof(CanActOnSelected))]
+    private void DuplicatePacketType()
+    {
+        if (SelectedPacketType is null) return;
+        _dataModelManager.DuplicatePacketType(SelectedPacketType.Model);
+        MarkEdited();
+    }
+
     // ── Window navigation ──────────────────────────────────────────────────────
 
     [RelayCommand]
@@ -112,21 +251,92 @@ public partial class MainWindowViewModel : ObservableObject
     private void OpenParameters() => ShowParametersWindow?.Invoke();
 
     [RelayCommand]
-    private void OpenExportWindow() => throw new NotImplementedException();
+    private void OpenExportWindow() { /* export not yet implemented */ }
 
     [RelayCommand]
-    private void OpenOptions() => throw new NotImplementedException();
+    private void OpenOptions() { /* options not yet implemented */ }
 
     [RelayCommand]
-    private void OpenAbout() => throw new NotImplementedException();
+    private async Task OpenAbout()
+    {
+        if (ShowAboutWindowDialog is not null)
+            await ShowAboutWindowDialog();
+    }
 
     [RelayCommand]
-    private void OpenHelp() => throw new NotImplementedException();
+    private void OpenHelp()
+    {
+        Process.Start(new ProcessStartInfo("https://github.com/Lurkerpas/icdfyit")
+        {
+            UseShellExecute = true
+        });
+    }
 
     [RelayCommand]
-    private void RunValidation() => throw new NotImplementedException();
+    private async Task RunValidation()
+    {
+        var validator = new ModelValidator();
+        var issues    = validator.Validate(_dataModelManager.CurrentModel);
+        if (ShowValidationDialog is not null)
+            await ShowValidationDialog(issues);
+    }
 
-    // ── Dirty notification (called from DataTypesWindow after inline edits) ───
+    // ── Dirty notification ────────────────────────────────────────────────────
 
-    public void NotifyModelEdited() => RefreshTitle();
+    public void NotifyModelEdited() => MarkEdited();
+
+    private void MarkEdited()
+    {
+        _dirtyTracker.MarkDirty();
+        RefreshTitle();
+    }
+
+    // ── PacketType collection sync ────────────────────────────────────────────
+
+    private void OnPacketTypesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                foreach (PacketType pt in e.NewItems!)
+                    PlaceNode(CreateNode(pt));
+                break;
+
+            case NotifyCollectionChangedAction.Remove:
+                foreach (PacketType pt in e.OldItems!)
+                    RemoveNodeFromCollections(pt);
+                break;
+
+            case NotifyCollectionChangedAction.Reset:
+                Telecommands.Clear();
+                Telemetries.Clear();
+                SelectedPacketType = null;
+                foreach (var pt in _changeNotifier.PacketTypes)
+                    PlaceNode(CreateNode(pt));
+                break;
+        }
+    }
+
+    private void PlaceNode(PacketTypeNodeViewModel node)
+    {
+        if (node.Model.Kind == PacketTypeKind.Telecommand)
+            Telecommands.Add(node);
+        else
+            Telemetries.Add(node);
+    }
+
+    private void RemoveNodeFromCollections(PacketType pt)
+    {
+        var tc = Telecommands.FirstOrDefault(n => n.Model == pt);
+        if (tc is not null) { Telecommands.Remove(tc); if (SelectedPacketType == tc) SelectedPacketType = null; return; }
+        var tm = Telemetries.FirstOrDefault(n => n.Model == pt);
+        if (tm is not null) { Telemetries.Remove(tm);  if (SelectedPacketType == tm) SelectedPacketType = null; }
+    }
+
+    private PacketTypeNodeViewModel CreateNode(PacketType pt)
+    {
+        var node = new PacketTypeNodeViewModel(pt, _changeNotifier.Parameters);
+        node.OnEdited = MarkEdited;
+        return node;
+    }
 }

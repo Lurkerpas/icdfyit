@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="IcdFyIt.App.Views.UnsavedChangesDialog"
+        Title="Unsaved Changes"
+        Width="390" Height="160"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+    <StackPanel Margin="20" Spacing="16">
+        <TextBlock Text="You have unsaved changes. What would you like to do?"
+                   TextWrapping="Wrap" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="_Save"    IsDefault="True"  Click="OnSaveClicked"    />
+            <Button Content="_Discard"                   Click="OnDiscardClicked" />
+            <Button Content="Cancel"   IsCancel="True"   Click="OnCancelClicked"  />
+        </StackPanel>
+    </StackPanel>
+</Window>

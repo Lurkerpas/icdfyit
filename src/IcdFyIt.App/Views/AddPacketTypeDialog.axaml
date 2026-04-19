@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="IcdFyIt.App.Views.AddPacketTypeDialog"
+        Title="Add Packet Type"
+        Width="340" Height="160"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="16" RowSpacing="6">
+        <TextBlock Grid.Row="0" Text="Name:" />
+        <TextBox   Grid.Row="1" x:Name="NameBox"
+                   Text="{Binding Name}"
+                   PlaceholderText="e.g. MyPacket" />
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Spacing="8" Margin="0,12,0,0">
+            <Button Content="OK"
+                    IsDefault="True"
+                    IsEnabled="{Binding IsValid}"
+                    Click="OnOkClicked" />
+            <Button Content="Cancel"
+                    IsCancel="True"
+                    Click="OnCancelClicked" />
+        </StackPanel>
+    </Grid>
+</Window>

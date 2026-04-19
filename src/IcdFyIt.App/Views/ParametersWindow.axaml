@@ -138,28 +138,21 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
-                <!-- Short Description -->
-                <DataGridTextColumn Header="Short Description"
-                                    Binding="{Binding ShortDescription, Mode=TwoWay}"
-                                    Width="180"/>
-
-                <!-- Long Description -->
-                <DataGridTextColumn Header="Long Description"
-                                    Binding="{Binding LongDescription, Mode=TwoWay}"
-                                    Width="180"/>
-
                 <!-- Data Type — read-only; edited via dialog -->
                 <DataGridTextColumn Header="Data Type"
                                     Binding="{Binding DataTypeName}"
                                     Width="130" IsReadOnly="True"/>
 
+                <!-- Short Description -->
+                <DataGridTextColumn Header="Short Description"
+                                    Binding="{Binding ShortDescription, Mode=TwoWay}"
+                                    Width="180"/>
+
                 <!-- Formula — SyntheticValue kind only -->
                 <DataGridTemplateColumn Header="Formula" Width="140">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Formula, TargetNullValue='\u2014'}"
-                                       Opacity="{Binding IsFormulaApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
+                            <TextBlock Text="{Binding FormulaDisplay, TargetNullValue='-'}"
                                        Padding="8,2" VerticalAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -175,7 +168,7 @@
                 <DataGridTemplateColumn Header="Hex Value" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding HexValue, TargetNullValue='\u2014'}"
+                            <TextBlock Text="{Binding HexValue, TargetNullValue='-'}"
                                        Opacity="{Binding IsHexValueApplicable,
                                                  Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
                                        Padding="8,2" VerticalAlignment="Center"/>
@@ -188,6 +181,11 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
+
+                <!-- Long Description -->
+                <DataGridTextColumn Header="Long Description"
+                                    Binding="{Binding LongDescription, Mode=TwoWay}"
+                                    Width="180"/>
 
             </DataGrid.Columns>
         </DataGrid>

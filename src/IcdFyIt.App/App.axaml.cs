@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.ViewModels;
 using IcdFyIt.App.Views;
+using IcdFyIt.Core.Infrastructure;
 using IcdFyIt.Core.Services;
 
 namespace IcdFyIt.App;
@@ -21,18 +22,19 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // ── Service layer (singletons) ──────────────────────────────────────
-            var changeNotifier  = new ChangeNotifier();
-            var dirtyTracker    = new DirtyTracker();
-            var undoRedoManager = new UndoRedoManager();
+            var changeNotifier   = new ChangeNotifier();
+            var dirtyTracker     = new DirtyTracker();
+            var undoRedoManager  = new UndoRedoManager();
             var dataModelManager = new DataModelManager(changeNotifier, dirtyTracker, undoRedoManager);
+            var optionsManager   = new OptionsManager();
             dataModelManager.New();
 
             // ── ViewModels ─────────────────────────────────────────────────────
-            var mainVm        = new MainWindowViewModel(dataModelManager, dirtyTracker);
-            var dataTypesVm   = new DataTypesWindowViewModel(dataModelManager, changeNotifier,
+            var mainVm       = new MainWindowViewModel(dataModelManager, changeNotifier, dirtyTracker, optionsManager);
+            var dataTypesVm  = new DataTypesWindowViewModel(dataModelManager, changeNotifier,
+                                                            dirtyTracker, mainVm);
+            var parametersVm = new ParametersWindowViewModel(dataModelManager, changeNotifier,
                                                              dirtyTracker, mainVm);
-            var parametersVm  = new ParametersWindowViewModel(dataModelManager, changeNotifier,
-                                                              dirtyTracker, mainVm);
 
             // ── Main window ────────────────────────────────────────────────────
             var mainWindow = new MainWindow();
@@ -72,6 +74,35 @@ public partial class App : Application
                         ]
                     });
                 return file?.Path.LocalPath;
+            };
+
+            // ── Modal dialog delegates ─────────────────────────────────────────
+
+            mainVm.RequestAddPacketTypeName = async () =>
+            {
+                var dialog = new AddPacketTypeDialog();
+                return await dialog.ShowDialog<string?>(mainWindow);
+            };
+
+            mainVm.RequestConfirmDiscardChanges = async () =>
+            {
+                var dialog = new UnsavedChangesDialog();
+                return await dialog.ShowDialog<string?>(mainWindow);
+            };
+
+            mainVm.ShowAboutWindowDialog = async () =>
+            {
+                var dialog = new AboutWindow { DataContext = new AboutWindowViewModel() };
+                await dialog.ShowDialog(mainWindow);
+            };
+
+            mainVm.ShowValidationDialog = async issues =>
+            {
+                var dialog = new ValidationDialog
+                {
+                    DataContext = new ValidationDialogViewModel(issues)
+                };
+                await dialog.ShowDialog(mainWindow);
             };
 
             // ── Data Types window lifecycle ────────────────────────────────────

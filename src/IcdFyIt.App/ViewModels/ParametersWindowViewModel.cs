@@ -77,11 +77,9 @@ public partial class ParametersWindowViewModel : ObservableObject
     // ── Add / Remove / Duplicate ──────────────────────────────────────────────
 
     [RelayCommand]
-    private async Task Add()
+    private void Add()
     {
-        var name = await (RequestAddParameter?.Invoke() ?? Task.FromResult<string?>(null));
-        if (string.IsNullOrWhiteSpace(name)) return;
-        var p = _dataModelManager.AddParameter(name);
+        var p = _dataModelManager.AddParameter("NewParameter");
         FilterText = string.Empty;
         SelectedKindFilter = AllKindLabel;
         SelectedRow = _filteredRows.FirstOrDefault(r => r.Model == p);

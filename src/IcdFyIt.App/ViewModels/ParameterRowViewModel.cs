@@ -53,7 +53,7 @@ public partial class ParameterRowViewModel : ObservableObject
     public string? Formula
     {
         get => Model.Formula;
-        set { Model.Formula = value; OnPropertyChanged(); }
+        set { Model.Formula = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormulaDisplay)); }
     }
 
     /// <summary>Hex value string; only meaningful when Kind == FixedValue.</summary>
@@ -68,12 +68,15 @@ public partial class ParameterRowViewModel : ObservableObject
     public string Kind => Model.Kind.ToString();
 
     /// <summary>Display name of the assigned data type, or "—" when none is assigned.</summary>
-    public string DataTypeName => Model.DataType?.Name ?? "\u2014";
+    public string DataTypeName => Model.DataType?.Name ?? "-";
 
     // ── Applicability helpers for conditional opacity / edit-guard ─────────────
 
     public bool IsFormulaApplicable  => Model.Kind == ParameterKind.SyntheticValue;
     public bool IsHexValueApplicable => Model.Kind == ParameterKind.FixedValue;
+
+    /// <summary>Returns the formula for display, or null (shown as —) when kind is not SyntheticValue.</summary>
+    public string? FormulaDisplay => IsFormulaApplicable ? Formula : null;
 
     // ── Post-dialog refresh ────────────────────────────────────────────────────
 
@@ -85,5 +88,6 @@ public partial class ParameterRowViewModel : ObservableObject
         OnPropertyChanged(nameof(DataTypeName));
         OnPropertyChanged(nameof(IsFormulaApplicable));
         OnPropertyChanged(nameof(IsHexValueApplicable));
+        OnPropertyChanged(nameof(FormulaDisplay));
     }
 }

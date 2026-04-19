@@ -22,4 +22,9 @@ public class AppOptions
     /// <summary>Named export template sets configured by the user (ICD-IF-73, ICD-DES-81).</summary>
     [XmlArray]
     public List<TemplateSetConfig> TemplateSets { get; set; } = new();
+
+    /// <summary>Paths of the 32 most recently opened files, newest first.</summary>
+    [XmlArray]
+    [XmlArrayItem("File")]
+    public List<string> RecentFiles { get; set; } = new();
 }
