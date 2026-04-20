@@ -36,6 +36,7 @@ public partial class App : Application
             var parametersVm   = new ParametersWindowViewModel(dataModelManager, changeNotifier,
                                                                dirtyTracker, mainVm);
             var headerTypesVm  = new HeaderTypesWindowViewModel(dataModelManager, changeNotifier, mainVm);
+            var optionsVm      = new OptionsWindowViewModel(optionsManager);
 
             // ── Main window ────────────────────────────────────────────────────
             var mainWindow = new MainWindow();
@@ -243,6 +244,41 @@ public partial class App : Application
                     DataContext = new SelectHeaderTypeDialogViewModel(packetType, availableTypes)
                 };
                 await dialog.ShowDialog(mainWindow);
+            };
+
+            // ── Options window lifecycle ───────────────────────────────────────
+            OptionsWindow? optionsWindow = null;
+
+            optionsVm.RequestBrowseTemplateFile = async currentPath =>
+            {
+                Window owner = (optionsWindow is { IsVisible: true })
+                    ? (Window)optionsWindow
+                    : (Window)mainWindow;
+                var files = await owner.StorageProvider.OpenFilePickerAsync(
+                    new FilePickerOpenOptions
+                    {
+                        Title = "Select Template File",
+                        AllowMultiple = false,
+                        FileTypeFilter =
+                        [
+                            new FilePickerFileType("Mako Templates") { Patterns = ["*.mako", "*.mak", "*.txt"] },
+                            new FilePickerFileType("All Files")       { Patterns = ["*"] }
+                        ]
+                    });
+                return files.Count > 0 ? files[0].Path.LocalPath : null;
+            };
+
+            mainVm.ShowOptionsWindow = () =>
+            {
+                if (optionsWindow is { IsVisible: true })
+                {
+                    optionsWindow.Activate();
+                    return;
+                }
+                optionsVm.LoadFromOptions();
+                optionsWindow = new OptionsWindow();
+                optionsWindow.DataContext = optionsVm;
+                optionsWindow.Show(mainWindow);
             };
         }
 
