@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.ViewModels;
 using IcdFyIt.App.Views;
+using IcdFyIt.Core.Export;
 using IcdFyIt.Core.Infrastructure;
 using IcdFyIt.Core.Services;
 
@@ -27,6 +28,7 @@ public partial class App : Application
             var undoRedoManager  = new UndoRedoManager();
             var dataModelManager = new DataModelManager(changeNotifier, dirtyTracker, undoRedoManager);
             var optionsManager   = new OptionsManager();
+            var exportEngine     = new ExportEngine();
             dataModelManager.New();
 
             // ── ViewModels ─────────────────────────────────────────────────────
@@ -37,6 +39,7 @@ public partial class App : Application
                                                                dirtyTracker, mainVm);
             var headerTypesVm  = new HeaderTypesWindowViewModel(dataModelManager, changeNotifier, mainVm);
             var optionsVm      = new OptionsWindowViewModel(optionsManager);
+            var exportVm       = new ExportWindowViewModel(dataModelManager, optionsManager, exportEngine);
 
             // ── Main window ────────────────────────────────────────────────────
             var mainWindow = new MainWindow();
@@ -279,6 +282,32 @@ public partial class App : Application
                 optionsWindow = new OptionsWindow();
                 optionsWindow.DataContext = optionsVm;
                 optionsWindow.Show(mainWindow);
+            };
+
+            // ── Export window lifecycle ────────────────────────────────────────
+            ExportWindow? exportWindow = null;
+
+            exportVm.RequestBrowseOutputFolder = async () =>
+            {
+                Window owner = (exportWindow is { IsVisible: true })
+                    ? (Window)exportWindow
+                    : (Window)mainWindow;
+                var folders = await owner.StorageProvider.OpenFolderPickerAsync(
+                    new FolderPickerOpenOptions { Title = "Select Output Folder", AllowMultiple = false });
+                return folders.Count > 0 ? folders[0].Path.LocalPath : null;
+            };
+
+            mainVm.ShowExportWindow = () =>
+            {
+                if (exportWindow is { IsVisible: true })
+                {
+                    exportWindow.Activate();
+                    return;
+                }
+                exportVm.Refresh();
+                exportWindow = new ExportWindow();
+                exportWindow.DataContext = exportVm;
+                exportWindow.Show(mainWindow);
             };
         }
 

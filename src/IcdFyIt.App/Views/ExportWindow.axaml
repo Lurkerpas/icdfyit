@@ -3,28 +3,49 @@
         xmlns:vm="using:IcdFyIt.App.ViewModels"
         x:Class="IcdFyIt.App.Views.ExportWindow"
         Title="Export"
-        Width="600" Height="300"
-        MinWidth="450" MinHeight="250"
-        CanResize="False">
+        Width="560" Height="320"
+        MinWidth="450" MinHeight="260">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="12">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Margin="14">
+
+        <!-- Template Set -->
         <TextBlock Grid.Row="0" Text="Template Set:" Margin="0,0,0,4" />
         <ComboBox Grid.Row="1"
                   ItemsSource="{Binding TemplateSets}"
                   SelectedItem="{Binding SelectedTemplateSet}"
                   DisplayMemberBinding="{Binding Name}"
+                  IsEnabled="{Binding IsNotExporting}"
                   HorizontalAlignment="Stretch" Margin="0,0,0,8" />
 
+        <!-- Output folder -->
         <TextBlock Grid.Row="2" Text="Output folder:" Margin="0,0,0,4" />
-        <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
-            <TextBox Grid.Column="0" Text="{Binding OutputFolder}" />
-            <Button Grid.Column="1" Content="Browse…"
-                    Command="{Binding BrowseOutputFolderCommand}" Margin="4,0,0,0" />
+        <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+            <TextBox Grid.Column="0"
+                     Text="{Binding OutputFolder}"
+                     IsEnabled="{Binding IsNotExporting}"
+                     PlaceholderText="Select or type an output folder path…" />
+            <Button Grid.Column="1" Content="…"
+                    Command="{Binding BrowseOutputFolderCommand}"
+                    IsEnabled="{Binding IsNotExporting}"
+                    Margin="4,0,0,0" ToolTip.Tip="Browse for output folder" />
         </Grid>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
-                    Spacing="8" Margin="0,12,0,0">
-            <Button Content="Export" Command="{Binding ExportCommand}" />
+        <!-- Export button row -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Export"
+                    Command="{Binding ExportCommand}"
+                    IsDefault="True" />
         </StackPanel>
+
+        <!-- Status message -->
+        <Border Grid.Row="5"
+                IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                Background="#2A2A2A" CornerRadius="3" Padding="8,6" Margin="0,10,0,0"
+                VerticalAlignment="Top">
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap"
+                       Foreground="#CCCCCC" />
+        </Border>
+
     </Grid>
 </Window>

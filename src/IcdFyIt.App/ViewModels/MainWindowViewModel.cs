@@ -70,6 +70,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Opens the Options window.</summary>
     public Action? ShowOptionsWindow { get; set; }
 
+    /// <summary>Opens (or focuses) the Export window.</summary>
+    public Action? ShowExportWindow { get; set; }
+
     /// <summary>Shows the About window as a modal dialog.</summary>
     public Func<Task>? ShowAboutWindowDialog { get; set; }
 
@@ -285,7 +288,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void OpenHeaderTypes() => ShowHeaderTypesWindow?.Invoke();
 
     [RelayCommand]
-    private void OpenExportWindow() { /* export not yet implemented */ }
+    private void OpenExportWindow() => ShowExportWindow?.Invoke();
 
     [RelayCommand]
     private void OpenOptions() => ShowOptionsWindow?.Invoke();

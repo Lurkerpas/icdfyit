@@ -13,6 +13,9 @@ public class OptionsManager
         "icdfyit",
         "settings.xml");
 
+    /// <summary>Directory that contains settings.xml; used to resolve relative template paths.</summary>
+    public string SettingsDirectory => Path.GetDirectoryName(SettingsPath)!;
+
     private static readonly XmlSerializer Serializer = new(typeof(AppOptions));
 
     /// <summary>Loads options from disk; returns defaults if file does not exist.</summary>
