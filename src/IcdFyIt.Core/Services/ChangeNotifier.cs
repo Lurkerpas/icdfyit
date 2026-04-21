@@ -36,6 +36,12 @@ public class ChangeNotifier
 
     public void NotifyAdded(Parameter parameter) => Parameters.Add(parameter);
     public void NotifyRemoved(Parameter parameter) => Parameters.Remove(parameter);
+    public void MoveParameter(Parameter parameter, int newIndex)
+    {
+        var oldIndex = Parameters.IndexOf(parameter);
+        if (oldIndex >= 0 && oldIndex != newIndex)
+            Parameters.Move(oldIndex, Math.Clamp(newIndex, 0, Parameters.Count - 1));
+    }
 
     public void NotifyAdded(PacketType packetType) => PacketTypes.Add(packetType);
     public void NotifyRemoved(PacketType packetType) => PacketTypes.Remove(packetType);

@@ -178,6 +178,17 @@ public partial class ParametersWindowViewModel : ObservableObject
         _mainVm.NotifyModelEdited();
     }
 
+    /// <summary>Reorders the parameter list by moving <paramref name="draggedRow"/> to the position of <paramref name="targetRow"/>.</summary>
+    public void MoveRow(ParameterRowViewModel draggedRow, ParameterRowViewModel targetRow)
+    {
+        var toIdx = _rows.IndexOf(targetRow);
+        if (toIdx < 0 || !_rows.Contains(draggedRow)) return;
+        _dataModelManager.MoveParameter(draggedRow.Model, toIdx);
+        // _rows is updated via OnParametersCollectionChanged(Move)
+        SelectedRow = draggedRow;
+        _mainVm.NotifyModelEdited();
+    }
+
     // ── Called by code-behind on inline cell edits / context menu open ────────
 
     public void MarkEdited()
@@ -215,6 +226,17 @@ public partial class ParametersWindowViewModel : ObservableObject
                 {
                     var row = _rows.FirstOrDefault(r => r.Model == p);
                     if (row is not null) _rows.Remove(row);
+                }
+                break;
+            case NotifyCollectionChangedAction.Move:
+                if (e.OldItems?[0] is Parameter movedP)
+                {
+                    var movedRow = _rows.FirstOrDefault(r => r.Model == movedP);
+                    if (movedRow is not null)
+                    {
+                        _rows.Remove(movedRow);
+                        _rows.Insert(Math.Clamp(e.NewStartingIndex, 0, _rows.Count), movedRow);
+                    }
                 }
                 break;
             case NotifyCollectionChangedAction.Reset:

@@ -125,6 +125,12 @@ public class DataModelManager
             _dirtyTracker) { IsRemove = true });
     }
 
+    public void MoveParameter(Parameter parameter, int newIndex)
+    {
+        _changeNotifier.MoveParameter(parameter, newIndex);
+        _dirtyTracker.MarkDirty();
+    }
+
     public Parameter DuplicateParameter(Parameter source)
     {
         var copy = new Parameter

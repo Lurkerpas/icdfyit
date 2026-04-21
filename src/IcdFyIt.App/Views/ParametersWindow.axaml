@@ -111,6 +111,23 @@
 
             <DataGrid.Columns>
 
+                <!-- Drag handle — click and drag to reorder rows -->
+                <DataGridTemplateColumn Header="" Width="24"
+                                        IsReadOnly="True" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="☰"
+                                       Classes="drag-handle"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Cursor="SizeNorthSouth"
+                                       ToolTip.Tip="Drag to reorder"
+                                       Foreground="#888"
+                                       FontSize="13"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <!-- Name — all parameters -->
                 <DataGridTextColumn Header="Name"
                                     Binding="{Binding Name, Mode=TwoWay}"
