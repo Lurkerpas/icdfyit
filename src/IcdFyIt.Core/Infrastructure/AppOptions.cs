@@ -12,6 +12,10 @@ public class AppOptions
     [XmlElement]
     public int UndoDepth { get; set; } = 64;
 
+    /// <summary>UI scale factor. Allowed values: 1.0 (Small), 1.5 (Medium), 2.0 (Large), 3.0 (Very Large). Default: 1.0.</summary>
+    [XmlElement]
+    public double UiScale { get; set; } = 1.0;
+
     /// <summary>
     /// Absolute path to the Python interpreter used by ExportEngine.
     /// Null means the system PATH is searched.

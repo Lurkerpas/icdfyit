@@ -23,7 +23,7 @@
 
             <!-- ─ General ────────────────────────────────────────────────── -->
             <TabItem Header="General">
-                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="110,*"
+                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="110,*"
                       Margin="8" RowSpacing="8" ColumnSpacing="8">
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Undo depth:"
@@ -38,6 +38,17 @@
                     <TextBox Grid.Row="1" Grid.Column="1"
                              Text="{Binding PythonPath}"
                              PlaceholderText="(leave blank to use PATH)" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="UI Scale:"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="Controls the size of all UI elements. Takes effect on Save." />
+                    <ComboBox Grid.Row="2" Grid.Column="1"
+                              SelectedIndex="{Binding UiScaleIndex}">
+                        <ComboBoxItem Content="Small (1×)" />
+                        <ComboBoxItem Content="Medium (1.5×)" />
+                        <ComboBoxItem Content="Large (2×)" />
+                        <ComboBoxItem Content="Very Large (3×)" />
+                    </ComboBox>
                 </Grid>
             </TabItem>
 

@@ -16,6 +16,9 @@ public partial class OptionsWindowViewModel : ObservableObject
     /// <summary>Injected by App.axaml.cs to open a file-picker for template files.</summary>
     public Func<string?, Task<string?>>? RequestBrowseTemplateFile { get; set; }
 
+    /// <summary>Called after Save with the new UiScale value so the main VM can apply it.</summary>
+    public Action<double>? OnScaleSaved { get; set; }
+
     /// <summary>Invoked by Save/Cancel commands to request the window to close.</summary>
     public Action? RequestClose { get; set; }
 
@@ -31,6 +34,19 @@ public partial class OptionsWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private string _pythonPath = string.Empty;
+
+    /// <summary>UI scale factor bound to the combo box in the General tab.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UiScaleIndex))]
+    private double _uiScale = 1.0;
+
+    private static readonly double[] _scaleValues = [1.0, 1.5, 2.0, 3.0];
+
+    public int UiScaleIndex
+    {
+        get => Array.IndexOf(_scaleValues, UiScale) is var i && i >= 0 ? i : 0;
+        set => UiScale = value >= 0 && value < _scaleValues.Length ? _scaleValues[value] : 1.0;
+    }
 
     // ── Template Sets tab ─────────────────────────────────────────────────────
 
@@ -64,6 +80,7 @@ public partial class OptionsWindowViewModel : ObservableObject
         var opts = _optionsManager.Load();
         UndoDepth  = opts.UndoDepth;
         PythonPath = opts.PythonPath ?? string.Empty;
+        UiScale    = opts.UiScale;
 
         TemplateSets.Clear();
         Templates.Clear();
@@ -94,8 +111,10 @@ public partial class OptionsWindowViewModel : ObservableObject
         var opts = _optionsManager.Load();
         opts.UndoDepth    = UndoDepth;
         opts.PythonPath   = string.IsNullOrWhiteSpace(PythonPath) ? null : PythonPath;
+        opts.UiScale      = UiScale;
         opts.TemplateSets = TemplateSets.Select(vm => vm.Model).ToList();
         _optionsManager.Save(opts);
+        OnScaleSaved?.Invoke(UiScale);
         RequestClose?.Invoke();
     }
 

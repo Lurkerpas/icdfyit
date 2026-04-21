@@ -7,9 +7,14 @@ namespace IcdFyIt.App.ViewModels;
 /// </summary>
 public partial class AddParameterViewModel : ObservableObject
 {
+    public AddParameterViewModel(string defaultName = "NewParameter")
+    {
+        _name = defaultName;
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsValid))]
-    private string _name = "NewParameter";
+    private string _name;
 
     public bool IsValid => !string.IsNullOrWhiteSpace(Name);
 }

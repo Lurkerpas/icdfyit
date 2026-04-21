@@ -105,7 +105,10 @@ public class DataModelManager
 
     public Parameter AddParameter(string name)
     {
-        var p = new Parameter { Name = name };
+        var nextId = _model.Parameters.Count > 0
+            ? _model.Parameters.Max(p => p.NumericId) + 1
+            : 0;
+        var p = new Parameter { Name = name, NumericId = nextId };
         _undoRedoManager.Push(new AddEntityCommand<Parameter>(
             p, _model.Parameters, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker));

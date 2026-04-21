@@ -35,6 +35,9 @@ public partial class MainWindowViewModel : ObservableObject
         _optionsManager   = optionsManager;
         _options          = optionsManager.Load();
 
+        // Apply persisted UI scale immediately
+        AppScale = _options.UiScale;
+
         foreach (var path in _options.RecentFiles)
             RecentFiles.Add(new RecentFileItemViewModel(path, OpenRecentFile));
 

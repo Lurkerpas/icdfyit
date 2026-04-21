@@ -13,7 +13,7 @@ public partial class AddPacketTypeDialog : Window
     public AddPacketTypeDialog()
     {
         InitializeComponent();
-        DataContext = new AddParameterViewModel();
+        DataContext = new AddParameterViewModel("Packet");
     }
 
     private void OnOkClicked(object? sender, RoutedEventArgs e)

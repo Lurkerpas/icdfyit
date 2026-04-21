@@ -284,6 +284,8 @@ public partial class App : Application
                 optionsWindow.Show(mainWindow);
             };
 
+            optionsVm.OnScaleSaved = scale => mainVm.AppScale = scale;
+
             // ── Export window lifecycle ────────────────────────────────────────
             ExportWindow? exportWindow = null;
 
