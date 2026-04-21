@@ -16,6 +16,10 @@
     -->
     <Application.Resources>
         <ResourceDictionary>
+            <!-- UI scale factors — updated at runtime by MainWindowViewModel -->
+            <x:Double x:Key="AppScale">1</x:Double>
+            <x:Double x:Key="AppMenuFontSize">14</x:Double>
+
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Dark">
                     <!-- Page / editor background — replaces Fluent dark default #000000 -->

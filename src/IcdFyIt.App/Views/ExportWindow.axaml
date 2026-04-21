@@ -6,6 +6,10 @@
         Width="560" Height="320"
         MinWidth="450" MinHeight="260">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Margin="14">
 
         <!-- Template Set -->
@@ -48,4 +52,5 @@
         </Border>
 
     </Grid>
+    </LayoutTransformControl>
 </Window>

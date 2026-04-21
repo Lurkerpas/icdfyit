@@ -6,6 +6,10 @@
         CanResize="False"
         WindowStartupLocation="CenterOwner">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <StackPanel Margin="20" Spacing="16">
         <TextBlock Text="You have unsaved changes. What would you like to do?"
                    TextWrapping="Wrap" />
@@ -16,4 +20,5 @@
             <Button Content="Cancel"   IsCancel="True"   Click="OnCancelClicked"  />
         </StackPanel>
     </StackPanel>
+    </LayoutTransformControl>
 </Window>

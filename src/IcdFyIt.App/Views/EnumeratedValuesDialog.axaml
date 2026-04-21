@@ -6,6 +6,10 @@
         MinWidth="320" MinHeight="240"
         WindowStartupLocation="CenterOwner">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <DockPanel Margin="8">
 
         <Button DockPanel.Dock="Bottom" Content="Close"
@@ -35,4 +39,5 @@
         </DataGrid>
 
     </DockPanel>
+    </LayoutTransformControl>
 </Window>

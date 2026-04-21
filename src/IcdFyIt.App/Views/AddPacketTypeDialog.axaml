@@ -6,6 +6,10 @@
         CanResize="False"
         WindowStartupLocation="CenterOwner">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="16" RowSpacing="6">
         <TextBlock Grid.Row="0" Text="Name:" />
         <TextBox   Grid.Row="1" x:Name="NameBox"
@@ -23,4 +27,5 @@
                     Click="OnCancelClicked" />
         </StackPanel>
     </Grid>
+    </LayoutTransformControl>
 </Window>

@@ -6,6 +6,10 @@
         MinWidth="360" MinHeight="260"
         WindowStartupLocation="CenterOwner">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <DockPanel Margin="8">
 
         <!-- Close only — Add/Remove are in each row's context menu -->
@@ -59,4 +63,5 @@
         </ScrollViewer>
 
     </DockPanel>
+    </LayoutTransformControl>
 </Window>

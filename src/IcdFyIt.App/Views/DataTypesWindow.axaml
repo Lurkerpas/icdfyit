@@ -7,6 +7,10 @@
         Width="1100" Height="640"
         MinWidth="700" MinHeight="400">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <DockPanel>
 
         <!-- ── Toolbar: integrated menu + filter ──────────────────────────── -->
@@ -249,5 +253,6 @@
         </DataGrid>
 
     </DockPanel>
+    </LayoutTransformControl>
 </Window>
 

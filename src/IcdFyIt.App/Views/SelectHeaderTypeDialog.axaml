@@ -7,6 +7,10 @@
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <DockPanel Margin="12">
 
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
@@ -30,4 +34,5 @@
         </Grid>
 
     </DockPanel>
+    </LayoutTransformControl>
 </Window>

@@ -6,6 +6,10 @@
         Width="600" Height="400"
         MinWidth="400" MinHeight="250">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <DockPanel Margin="8">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
                     HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
@@ -22,4 +26,5 @@
             </ListBox.ItemTemplate>
         </ListBox>
     </DockPanel>
+    </LayoutTransformControl>
 </Window>

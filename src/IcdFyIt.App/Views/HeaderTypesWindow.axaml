@@ -6,6 +6,10 @@
         Width="950" Height="620"
         MinWidth="600" MinHeight="400">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <DockPanel>
 
         <!-- ── Toolbar ────────────────────────────────────────────────────── -->
@@ -131,4 +135,5 @@
         </Grid>
 
     </DockPanel>
+    </LayoutTransformControl>
 </Window>

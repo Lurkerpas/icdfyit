@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IcdFyIt.Core.Infrastructure;
@@ -275,6 +276,41 @@ public partial class MainWindowViewModel : ObservableObject
         SelectedPacketType.RefreshHeaderType();
         MarkEdited();
     }
+
+    // ── Appearance / UI scale ─────────────────────────────────────────────────
+
+    private static readonly double[] _scales = [1.0, 1.5, 2.0, 3.0];
+
+    [ObservableProperty]
+    private double _appScale = 1.0;
+
+    partial void OnAppScaleChanged(double value)
+    {
+        if (Application.Current is not { } app) return;
+        app.Resources["AppScale"]       = value;
+        app.Resources["AppMenuFontSize"] = value * 14.0;
+    }
+
+    [RelayCommand]
+    private void IncreaseSize()
+    {
+        var idx = Array.IndexOf(_scales, AppScale);
+        if (idx < _scales.Length - 1)
+            AppScale = _scales[idx + 1];
+    }
+
+    [RelayCommand]
+    private void DecreaseSize()
+    {
+        var idx = Array.IndexOf(_scales, AppScale);
+        if (idx > 0)
+            AppScale = _scales[idx - 1];
+    }
+
+    [RelayCommand] private void SetSizeSmall()    => AppScale = 1.0;
+    [RelayCommand] private void SetSizeMedium()   => AppScale = 1.5;
+    [RelayCommand] private void SetSizeLarge()    => AppScale = 2.0;
+    [RelayCommand] private void SetSizeVeryLarge() => AppScale = 3.0;
 
     // ── Window navigation ──────────────────────────────────────────────────────
 

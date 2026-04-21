@@ -6,6 +6,10 @@
         Width="760" Height="540"
         MinWidth="600" MinHeight="420">
 
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
     <DockPanel Margin="12">
         <!-- Save / Cancel buttons -->
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
@@ -192,4 +196,5 @@
 
         </TabControl>
     </DockPanel>
+    </LayoutTransformControl>
 </Window>
