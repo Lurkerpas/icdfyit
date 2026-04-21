@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:IcdFyIt.App.ViewModels"
         xmlns:cvt="using:IcdFyIt.App.Converters"
+        xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.ParametersWindow"
         Title="Parameters"
         Width="1100" Height="640"
@@ -87,129 +88,90 @@
             </DockPanel>
         </Border>
 
-        <!-- ── Spreadsheet grid (ICD-IF-92) ──────────────────────────────── -->
-        <DataGrid x:Name="ParamsGrid"
-                  ItemsSource="{Binding FilteredRows}"
-                  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-                  AutoGenerateColumns="False"
-                  CanUserSortColumns="True"
-                  CanUserResizeColumns="True"
-                  IsReadOnly="False"
-                  CellEditEnded="OnCellEditEnded"
-                  BeginningEdit="OnBeginningEdit">
+        <!-- ── Spreadsheet grid with native drag-to-reorder (ICD-IF-92) ─────── -->
+        <ctrl:DraggableGrid x:Name="ParamsGrid"
+                            ItemsSource="{Binding FilteredRows}"
+                            SelectedItem="{Binding SelectedRow, Mode=TwoWay}">
 
-            <!-- Context menu -->
-            <DataGrid.ContextMenu>
+            <ctrl:DraggableGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Add…"         Command="{Binding AddCommand}"/>
-                    <MenuItem Header="Duplicate"    Command="{Binding DuplicateCommand}"/>
-                    <MenuItem Header="Remove"       Command="{Binding RemoveCommand}"/>
+                    <MenuItem Header="Add…"               Command="{Binding AddCommand}"/>
+                    <MenuItem Header="Duplicate"          Command="{Binding DuplicateCommand}"/>
+                    <MenuItem Header="Remove"             Command="{Binding RemoveCommand}"/>
                     <Separator/>
-                    <MenuItem Header="Edit Attributes…" Command="{Binding EditAttributesCommand}"/>
+                    <MenuItem Header="Edit Attributes…"  Command="{Binding EditAttributesCommand}"/>
                 </ContextMenu>
-            </DataGrid.ContextMenu>
+            </ctrl:DraggableGrid.ContextMenu>
 
-            <DataGrid.Columns>
+            <ctrl:DraggableGrid.Columns>
 
-                <!-- Drag handle — click and drag to reorder rows -->
-                <DataGridTemplateColumn Header="" Width="24"
-                                        IsReadOnly="True" CanUserSort="False">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="☰"
-                                       Classes="drag-handle"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Cursor="SizeNorthSouth"
-                                       ToolTip.Tip="Drag to reorder"
-                                       Foreground="#888"
-                                       FontSize="13"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <!-- Drag handle — press and drag to reorder rows -->
+                <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
 
                 <!-- Name — all parameters -->
-                <DataGridTextColumn Header="Name"
-                                    Binding="{Binding Name, Mode=TwoWay}"
-                                    Width="150"/>
+                <ctrl:DraggableGridColumn Header="Name"
+                                          Path="Name"
+                                          Width="150"
+                                          IsEditable="True"/>
 
                 <!-- Mnemonic -->
-                <DataGridTextColumn Header="Mnemonic"
-                                    Binding="{Binding Mnemonic, Mode=TwoWay}"
-                                    Width="110"/>
+                <ctrl:DraggableGridColumn Header="Mnemonic"
+                                          Path="Mnemonic"
+                                          Width="110"
+                                          IsEditable="True"
+                                          Name="Mnemonic"/>
 
                 <!-- Kind — read-only; edited via dialog -->
-                <DataGridTextColumn Header="Kind"
-                                    Binding="{Binding Kind}"
-                                    Width="130" IsReadOnly="True"/>
+                <ctrl:DraggableGridColumn Header="Kind"
+                                          Path="Kind"
+                                          Width="130"
+                                          Name="Kind"/>
 
                 <!-- Numeric ID -->
-                <DataGridTemplateColumn Header="Numeric ID" Width="85">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding NumericId}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding NumericId, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <ctrl:DraggableGridColumn Header="Numeric ID"
+                                          Path="NumericId"
+                                          Width="85"
+                                          IsEditable="True"
+                                          Name="NumericId"/>
 
                 <!-- Data Type — read-only; edited via dialog -->
-                <DataGridTextColumn Header="Data Type"
-                                    Binding="{Binding DataTypeName}"
-                                    Width="130" IsReadOnly="True"/>
+                <ctrl:DraggableGridColumn Header="Data Type"
+                                          Path="DataTypeName"
+                                          Width="130"
+                                          Name="DataType"/>
 
                 <!-- Short Description -->
-                <DataGridTextColumn Header="Short Description"
-                                    Binding="{Binding ShortDescription, Mode=TwoWay}"
-                                    Width="180"/>
+                <ctrl:DraggableGridColumn Header="Short Description"
+                                          Path="ShortDescription"
+                                          Width="180"
+                                          IsEditable="True"
+                                          Name="ShortDescription"/>
 
-                <!-- Formula — SyntheticValue kind only -->
-                <DataGridTemplateColumn Header="Formula" Width="140">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding FormulaDisplay, TargetNullValue='-'}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding Formula, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <!-- Formula — only applicable for SyntheticValue kind -->
+                <ctrl:DraggableGridColumn Header="Formula"
+                                          Path="Formula"
+                                          Width="140"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsFormulaApplicable"
+                                          Name="Formula"/>
 
-                <!-- Hex Value — FixedValue kind only -->
-                <DataGridTemplateColumn Header="Hex Value" Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding HexValue, TargetNullValue='-'}"
-                                       Opacity="{Binding IsHexValueApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding HexValue, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <!-- Hex Value — only applicable for FixedValue kind -->
+                <ctrl:DraggableGridColumn Header="Hex Value"
+                                          Path="HexValue"
+                                          Width="100"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsHexValueApplicable"
+                                          Name="HexValue"/>
 
                 <!-- Long Description -->
-                <DataGridTextColumn Header="Long Description"
-                                    Binding="{Binding LongDescription, Mode=TwoWay}"
-                                    Width="180"/>
+                <ctrl:DraggableGridColumn Header="Long Description"
+                                          Path="LongDescription"
+                                          Width="180"
+                                          IsEditable="True"
+                                          Name="LongDescription"/>
 
-            </DataGrid.Columns>
-        </DataGrid>
+            </ctrl:DraggableGrid.Columns>
+        </ctrl:DraggableGrid>
 
     </DockPanel>
     </LayoutTransformControl>
