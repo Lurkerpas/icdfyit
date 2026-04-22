@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DataModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SchemaVersion="1">
+  <DataTypes>
+    <DataType xsi:type="SignedIntegerType" Id="831f029f-7380-4790-bb41-ec2f630853cb" Name="int16">
+      <Scalar>
+        <Endianness>BigEndian</Endianness>
+        <BitSize>16</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>16000</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="UnsignedIntegerType" Id="e724f4be-1901-4147-8303-c236fdab3936" Name="uint16">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>16</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>65535</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="StructureType" Id="29f28d27-bc48-40bd-9448-b1bcdb585a92" Name="struct">
+      <Fields>
+        <StructureField DataTypeRef="831f029f-7380-4790-bb41-ec2f630853cb">
+          <Name>f1</Name>
+        </StructureField>
+        <StructureField DataTypeRef="831f029f-7380-4790-bb41-ec2f630853cb">
+          <Name>test field</Name>
+        </StructureField>
+      </Fields>
+    </DataType>
+    <DataType xsi:type="EnumeratedType" Id="028dbacb-6889-445d-a576-6954c138bac2" Name="enum" Endianness="LittleEndian" BitSize="32">
+      <Values>
+        <EnumeratedValue>
+          <Name>v1</Name>
+          <RawValues>
+            <int>0</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue>
+          <Name>v2</Name>
+          <RawValues>
+            <int>1</int>
+          </RawValues>
+        </EnumeratedValue>
+      </Values>
+    </DataType>
+    <DataType xsi:type="BooleanType" Id="f082896d-f520-4e7f-8fa7-db99d2bd006a" Name="bool8">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>8</BitSize>
+      </Scalar>
+    </DataType>
+    <DataType xsi:type="FloatType" Id="d39a0feb-d1dd-4dc0-b1a4-acc42d4f7480" Name="float32">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>32</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>0</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="ArrayType" Id="86e5675f-826a-406a-9824-f5801a266d6d" Name="array" ElementTypeRef="e724f4be-1901-4147-8303-c236fdab3936">
+      <ArraySize>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>8</BitSize>
+        <Range>
+          <Min>0</Min>
+          <Max>16</Max>
+        </Range>
+      </ArraySize>
+    </DataType>
+    <DataType xsi:type="BitStringType" Id="cf2d4c82-accd-4147-a76c-79ba8d7e48e5" Name="bs">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>16</BitSize>
+      </Scalar>
+    </DataType>
+    <DataType xsi:type="UnsignedIntegerType" Id="e858027e-6521-43bd-bfe2-26595eeb130d" Name="uint8">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>8</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>255</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="EnumeratedType" Id="61579da9-ff4a-477d-a2bc-7d94f20d6ada" Name="address" Endianness="LittleEndian" BitSize="32">
+      <Values>
+        <EnumeratedValue>
+          <Name>dpu</Name>
+          <RawValues>
+            <int>1</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue>
+          <Name>aocs</Name>
+          <RawValues>
+            <int>2</int>
+          </RawValues>
+        </EnumeratedValue>
+      </Values>
+    </DataType>
+  </DataTypes>
+  <Parameters>
+    <Parameter Id="fda28aff-f0ee-4204-ab7f-b8555d411629" Name="Parameter2" DataTypeRef="e724f4be-1901-4147-8303-c236fdab3936" NumericId="1" Mnemonic="P2" Kind="SoftwareSetting">
+      <ShortDescription>Another Parameter</ShortDescription>
+      <Formula />
+    </Parameter>
+    <Parameter Id="b5233d83-afc0-4145-8d6b-6f7005298278" Name="Synthetic Param" DataTypeRef="d39a0feb-d1dd-4dc0-b1a4-acc42d4f7480" NumericId="2" Mnemonic="S1" Kind="SyntheticValue">
+      <Formula>P1 * P2</Formula>
+    </Parameter>
+    <Parameter Id="97cf55da-d598-4f25-aff1-4a312d595082" Name="FixedN1" DataTypeRef="e858027e-6521-43bd-bfe2-26595eeb130d" NumericId="5" Mnemonic="FN1" Kind="FixedValue">
+      <Formula />
+      <HexValue>0x01</HexValue>
+    </Parameter>
+    <Parameter Id="f6faca23-2bce-443f-bc84-59376faed09d" Name="Fixed Param" DataTypeRef="e724f4be-1901-4147-8303-c236fdab3936" NumericId="3" Mnemonic="F1" Kind="FixedValue">
+      <Formula />
+      <HexValue>0xffff</HexValue>
+    </Parameter>
+    <Parameter Id="bdb18a39-8f3c-4b7d-8e20-072fd908cb74" Name="OnOffDeviceAddress" DataTypeRef="61579da9-ff4a-477d-a2bc-7d94f20d6ada" NumericId="4" Mnemonic="OODA" Kind="Id">
+      <Formula />
+    </Parameter>
+    <Parameter Id="96c4378e-202f-4fc8-9f5b-59fd3bb01f71" Name="Parameter1" DataTypeRef="e724f4be-1901-4147-8303-c236fdab3936" NumericId="0" Mnemonic="P1" Kind="SoftwareSetting">
+      <ShortDescription>Basic Parameter</ShortDescription>
+      <Formula />
+    </Parameter>
+  </Parameters>
+  <PacketTypes>
+    <PacketType Id="b4e9011e-f86a-4017-83d4-1640f93013f7" Name="distribute on/off device command" Kind="Telecommand" HeaderTypeRef="6b8a552d-395c-4b9e-90b0-3374c22b7de9">
+      <Fields>
+        <PacketField Name="N" ParameterRef="97cf55da-d598-4f25-aff1-4a312d595082" IsTypeIndicator="true" IndicatorValue="1" />
+        <PacketField Name="on/off device address" ParameterRef="bdb18a39-8f3c-4b7d-8e20-072fd908cb74" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="aa2950ad-d8e2-4746-a154-57da0889fcfc" Value="2" />
+        <Entry IdRef="59ff08ca-49aa-4d4a-931b-0c3ba5309b06" Value="1" />
+      </HeaderIdValues>
+    </PacketType>
+  </PacketTypes>
+  <HeaderTypes>
+    <HeaderType Id="6b8a552d-395c-4b9e-90b0-3374c22b7de9" Name="PUSC-TC">
+      <Description>PUS C Telecommand Header</Description>
+      <Ids>
+        <HeaderTypeId Id="aa2950ad-d8e2-4746-a154-57da0889fcfc" Name="ST" DataTypeRef="e858027e-6521-43bd-bfe2-26595eeb130d">
+          <Description>Service Type ID</Description>
+        </HeaderTypeId>
+        <HeaderTypeId Id="59ff08ca-49aa-4d4a-931b-0c3ba5309b06" Name="MT" DataTypeRef="e858027e-6521-43bd-bfe2-26595eeb130d">
+          <Description>Message Type ID</Description>
+        </HeaderTypeId>
+      </Ids>
+    </HeaderType>
+    <HeaderType Id="e5aae2ab-2724-4c31-a979-3ed4a0c72566" Name="PUSC-TM">
+      <Description>PUS C Telemetry Header</Description>
+      <Ids>
+        <HeaderTypeId Id="542a10cf-f899-407a-958c-e39fe7dc1f0d" Name="MT" DataTypeRef="e858027e-6521-43bd-bfe2-26595eeb130d">
+          <Description>Service Type ID</Description>
+        </HeaderTypeId>
+        <HeaderTypeId Id="b39f2ba3-91aa-4518-8520-af6549cc236b" Name="ST" DataTypeRef="e858027e-6521-43bd-bfe2-26595eeb130d">
+          <Description>Message Type ID</Description>
+        </HeaderTypeId>
+      </Ids>
+    </HeaderType>
+    <HeaderType Id="f05cada2-c558-4975-9dff-ba668e058685" Name="PUSC-HTM">
+      <Description>PUS C Headerless Telemetry Header</Description>
+      <Ids />
+    </HeaderType>
+  </HeaderTypes>
+</DataModel>

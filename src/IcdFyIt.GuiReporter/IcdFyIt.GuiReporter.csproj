@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Headless platform — virtual windowing, no OS display needed -->
+    <PackageReference Include="Avalonia.Headless"        Version="12.0.1" />
+    <!-- Skia renderer — required for RenderTargetBitmap and bitmap.Save() -->
+    <PackageReference Include="Avalonia.Skia"            Version="12.0.1" />
+    <PackageReference Include="Avalonia.Themes.Fluent"   Version="12.0.1" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.*" />
+    <PackageReference Include="Avalonia.Fonts.Inter"     Version="12.0.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm"    Version="8.*"    />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pulls in all Views, ViewModels, Controls and resources from the main app. -->
+    <ProjectReference Include="..\IcdFyIt.App\IcdFyIt.App.csproj" />
+  </ItemGroup>
+
+  <!-- Copy the demo test model alongside the output so the reporter can find it. -->
+  <ItemGroup>
+    <None Update="..\..\demo\testmodel.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>testmodel.xml</Link>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,8 +1,9 @@
-SOLUTION    := icdfyit.sln
-APP_PROJECT := src/IcdFyIt.App/IcdFyIt.App.csproj
-DOCS_DIR    := docs
+SOLUTION       := icdfyit.sln
+APP_PROJECT    := src/IcdFyIt.App/IcdFyIt.App.csproj
+REPORTER_PROJECT := src/IcdFyIt.GuiReporter/IcdFyIt.GuiReporter.csproj
+DOCS_DIR       := docs
 
-.PHONY: all build run test docs clean help
+.PHONY: all build run report test docs clean help
 
 all: build
 
@@ -13,6 +14,10 @@ build:
 ## Run the application
 run:
 	dotnet run --project $(APP_PROJECT)
+
+## Capture PNG screenshots of all screens and dialogs at all size scales into GuiReport/
+report:
+	dotnet run --project $(REPORTER_PROJECT) -- --model demo/testmodel.xml --output reports/GuiReport
 
 ## Execute the test suite
 test:
@@ -34,6 +39,7 @@ help:
 	@echo "Targets:"
 	@echo "  build   Build the entire solution (default)"
 	@echo "  run     Run the application"
+	@echo "  report  Capture screenshots into GuiReport/ (uses demo/testmodel.xml)"
 	@echo "  test    Execute the test suite"
 	@echo "  docs    Generate Doxygen HTML documentation into $(DOCS_DIR)/"
 	@echo "  clean   Clean build outputs and generated docs"
