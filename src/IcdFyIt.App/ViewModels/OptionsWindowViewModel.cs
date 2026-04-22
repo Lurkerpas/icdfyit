@@ -166,6 +166,22 @@ public partial class OptionsWindowViewModel : ObservableObject
 
     private bool HasSelectedTemplate => SelectedTemplate is not null;
 
+    public void MoveTemplate(TemplateRowViewModel dragged, TemplateRowViewModel target, bool above)
+    {
+        if (SelectedTemplateSet is null) return;
+        var fromIdx = Templates.IndexOf(dragged);
+        var toIdx   = Templates.IndexOf(target);
+        if (fromIdx < 0 || toIdx < 0 || fromIdx == toIdx) return;
+
+        var insertAt = above ? toIdx : toIdx + 1;
+        if (insertAt > fromIdx) insertAt--;
+
+        Templates.Move(fromIdx, insertAt);
+        var modelList = SelectedTemplateSet.Model.Templates;
+        modelList.RemoveAt(fromIdx);
+        modelList.Insert(insertAt, dragged.Model);
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private void RebuildTemplates(TemplateSetRowViewModel? ts)
