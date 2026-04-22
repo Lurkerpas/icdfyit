@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -88,6 +89,26 @@ public partial class DraggableGrid : UserControl
     private bool     _isDragging;
     private IPointer? _capturedPointer;
 
+    // ── Column-resize state ───────────────────────────────────────────────────
+
+    /// <summary>Current pixel widths indexed by <see cref="Columns"/> list index.</summary>
+    private double[] _colWidths = Array.Empty<double>();
+
+    /// <summary>Maps visible-column index → Columns-list index.</summary>
+    private int[] _visibleToAllIdx = Array.Empty<int>();
+
+    /// <summary>ColumnDefinitions of the header grid (one per visible column).</summary>
+    private ColumnDefinition[]? _headerColDefs;
+
+    /// <summary>ColumnDefinitions of each row grid (one array per row).</summary>
+    private readonly List<ColumnDefinition[]> _rowColDefs = new();
+
+    private int      _resizingAllIdx   = -1;
+    private int      _resizingVisIdx   = -1;
+    private double   _resizeStartX;
+    private double   _resizeStartWidth;
+    private IPointer? _resizePointer;
+
     // ── Brushes (dark / Fluent-compatible theme) ──────────────────────────────
 
     private static readonly IBrush HeaderBrush    = new SolidColorBrush(Color.FromRgb(45,  45,  48));
@@ -99,6 +120,12 @@ public partial class DraggableGrid : UserControl
     private static readonly IBrush RowBorderBrush = new SolidColorBrush(Color.FromRgb(60,  60,  60));
     private static readonly IBrush FgNormal       = new SolidColorBrush(Color.FromRgb(204, 204, 204));
     private static readonly IBrush FgDim          = new SolidColorBrush(Color.FromRgb(128, 128, 128));
+    private static readonly IBrush GripperBrush   = new SolidColorBrush(Color.FromArgb(60,  255, 255, 255));
+
+    // ── Converters ────────────────────────────────────────────────────────────
+
+    private static readonly IValueConverter InverseBool =
+        new FuncValueConverter<bool, bool>(b => !b);
 
     // ── Static initialiser ────────────────────────────────────────────────────
 
@@ -138,6 +165,17 @@ public partial class DraggableGrid : UserControl
 
     private void Build()
     {
+        // Initialise pixel widths from XAML declarations (preserved across rebuilds).
+        if (_colWidths.Length != Columns.Count)
+        {
+            _colWidths = new double[Columns.Count];
+            for (int i = 0; i < Columns.Count; i++)
+            {
+                var gl = Columns[i].Width;
+                _colWidths[i] = gl.GridUnitType == GridUnitType.Pixel ? gl.Value : 100.0;
+            }
+        }
+
         _root = new Grid();
         _root.RowDefinitions.Add(new RowDefinition(GridLength.Auto)); // 0: header
         _root.RowDefinitions.Add(new RowDefinition(GridLength.Star)); // 1: scroll area
@@ -162,7 +200,8 @@ public partial class DraggableGrid : UserControl
     // ── Column visibility API ─────────────────────────────────────────────────
 
     /// <summary>Shows or hides the column whose <see cref="DraggableGridColumn.Name"/> matches
-    /// <paramref name="name"/>. A full header-and-row rebuild is performed.</summary>
+    /// <paramref name="name"/>. The header and all rows are rebuilt; current column widths
+    /// (including any resize the user has performed) are preserved.</summary>
     public void SetColumnVisible(string? name, bool visible)
     {
         var col = Columns.FirstOrDefault(c => c.Name == name);
@@ -171,7 +210,7 @@ public partial class DraggableGrid : UserControl
 
         if (_root is null) return; // not yet attached to visual tree
 
-        // Replace the header in-place
+        // Replace header in-place (MakeHeader also rebuilds _headerColDefs + _visibleToAllIdx).
         _root.Children.Remove(_headerBorder!);
         _headerBorder = MakeHeader();
         Grid.SetRow(_headerBorder, 0);
@@ -185,29 +224,70 @@ public partial class DraggableGrid : UserControl
     private Border MakeHeader()
     {
         var visibleCols = Columns.Where(c => c.IsVisible).ToList();
+
+        // Build the visible→all-index mapping.
+        _visibleToAllIdx = visibleCols
+            .Select(c => Columns.IndexOf(c))
+            .ToArray();
+
         var g = new Grid { Background = HeaderBrush };
-        foreach (var col in visibleCols)
-            g.ColumnDefinitions.Add(new ColumnDefinition(col.Width));
+        _headerColDefs = new ColumnDefinition[visibleCols.Count];
+        for (int i = 0; i < visibleCols.Count; i++)
+        {
+            var cd = new ColumnDefinition(new GridLength(_colWidths[_visibleToAllIdx[i]], GridUnitType.Pixel));
+            _headerColDefs[i] = cd;
+            g.ColumnDefinitions.Add(cd);
+        }
 
         for (int i = 0; i < visibleCols.Count; i++)
         {
-            var tb = new TextBlock
+            var col = visibleCols[i];
+            int allIdx = _visibleToAllIdx[i];
+            int visIdx = i;
+
+            // Each header cell is a Panel: TextBlock label + right-edge resize gripper.
+            var label = new TextBlock
             {
-                Text               = visibleCols[i].Header,
-                Foreground         = Brushes.White,
-                FontWeight         = FontWeight.SemiBold,
-                Margin             = new Thickness(6, 5),
-                VerticalAlignment  = VerticalAlignment.Center
+                Text              = col.Header,
+                Foreground        = Brushes.White,
+                FontWeight        = FontWeight.SemiBold,
+                Margin            = new Thickness(6, 5, 14, 5), // leave room for gripper
+                VerticalAlignment = VerticalAlignment.Center
             };
-            Grid.SetColumn(tb, i);
-            g.Children.Add(tb);
+
+            // Gripper: a thin transparent border on the right edge that responds to drag.
+            var gripper = new Border
+            {
+                Width               = 5,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Background          = GripperBrush,
+                Cursor              = new Cursor(StandardCursorType.SizeWestEast)
+            };
+            ToolTip.SetTip(gripper, "Drag to resize column");
+
+            gripper.PointerPressed  += (_, e) => OnGripperPointerPressed(gripper, allIdx, visIdx, e);
+            gripper.PointerMoved    += (_, e) => OnGripperPointerMoved(e);
+            gripper.PointerReleased += (_, e) => OnGripperPointerReleased(e);
+            gripper.PointerCaptureLost += (_, _) =>
+            {
+                _resizePointer    = null;
+                _resizingAllIdx   = -1;
+                _resizingVisIdx   = -1;
+            };
+
+            var cell = new Panel();
+            cell.Children.Add(label);
+            cell.Children.Add(gripper);
+
+            Grid.SetColumn(cell, i);
+            g.Children.Add(cell);
         }
 
         return new Border
         {
-            Child            = g,
-            BorderBrush      = RowBorderBrush,
-            BorderThickness  = new Thickness(0, 0, 0, 1)
+            Child           = g,
+            BorderBrush     = RowBorderBrush,
+            BorderThickness = new Thickness(0, 0, 0, 1)
         };
     }
 
@@ -219,10 +299,15 @@ public partial class DraggableGrid : UserControl
 
         _rowsPanel.Children.Clear();
         _rowBorders.Clear();
+        _rowColDefs.Clear();
 
         if (ItemsSource is null) { return; }
 
-        var visibleCols = Columns.Where(c => c.IsVisible).ToList();
+        var visibleCols = Columns
+            .Select((c, i) => (col: c, allIdx: i))
+            .Where(t => t.col.IsVisible)
+            .ToList();
+
         int idx = 0;
         foreach (var item in ItemsSource)
         {
@@ -235,15 +320,22 @@ public partial class DraggableGrid : UserControl
         ResetRowStyles();
     }
 
-    private Border MakeRow(object item, int index, IReadOnlyList<DraggableGridColumn> visibleCols)
+    private Border MakeRow(object item, int index,
+        IReadOnlyList<(DraggableGridColumn col, int allIdx)> visibleCols)
     {
         var g = new Grid();
-        foreach (var col in visibleCols)
-            g.ColumnDefinitions.Add(new ColumnDefinition(col.Width));
+        var colDefs = new ColumnDefinition[visibleCols.Count];
+        for (int i = 0; i < visibleCols.Count; i++)
+        {
+            var cd = new ColumnDefinition(new GridLength(_colWidths[visibleCols[i].allIdx], GridUnitType.Pixel));
+            colDefs[i] = cd;
+            g.ColumnDefinitions.Add(cd);
+        }
+        _rowColDefs.Add(colDefs);
 
         for (int i = 0; i < visibleCols.Count; i++)
         {
-            Control cell = BuildCell(visibleCols[i]);
+            Control cell = BuildCell(visibleCols[i].col);
             Grid.SetColumn(cell, i);
             g.Children.Add(cell);
         }
@@ -301,7 +393,7 @@ public partial class DraggableGrid : UserControl
             return cb;
         }
 
-        // Editable TextBox
+        // Editable TextBox — conditionally blocked via IsEnabledPath
         if (col.IsEditable)
         {
             var tb = new TextBox
@@ -314,16 +406,29 @@ public partial class DraggableGrid : UserControl
                 MinWidth          = 0
             };
             tb.Bind(TextBox.TextProperty, new Binding(col.Path) { Mode = BindingMode.TwoWay });
-
-            if (col.IsEnabledPath is not null)
-                tb.Bind(InputElement.IsEnabledProperty, new Binding(col.IsEnabledPath));
-
-            if (col.OpacityPath is not null)
-                tb.Bind(Visual.OpacityProperty, new Binding(col.OpacityPath)
-                    { Converter = BoolToOpacityConverter.Instance });
-
             tb.LostFocus += (_, _) => EditEnded?.Invoke(this, EventArgs.Empty);
-            return tb;
+
+            if (col.IsEnabledPath is null)
+                return tb;
+
+            // Wrap in a Panel with a placeholder so the blocked state shows "-"
+            // at normal foreground colour rather than a greyed-out disabled TextBox.
+            var placeholder = new TextBlock
+            {
+                Text              = "-",
+                Foreground        = FgNormal,
+                Margin            = new Thickness(6, 4),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            placeholder.Bind(Visual.IsVisibleProperty,
+                new Binding(col.IsEnabledPath) { Converter = InverseBool });
+
+            tb.Bind(Visual.IsVisibleProperty, new Binding(col.IsEnabledPath));
+
+            var panel = new Panel();
+            panel.Children.Add(placeholder);
+            panel.Children.Add(tb);
+            return panel;
         }
 
         // Read-only TextBlock
@@ -347,6 +452,53 @@ public partial class DraggableGrid : UserControl
 
             return tb;
         }
+    }
+
+    // ── Column resize ─────────────────────────────────────────────────────────
+
+    private void OnGripperPointerPressed(Border gripper, int allIdx, int visIdx,
+        PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(gripper).Properties.IsLeftButtonPressed) return;
+        _resizingAllIdx   = allIdx;
+        _resizingVisIdx   = visIdx;
+        _resizeStartX     = e.GetPosition(this).X;
+        _resizeStartWidth = _colWidths[allIdx];
+        _resizePointer    = e.Pointer;
+        e.Pointer.Capture(gripper);
+        e.Handled = true;
+    }
+
+    private void OnGripperPointerMoved(PointerEventArgs e)
+    {
+        if (_resizingAllIdx < 0) return;
+        double delta    = e.GetPosition(this).X - _resizeStartX;
+        double newWidth = Math.Max(24, _resizeStartWidth + delta);
+        ApplyColumnWidth(_resizingAllIdx, _resizingVisIdx, newWidth);
+        e.Handled = true;
+    }
+
+    private void OnGripperPointerReleased(PointerReleasedEventArgs e)
+    {
+        _resizePointer?.Capture(null);
+        _resizePointer  = null;
+        _resizingAllIdx = -1;
+        _resizingVisIdx = -1;
+        e.Handled = true;
+    }
+
+    /// <summary>Updates the stored pixel width and all live ColumnDefinitions for one column.</summary>
+    private void ApplyColumnWidth(int allIdx, int visIdx, double newWidth)
+    {
+        _colWidths[allIdx] = newWidth;
+        var gl = new GridLength(newWidth, GridUnitType.Pixel);
+
+        if (_headerColDefs is not null && (uint)visIdx < (uint)_headerColDefs.Length)
+            _headerColDefs[visIdx].Width = gl;
+
+        foreach (var rowDefs in _rowColDefs)
+            if ((uint)visIdx < (uint)rowDefs.Length)
+                rowDefs[visIdx].Width = gl;
     }
 
     // ── Selection ─────────────────────────────────────────────────────────────
