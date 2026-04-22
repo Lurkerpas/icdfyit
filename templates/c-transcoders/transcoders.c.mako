@@ -125,11 +125,27 @@ def declared_c_type(dt):
     return T(dt.Name)
 
 
+def ctype_for_scalar_bits(is_signed, bits):
+    if bits == 8:
+        return 'int8_t' if is_signed else 'uint8_t'
+    if bits == 16:
+        return 'int16_t' if is_signed else 'uint16_t'
+    if bits == 24:
+        return 'int32_t' if is_signed else 'uint32_t'
+    if bits == 32:
+        return 'int32_t' if is_signed else 'uint32_t'
+    raise RuntimeError(f'Unsupported scalar bit-size: {bits}')
+
+
 def enum_has_negative_values(dt):
     for v in dt.Values:
         if len(v.RawValues) > 0 and int(v.RawValues[0]) < 0:
             return True
     return False
+
+
+def kind_uses_utility(kind):
+    return kind in ('SignedInteger', 'UnsignedInteger', 'Boolean', 'Float', 'Enumerated', 'Array')
 
 
 def utility_unsigned(bits, endianness, encode):
@@ -279,7 +295,9 @@ kind = dt.Kind.ToString()
 %>
 bool icdt_${F(dt.Name)}_encode(IcdUF_ByteBuffer* buffer, const ${declared_c_type(dt)}* value, uint32_t* errorCode)
 {
+% if kind_uses_utility(kind):
     uint32_t utilErr = ICDUF_ERROR_NONE;
+% endif
 
     /* Error output is mandatory and is cleared on entry. */
     if (!icdt_set_success(errorCode))
@@ -354,9 +372,11 @@ bool icdt_${F(dt.Name)}_encode(IcdUF_ByteBuffer* buffer, const ${declared_c_type
 
     /* Delegate low-level byte encoding to utility layer. */
 % if enum_has_negative_values(dt):
-    if (!${utility_signed(int(dt.BitSize), dt.Endianness.ToString(), True)}(buffer, *value, &utilErr))
+    ${ctype_for_scalar_bits(True, int(dt.BitSize))} wireValue = (${ctype_for_scalar_bits(True, int(dt.BitSize))})(*value);
+    if (!${utility_signed(int(dt.BitSize), dt.Endianness.ToString(), True)}(buffer, wireValue, &utilErr))
 % else:
-    if (!${utility_unsigned(int(dt.BitSize), dt.Endianness.ToString(), True)}(buffer, *value, &utilErr))
+    ${ctype_for_scalar_bits(False, int(dt.BitSize))} wireValue = (${ctype_for_scalar_bits(False, int(dt.BitSize))})(*value);
+    if (!${utility_unsigned(int(dt.BitSize), dt.Endianness.ToString(), True)}(buffer, wireValue, &utilErr))
 % endif
     {
         return icdt_fail_from_utility(utilErr, errorCode);
@@ -372,6 +392,10 @@ bool icdt_${F(dt.Name)}_encode(IcdUF_ByteBuffer* buffer, const ${declared_c_type
 % endfor
 
 % elif kind == 'Array':
+<%
+array_min = int(float(dt.ArraySize.Range.Min))
+array_max = int(float(dt.ArraySize.Range.Max))
+%>
     uint32_t lengthOnWire = value->count;
 
     /* Count must fit static storage and configured min/max limits. */
@@ -379,8 +403,12 @@ bool icdt_${F(dt.Name)}_encode(IcdUF_ByteBuffer* buffer, const ${declared_c_type
     {
         return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
     }
-    if ((value->count < (uint32_t)(${int(float(dt.ArraySize.Range.Min))})) ||
-        (value->count > (uint32_t)(${int(float(dt.ArraySize.Range.Max))})))
+% if array_min > 0:
+    if ((value->count < (uint32_t)(${array_min})) ||
+        (value->count > (uint32_t)(${array_max})))
+% else:
+    if (value->count > (uint32_t)(${array_max}))
+% endif
     {
         return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
     }
@@ -407,7 +435,9 @@ bool icdt_${F(dt.Name)}_encode(IcdUF_ByteBuffer* buffer, const ${declared_c_type
 
 bool icdt_${F(dt.Name)}_decode(IcdUF_ByteBuffer* buffer, ${declared_c_type(dt)}* value, uint32_t* errorCode)
 {
+% if kind_uses_utility(kind):
     uint32_t utilErr = ICDUF_ERROR_NONE;
+% endif
 
     /* Error output is mandatory and is cleared on entry. */
     if (!icdt_set_success(errorCode))
@@ -476,13 +506,18 @@ bool icdt_${F(dt.Name)}_decode(IcdUF_ByteBuffer* buffer, ${declared_c_type(dt)}*
 % elif kind == 'Enumerated':
     /* Decode low-level representation from utility layer. */
 % if enum_has_negative_values(dt):
-    if (!${utility_signed(int(dt.BitSize), dt.Endianness.ToString(), False)}(buffer, value, &utilErr))
+    ${ctype_for_scalar_bits(True, int(dt.BitSize))} wireValue = 0;
+    if (!${utility_signed(int(dt.BitSize), dt.Endianness.ToString(), False)}(buffer, &wireValue, &utilErr))
 % else:
-    if (!${utility_unsigned(int(dt.BitSize), dt.Endianness.ToString(), False)}(buffer, (uint32_t*)value, &utilErr))
+    ${ctype_for_scalar_bits(False, int(dt.BitSize))} wireValue = 0u;
+    if (!${utility_unsigned(int(dt.BitSize), dt.Endianness.ToString(), False)}(buffer, &wireValue, &utilErr))
 % endif
     {
         return icdt_fail_from_utility(utilErr, errorCode);
     }
+
+    /* Cast utility wire value into generated enum type. */
+    *value = (${declared_c_type(dt)})wireValue;
 
     /* Enumerated values must be one of configured literals. */
     if (!icdt_${F(dt.Name)}_is_valid(*value))
@@ -500,6 +535,10 @@ bool icdt_${F(dt.Name)}_decode(IcdUF_ByteBuffer* buffer, ${declared_c_type(dt)}*
 % endfor
 
 % elif kind == 'Array':
+<%
+array_min = int(float(dt.ArraySize.Range.Min))
+array_max = int(float(dt.ArraySize.Range.Max))
+%>
     uint32_t lengthOnWire = 0u;
 
     /* Decode declared element count first using utility primitive. */
@@ -513,8 +552,12 @@ bool icdt_${F(dt.Name)}_decode(IcdUF_ByteBuffer* buffer, ${declared_c_type(dt)}*
     {
         return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
     }
-    if ((lengthOnWire < (uint32_t)(${int(float(dt.ArraySize.Range.Min))})) ||
-        (lengthOnWire > (uint32_t)(${int(float(dt.ArraySize.Range.Max))})))
+% if array_min > 0:
+    if ((lengthOnWire < (uint32_t)(${array_min})) ||
+        (lengthOnWire > (uint32_t)(${array_max})))
+% else:
+    if (lengthOnWire > (uint32_t)(${array_max}))
+% endif
     {
         return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
     }

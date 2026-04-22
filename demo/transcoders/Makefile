@@ -7,7 +7,7 @@ SETTINGS := settings.xml
 TEMPLATE_SET := c-transcoders-demo
 OUT_DIR := generated
 
-CFLAGS := -std=c17 -Wall -Wextra -pedantic
+CFLAGS := -std=c17 -Wall -Wextra -Werror -pedantic
 
 .PHONY: all validate generate compile clean
 
