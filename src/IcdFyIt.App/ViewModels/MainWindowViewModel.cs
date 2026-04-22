@@ -117,6 +117,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     public bool CanActOnSelected => SelectedPacketType is not null;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RemoveFieldCommand))]
+    private PacketFieldRowViewModel? _selectedField;
+
+    private bool HasSelectedField() => SelectedField is not null;
+
     // ── Title bar ──────────────────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -261,6 +267,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void AddField() => SelectedPacketType?.AddField();
+
+    [RelayCommand(CanExecute = nameof(HasSelectedField))]
+    private void RemoveField()
+    {
+        if (SelectedPacketType is null || SelectedField is null) return;
+        SelectedPacketType.RemoveField(SelectedField);
+        SelectedField = null;
+        MarkEdited();
+    }
 
     [RelayCommand(CanExecute = nameof(CanActOnSelected))]
     private void DuplicatePacketType()

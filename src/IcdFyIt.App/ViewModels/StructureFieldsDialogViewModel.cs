@@ -26,8 +26,33 @@ public partial class StructureFieldsDialogViewModel : ObservableObject
 
     public ObservableCollection<StructureFieldRowViewModel> Fields { get; }
 
+    [ObservableProperty]
+    private StructureFieldRowViewModel? _selectedField;
+
     [RelayCommand]
     private void Add() => AddField();
+
+    [RelayCommand]
+    private void Remove()
+    {
+        if (SelectedField is null) return;
+        RemoveField(SelectedField);
+        SelectedField = null;
+    }
+
+    public void MoveField(StructureFieldRowViewModel dragged, StructureFieldRowViewModel target, bool above)
+    {
+        var fromIdx = Fields.IndexOf(dragged);
+        var toIdx   = Fields.IndexOf(target);
+        if (fromIdx < 0 || toIdx < 0 || fromIdx == toIdx) return;
+
+        var insertAt = above ? toIdx : toIdx + 1;
+        if (insertAt > fromIdx) insertAt--;
+
+        Fields.Move(fromIdx, insertAt);
+        _type.Fields.RemoveAt(fromIdx);
+        _type.Fields.Insert(insertAt, dragged.Model);
+    }
 
     private void AddField()
     {

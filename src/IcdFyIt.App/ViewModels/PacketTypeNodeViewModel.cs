@@ -90,6 +90,21 @@ public partial class PacketTypeNodeViewModel : ObservableObject
         OnEdited?.Invoke();
     }
 
+    public void MoveField(PacketFieldRowViewModel dragged, PacketFieldRowViewModel target, bool above)
+    {
+        var fromIdx = Fields.IndexOf(dragged);
+        var toIdx   = Fields.IndexOf(target);
+        if (fromIdx < 0 || toIdx < 0 || fromIdx == toIdx) return;
+
+        var insertAt = above ? toIdx : toIdx + 1;
+        if (insertAt > fromIdx) insertAt--;
+
+        Fields.Move(fromIdx, insertAt);
+        _packetType.Fields.RemoveAt(fromIdx);
+        _packetType.Fields.Insert(insertAt, dragged.Model);
+        OnEdited?.Invoke();
+    }
+
     // ── Private ───────────────────────────────────────────────────────────────
 
     private PacketFieldRowViewModel MakeRow(PacketField field)

@@ -113,6 +113,9 @@
 
             <ctrl:DraggableGrid.Columns>
 
+                <!-- Drag handle -->
+                <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
+
                 <!-- Name — all types -->
                 <ctrl:DraggableGridColumn Header="Name"
                                           Path="Name"

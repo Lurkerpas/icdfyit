@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.StructureFieldsDialog"
         Title="{Binding TypeName, StringFormat='Structure Fields – {0}'}"
         Width="560" Height="420"
@@ -12,55 +13,30 @@
         </LayoutTransformControl.LayoutTransform>
     <DockPanel Margin="8">
 
-        <!-- Close only — Add/Remove are in each row's context menu -->
         <Button DockPanel.Dock="Bottom" Content="Close"
                 HorizontalAlignment="Right" Margin="0,6,0,0"
                 IsDefault="True" Click="OnCloseClicked"/>
 
-        <!-- Column headers -->
-        <Border DockPanel.Dock="Top" Background="#2D2D30" Padding="4,3" Margin="0,0,0,2">
-            <Grid ColumnDefinitions="22,*,2*">
-                <TextBlock Grid.Column="0" Text=""           Foreground="#CCCCCC" FontWeight="SemiBold"/>
-                <TextBlock Grid.Column="1" Text="Name"       Foreground="#CCCCCC" FontWeight="SemiBold"/>
-                <TextBlock Grid.Column="2" Text="Data Type"  Foreground="#CCCCCC" FontWeight="SemiBold"/>
-            </Grid>
-        </Border>
-
-        <!-- Field rows — ItemsControl avoids DataGrid popup-crash on Linux/X11 -->
-        <ScrollViewer>
-            <ItemsControl ItemsSource="{Binding Fields}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid ColumnDefinitions="22,*,2*" Margin="0,1" Background="Transparent">
-                            <Grid.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Add"    Command="{Binding AddCommand}"/>
-                                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
-                                </ContextMenu>
-                            </Grid.ContextMenu>
-                            <!-- Grip cell: click or right-click to open the context menu -->
-                            <Border Grid.Column="0"
-                                    Background="Transparent"
-                                    ToolTip.Tip="Right-click for options"
-                                    ContextMenu="{Binding $parent[Grid].ContextMenu}">
-                                <TextBlock Text="⋮" HorizontalAlignment="Center"
-                                           VerticalAlignment="Center" Foreground="#858585"
-                                           FontSize="14" Cursor="Hand"/>
-                            </Border>
-                            <TextBox Grid.Column="1"
-                                     Text="{Binding Name, Mode=TwoWay}"
-                                     Margin="0,0,2,0"/>
-                            <AutoCompleteBox Grid.Column="2"
-                                             ItemsSource="{Binding AvailableTypes}"
-                                             SelectedItem="{Binding DataType, Mode=TwoWay}"
-                                             FilterMode="Contains"
-                                             MinimumPrefixLength="0"
-                                             Margin="0,0,0,0"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+        <ctrl:DraggableGrid x:Name="FieldsGrid"
+                            ItemsSource="{Binding Fields}"
+                            SelectedItem="{Binding SelectedField, Mode=TwoWay}">
+            <ctrl:DraggableGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add"    Command="{Binding AddCommand}"/>
+                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
+                </ContextMenu>
+            </ctrl:DraggableGrid.ContextMenu>
+            <ctrl:DraggableGrid.Columns>
+                <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
+                <ctrl:DraggableGridColumn Header="Name"
+                                          Path="Name"
+                                          Width="160"
+                                          IsEditable="True"/>
+                <ctrl:DraggableGridColumn Header="Data Type"
+                                          Width="320"
+                                          Name="DataType"/>
+            </ctrl:DraggableGrid.Columns>
+        </ctrl:DraggableGrid>
 
     </DockPanel>
     </LayoutTransformControl>

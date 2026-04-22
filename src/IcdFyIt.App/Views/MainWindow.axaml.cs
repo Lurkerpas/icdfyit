@@ -1,5 +1,9 @@
 using Avalonia.Controls;
+using Avalonia.Data;
+using Avalonia.Layout;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
+using IcdFyIt.App.Controls;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -18,6 +22,70 @@ public partial class MainWindow : Window
             if (DataContext is not MainWindowViewModel vm) return;
             vm.SelectedPacketType = PacketTypeTree.SelectedItem as PacketTypeNodeViewModel;
         };
+
+        // CellFactory for Parameter column (AutoCompleteBox — safe in DraggableGrid on X11)
+        FieldsGrid.Columns.First(c => c.Name == "Parameter").CellFactory = _ =>
+        {
+            var acb = new AutoCompleteBox
+            {
+                FilterMode = AutoCompleteFilterMode.ContainsOrdinal,
+            };
+            acb.Bind(AutoCompleteBox.ItemsSourceProperty,
+                new Binding(nameof(PacketFieldRowViewModel.AvailableParameters)));
+            acb.Bind(AutoCompleteBox.SelectedItemProperty,
+                new Binding(nameof(PacketFieldRowViewModel.Parameter)) { Mode = BindingMode.TwoWay });
+            return acb;
+        };
+
+        // CellFactory for IsTypeIndicator column (editable CheckBox)
+        FieldsGrid.Columns.First(c => c.Name == "IsTypeIndicator").CellFactory = _ =>
+        {
+            var cb = new CheckBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Avalonia.Thickness(4, 0),
+            };
+            cb.Bind(CheckBox.IsCheckedProperty,
+                new Binding(nameof(PacketFieldRowViewModel.IsTypeIndicator)) { Mode = BindingMode.TwoWay });
+            return cb;
+        };
+
+        // CellFactory for IndicatorValue column (TextBox, hidden when not a type-indicator field)
+        FieldsGrid.Columns.First(c => c.Name == "IndicatorValue").CellFactory = _ =>
+        {
+            var tb = new TextBox
+            {
+                Background      = Brushes.Transparent,
+                BorderThickness = new Avalonia.Thickness(0),
+                Foreground      = new SolidColorBrush(Color.FromRgb(204, 204, 204)),
+                Padding         = new Avalonia.Thickness(6, 2),
+                VerticalAlignment = VerticalAlignment.Center,
+                MinWidth        = 0,
+            };
+            tb.Bind(TextBox.TextProperty,
+                new Binding(nameof(PacketFieldRowViewModel.IndicatorValue)) { Mode = BindingMode.TwoWay });
+            tb.Bind(IsVisibleProperty,
+                new Binding(nameof(PacketFieldRowViewModel.ShowIndicatorValue)));
+            return tb;
+        };
+
+        // Notify the ViewModel whenever an inline cell edit is committed.
+        FieldsGrid.EditEnded += (_, _) =>
+            (DataContext as MainWindowViewModel)?.NotifyModelEdited();
+
+        // Delegate drag-to-reorder to the SelectedPacketType so the underlying model is kept in sync.
+        FieldsGrid.ItemMoved += OnFieldMoved;
+    }
+
+    private void OnFieldMoved(object? sender, ItemMovedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (vm.SelectedPacketType is null) return;
+        e.Handled = true;
+        vm.SelectedPacketType.MoveField(
+            (PacketFieldRowViewModel)e.DraggedItem,
+            (PacketFieldRowViewModel)e.TargetItem,
+            e.Above);
     }
 
     // ── Close guard (ICD-IF-180) ──────────────────────────────────────────────

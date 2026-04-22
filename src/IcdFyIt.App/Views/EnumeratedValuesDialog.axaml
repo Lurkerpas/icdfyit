@@ -26,6 +26,7 @@
                 </ContextMenu>
             </ctrl:DraggableGrid.ContextMenu>
             <ctrl:DraggableGrid.Columns>
+                <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
                 <ctrl:DraggableGridColumn Header="Name"
                                           Path="Name"
                                           Width="160"
