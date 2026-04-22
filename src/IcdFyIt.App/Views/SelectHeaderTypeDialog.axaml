@@ -1,9 +1,9 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="IcdFyIt.App.Views.SelectHeaderTypeDialog"
-        Title="{Binding PacketTypeName, StringFormat='Select Header Type \u2013 {0}'}"
-        Width="380" Height="140"
-        MinWidth="300" MinHeight="120"
+        Title="{Binding PacketTypeName, StringFormat='Select Header Type – {0}'}"
+        SizeToContent="WidthAndHeight"
+        MinWidth="300"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 
@@ -11,28 +11,26 @@
         <LayoutTransformControl.LayoutTransform>
             <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
         </LayoutTransformControl.LayoutTransform>
-    <DockPanel Margin="12">
+        <DockPanel Margin="12">
 
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
-                    HorizontalAlignment="Right" Spacing="6" Margin="0,10,0,0">
-            <Button Content="Clear"  Click="OnClearClicked" />
-            <Button Content="Close"  Click="OnCloseClicked" IsDefault="True" />
-        </StackPanel>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                        HorizontalAlignment="Right" Spacing="6" Margin="0,10,0,0">
+                <Button Content="Clear"  Click="OnClearClicked"/>
+                <Button Content="Close"  Click="OnCloseClicked" IsDefault="True"/>
+            </StackPanel>
 
-        <Grid RowDefinitions="Auto" ColumnDefinitions="110,*" VerticalAlignment="Top">
+            <Grid ColumnDefinitions="110,*" VerticalAlignment="Center">
+                <TextBlock Grid.Column="0" Text="Header Type:"
+                           VerticalAlignment="Center"/>
+                <AutoCompleteBox Grid.Column="1"
+                                 ItemsSource="{Binding AvailableTypes}"
+                                 SelectedItem="{Binding SelectedHeaderType, Mode=TwoWay}"
+                                 FilterMode="Contains"
+                                 MinimumPrefixLength="0"
+                                 PlaceholderText="(none)"
+                                 MinWidth="160"/>
+            </Grid>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Header Type:"
-                       VerticalAlignment="Center" Margin="0,4,8,4" />
-            <AutoCompleteBox Grid.Row="0" Grid.Column="1"
-                             ItemsSource="{Binding AvailableTypes}"
-                             SelectedItem="{Binding SelectedHeaderType, Mode=TwoWay}"
-                             FilterMode="Contains"
-                             MinimumPrefixLength="0"
-                             PlaceholderText="(none)"
-                             Margin="0,4,0,4" />
-
-        </Grid>
-
-    </DockPanel>
+        </DockPanel>
     </LayoutTransformControl>
 </Window>

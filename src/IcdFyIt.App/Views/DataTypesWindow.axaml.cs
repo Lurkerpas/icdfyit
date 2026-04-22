@@ -1,20 +1,78 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using IcdFyIt.App.Controls;
+using IcdFyIt.App.Converters;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
 
 public partial class DataTypesWindow : Window
 {
+    private static readonly IBrush FgNormal = new SolidColorBrush(Color.FromRgb(204, 204, 204));
+
     public DataTypesWindow()
     {
         InitializeComponent();
+
+        // CellFactory for the Endianness column (RadioButtons, no popup — safe on X11)
+        TypesGrid.Columns.First(c => c.Name == "Endianness").CellFactory = _ =>
+        {
+            var le = new RadioButton { Content = "LE", Margin = new Thickness(0, 0, 8, 0) };
+            le.Bind(RadioButton.IsCheckedProperty,
+                new Binding(nameof(DataTypeRowViewModel.IsLittleEndian)) { Mode = BindingMode.TwoWay });
+            ToolTip.SetTip(le, "Little endian");
+
+            var be = new RadioButton { Content = "BE" };
+            be.Bind(RadioButton.IsCheckedProperty,
+                new Binding(nameof(DataTypeRowViewModel.IsBigEndian)) { Mode = BindingMode.TwoWay });
+            ToolTip.SetTip(be, "Big endian");
+
+            var sp = new StackPanel
+            {
+                Orientation       = Orientation.Horizontal,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin            = new Thickness(6, 0)
+            };
+            sp.Bind(StackPanel.IsEnabledProperty,
+                new Binding(nameof(DataTypeRowViewModel.IsScalarApplicable)));
+            sp.Bind(Visual.OpacityProperty,
+                new Binding(nameof(DataTypeRowViewModel.IsScalarApplicable))
+                    { Converter = BoolToOpacityConverter.Instance });
+            sp.Children.Add(le);
+            sp.Children.Add(be);
+            return sp;
+        };
+
+        // CellFactory for the Details column (text trimming + tooltip)
+        TypesGrid.Columns.First(c => c.Name == "Details").CellFactory = _ =>
+        {
+            var tb = new TextBlock
+            {
+                TextTrimming      = TextTrimming.CharacterEllipsis,
+                Foreground        = FgNormal,
+                Padding           = new Thickness(6, 4),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            tb.Bind(TextBlock.TextProperty,
+                new Binding(nameof(DataTypeRowViewModel.Summary)) { TargetNullValue = "—" });
+            tb.Bind(ToolTip.TipProperty,
+                new Binding(nameof(DataTypeRowViewModel.Summary)));
+            return tb;
+        };
 
         // Avalonia disconnects ContextMenu bindings while the popup is closed,
         // so IsVisible values become stale. Force a refresh when it opens.
         TypesGrid.ContextMenu!.Opened += (_, _) =>
             (DataContext as DataTypesWindowViewModel)?.ForceCanEditNotify();
+
+        // Notify the ViewModel whenever an inline cell edit is committed.
+        TypesGrid.EditEnded += (_, _) =>
+            (DataContext as DataTypesWindowViewModel)?.MarkEdited();
     }
 
     protected override void OnDataContextChanged(EventArgs e)
@@ -45,31 +103,8 @@ public partial class DataTypesWindow : Window
         };
     }
 
-    /// <summary>Marks the model edited when a DataGrid cell edit completes.</summary>
-    private void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
-    {
-        if (DataContext is DataTypesWindowViewModel vm) vm.MarkEdited();
-    }
-
     /// <summary>
-    /// Cancels attempts to edit cells that are not applicable to the selected row's type
-    /// (e.g. Range columns for an Enumerated type).
-    /// </summary>
-    private void OnBeginningEdit(object? sender, DataGridBeginningEditEventArgs e)
-    {
-        if (e.Row.DataContext is not DataTypeRowViewModel row) return;
-        var header = e.Column.Header?.ToString();
-        bool applicable = header switch
-        {
-            "Bit Size"                                              => row.IsBitSizeApplicable,
-            "Range Min" or "Range Max" or "Unit" or "Calibration"  => row.IsNumericApplicable,
-            _                                                       => true
-        };
-        if (!applicable) e.Cancel = true;
-    }
-
-    /// <summary>
-    /// Toggles DataGrid column visibility from the integrated Columns menu (ICD-IF-150).
+    /// Toggles DraggableGrid column visibility from the integrated Columns menu (ICD-IF-150).
     /// </summary>
     private void OnColumnMenuItemChanged(object? sender, RoutedEventArgs e)
     {
@@ -78,28 +113,22 @@ public partial class DataTypesWindow : Window
 
         if (mi.Name == "RangeItem")
         {
-            SetColumnVisible("Range Min", visible);
-            SetColumnVisible("Range Max", visible);
+            TypesGrid.SetColumnVisible("RangeMin", visible);
+            TypesGrid.SetColumnVisible("RangeMax", visible);
         }
         else
         {
-            var header = mi.Name switch
+            var name = mi.Name switch
             {
                 "EndiannessItem"  => "Endianness",
-                "BitSizeItem"     => "Bit Size",
+                "BitSizeItem"     => "BitSize",
                 "UnitItem"        => "Unit",
                 "CalibrationItem" => "Calibration",
                 "DetailsItem"     => "Details",
                 _                 => null
             };
-            if (header is not null) SetColumnVisible(header, visible);
+            if (name is not null) TypesGrid.SetColumnVisible(name, visible);
         }
-    }
-
-    private void SetColumnVisible(string header, bool visible)
-    {
-        var col = TypesGrid.Columns.FirstOrDefault(c => c.Header?.ToString() == header);
-        if (col is not null) col.IsVisible = visible;
     }
 }
 

@@ -15,6 +15,4 @@ public partial class EnumeratedValuesDialog : Window
     }
 
     private void OnCloseClicked(object? sender, RoutedEventArgs e) => Close();
-
-    private void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e) { }
 }

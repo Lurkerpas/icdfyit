@@ -1,7 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:IcdFyIt.App.ViewModels"
-        xmlns:cvt="using:IcdFyIt.App.Converters"
+        xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.DataTypesWindow"
         Title="Data Types"
         Width="1100" Height="640"
@@ -89,18 +89,12 @@
         </Border>
 
         <!-- ── Spreadsheet grid (ICD-IF-120) ─────────────────────────────── -->
-        <DataGrid x:Name="TypesGrid"
+        <ctrl:DraggableGrid x:Name="TypesGrid"
                   ItemsSource="{Binding FilteredRows}"
-                  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-                  AutoGenerateColumns="False"
-                  CanUserSortColumns="True"
-                  CanUserResizeColumns="True"
-                  IsReadOnly="False"
-                  CellEditEnded="OnCellEditEnded"
-                  BeginningEdit="OnBeginningEdit">
+                  SelectedItem="{Binding SelectedRow, Mode=TwoWay}">
 
             <!-- Context menu: Add / Duplicate / Remove + Edit Values for enums -->
-            <DataGrid.ContextMenu>
+            <ctrl:DraggableGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Add…"         Command="{Binding AddCommand}"/>
                     <MenuItem Header="Duplicate"    Command="{Binding DuplicateCommand}"/>
@@ -115,142 +109,83 @@
                     <MenuItem Header="Edit Array…" Command="{Binding EditArrayCommand}"
                               IsVisible="{Binding CanEditArray}"/>
                 </ContextMenu>
-            </DataGrid.ContextMenu>
+            </ctrl:DraggableGrid.ContextMenu>
 
-            <DataGrid.Columns>
+            <ctrl:DraggableGrid.Columns>
 
                 <!-- Name — all types -->
-                <DataGridTextColumn Header="Name"
-                                    Binding="{Binding Name, Mode=TwoWay}"
-                                    Width="160"/>
+                <ctrl:DraggableGridColumn Header="Name"
+                                          Path="Name"
+                                          Width="160"
+                                          IsEditable="True"/>
 
                 <!-- Kind — all types, read-only -->
-                <DataGridTextColumn Header="Kind"
-                                    Binding="{Binding Kind}"
-                                    Width="130" IsReadOnly="True"/>
+                <ctrl:DraggableGridColumn Header="Kind"
+                                          Path="Kind"
+                                          Width="130"/>
 
-                <!-- Endianness — inline RadioButtons; no popup so safe on X11 -->
-                <DataGridTemplateColumn Header="Endianness" Width="115" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
-                                        IsEnabled="{Binding IsScalarApplicable}"
-                                        Opacity="{Binding IsScalarApplicable,
-                                                  Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                        Margin="6,0">
-                                <RadioButton Content="LE" IsChecked="{Binding IsLittleEndian, Mode=TwoWay}"
-                                             Margin="0,0,8,0" ToolTip.Tip="Little endian"/>
-                                <RadioButton Content="BE" IsChecked="{Binding IsBigEndian, Mode=TwoWay}"
-                                             ToolTip.Tip="Big endian"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <!-- Endianness — RadioButtons built in code-behind (no popup, safe on X11) -->
+                <ctrl:DraggableGridColumn Header="Endianness"
+                                          Name="Endianness"
+                                          Width="115"/>
 
                 <!-- Bit Size — scalar types and Enumerated -->
-                <DataGridTemplateColumn Header="Bit Size" Width="95">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding BitSize, TargetNullValue='—'}"
-                                       Opacity="{Binding IsBitSizeApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding BitSize, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <ctrl:DraggableGridColumn Header="Bit Size"
+                                          Path="BitSize"
+                                          NullText="—"
+                                          Width="95"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsBitSizeApplicable"
+                                          OpacityPath="IsBitSizeApplicable"
+                                          Name="BitSize"/>
 
                 <!-- Range Min — numeric types only -->
-                <DataGridTemplateColumn Header="Range Min" Width="120">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding RangeMin, TargetNullValue='—'}"
-                                       Opacity="{Binding IsNumericApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding RangeMin, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <ctrl:DraggableGridColumn Header="Range Min"
+                                          Path="RangeMin"
+                                          NullText="—"
+                                          Width="120"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsNumericApplicable"
+                                          OpacityPath="IsNumericApplicable"
+                                          Name="RangeMin"/>
 
                 <!-- Range Max — numeric types only -->
-                <DataGridTemplateColumn Header="Range Max" Width="120">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding RangeMax, TargetNullValue='—'}"
-                                       Opacity="{Binding IsNumericApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding RangeMax, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <ctrl:DraggableGridColumn Header="Range Max"
+                                          Path="RangeMax"
+                                          NullText="—"
+                                          Width="120"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsNumericApplicable"
+                                          OpacityPath="IsNumericApplicable"
+                                          Name="RangeMax"/>
 
                 <!-- Unit — numeric types only -->
-                <DataGridTemplateColumn Header="Unit" Width="80">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Unit, TargetNullValue='—'}"
-                                       Opacity="{Binding IsNumericApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding Unit, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <ctrl:DraggableGridColumn Header="Unit"
+                                          Path="Unit"
+                                          NullText="—"
+                                          Width="80"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsNumericApplicable"
+                                          OpacityPath="IsNumericApplicable"
+                                          Name="Unit"/>
 
                 <!-- Calibration — numeric types only -->
-                <DataGridTemplateColumn Header="Calibration" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding CalibrationFormula, TargetNullValue='—'}"
-                                       Opacity="{Binding IsNumericApplicable,
-                                                 Converter={x:Static cvt:BoolToOpacityConverter.Instance}}"
-                                       Padding="8,2" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding CalibrationFormula, Mode=TwoWay}"
-                                     HorizontalAlignment="Stretch"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <ctrl:DraggableGridColumn Header="Calibration"
+                                          Path="CalibrationFormula"
+                                          NullText="—"
+                                          Width="150"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsNumericApplicable"
+                                          OpacityPath="IsNumericApplicable"
+                                          Name="Calibration"/>
 
-                <!-- Details — complex types summary, read-only -->
-                <DataGridTemplateColumn Header="Details" Width="120" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Summary}"
-                                       TextTrimming="CharacterEllipsis"
-                                       Padding="8,2" VerticalAlignment="Center"
-                                       ToolTip.Tip="{Binding Summary}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <!-- Details — complex types summary; CellFactory (tooltip + trimming) in code-behind -->
+                <ctrl:DraggableGridColumn Header="Details"
+                                          Width="120"
+                                          Name="Details"/>
 
-            </DataGrid.Columns>
-        </DataGrid>
+            </ctrl:DraggableGrid.Columns>
+        </ctrl:DraggableGrid>
 
     </DockPanel>
     </LayoutTransformControl>

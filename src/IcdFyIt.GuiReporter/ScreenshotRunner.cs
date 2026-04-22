@@ -41,7 +41,6 @@ public sealed class ScreenshotRunner
         // intentionally omitted here so their dimensions are not overridden.
         ["enum_values"]       = (480,  380),
         ["struct_fields"]     = (520,  420),
-        ["select_header_type"]= (400,  220),
     };
 
     private readonly string _modelPath;

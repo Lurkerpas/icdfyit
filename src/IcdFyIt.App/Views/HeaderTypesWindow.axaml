@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:IcdFyIt.App.ViewModels"
+        xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.HeaderTypesWindow"
         Title="Header Types"
         Width="950" Height="620"
@@ -40,36 +41,33 @@
         <Grid RowDefinitions="*,4,*">
 
             <!-- Header Types grid -->
-            <DataGrid Grid.Row="0"
-                      x:Name="HeaderTypesGrid"
-                      ItemsSource="{Binding FilteredRows}"
-                      SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-                      AutoGenerateColumns="False"
-                      CanUserSortColumns="True"
-                      CanUserResizeColumns="True"
-                      IsReadOnly="False"
-                      CellEditEnded="OnHeaderTypeCellEditEnded">
+            <ctrl:DraggableGrid Grid.Row="0"
+                          x:Name="HeaderTypesGrid"
+                          ItemsSource="{Binding FilteredRows}"
+                          SelectedItem="{Binding SelectedRow, Mode=TwoWay}">
 
-                <DataGrid.ContextMenu>
+                <ctrl:DraggableGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Add"       Command="{Binding AddCommand}"/>
                         <MenuItem Header="Duplicate" Command="{Binding DuplicateCommand}"/>
                         <MenuItem Header="Remove"    Command="{Binding RemoveCommand}"/>
                     </ContextMenu>
-                </DataGrid.ContextMenu>
+                </ctrl:DraggableGrid.ContextMenu>
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name"
-                                        Binding="{Binding Name, Mode=TwoWay}"
-                                        Width="200"/>
-                    <DataGridTextColumn Header="Description"
-                                        Binding="{Binding Description, Mode=TwoWay}"
-                                        Width="*"/>
-                    <DataGridTextColumn Header="IDs"
-                                        Binding="{Binding IdCount}"
-                                        Width="60" IsReadOnly="True"/>
-                </DataGrid.Columns>
-            </DataGrid>
+                <ctrl:DraggableGrid.Columns>
+                    <ctrl:DraggableGridColumn Header="Name"
+                                              Path="Name"
+                                              Width="200"
+                                              IsEditable="True"/>
+                    <ctrl:DraggableGridColumn Header="Description"
+                                              Path="Description"
+                                              Width="400"
+                                              IsEditable="True"/>
+                    <ctrl:DraggableGridColumn Header="IDs"
+                                              Path="IdCount"
+                                              Width="60"/>
+                </ctrl:DraggableGrid.Columns>
+            </ctrl:DraggableGrid>
 
             <!-- Splitter -->
             <GridSplitter Grid.Row="1"
@@ -99,36 +97,33 @@
                 </Border>
 
                 <!-- ID entries grid -->
-                <DataGrid x:Name="IdsGrid"
+                <ctrl:DraggableGrid x:Name="IdsGrid"
                           ItemsSource="{Binding IdRows}"
-                          SelectedItem="{Binding SelectedIdRow, Mode=TwoWay}"
-                          AutoGenerateColumns="False"
-                          CanUserSortColumns="True"
-                          CanUserResizeColumns="True"
-                          IsReadOnly="False"
-                          CellEditEnded="OnIdCellEditEnded">
+                          SelectedItem="{Binding SelectedIdRow, Mode=TwoWay}">
 
-                    <DataGrid.ContextMenu>
+                    <ctrl:DraggableGrid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Add ID"         Command="{Binding AddIdCommand}"/>
                             <MenuItem Header="Remove ID"      Command="{Binding RemoveIdCommand}"/>
                             <Separator/>
                             <MenuItem Header="Set Data Type…" Command="{Binding EditIdDataTypeCommand}"/>
                         </ContextMenu>
-                    </DataGrid.ContextMenu>
+                    </ctrl:DraggableGrid.ContextMenu>
 
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name"
-                                            Binding="{Binding Name, Mode=TwoWay}"
-                                            Width="180"/>
-                        <DataGridTextColumn Header="Description"
-                                            Binding="{Binding Description, Mode=TwoWay}"
-                                            Width="*"/>
-                        <DataGridTextColumn Header="Data Type"
-                                            Binding="{Binding DataTypeName}"
-                                            Width="180" IsReadOnly="True"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                    <ctrl:DraggableGrid.Columns>
+                        <ctrl:DraggableGridColumn Header="Name"
+                                                  Path="Name"
+                                                  Width="180"
+                                                  IsEditable="True"/>
+                        <ctrl:DraggableGridColumn Header="Description"
+                                                  Path="Description"
+                                                  Width="340"
+                                                  IsEditable="True"/>
+                        <ctrl:DraggableGridColumn Header="Data Type"
+                                                  Path="DataTypeName"
+                                                  Width="180"/>
+                    </ctrl:DraggableGrid.Columns>
+                </ctrl:DraggableGrid>
 
             </DockPanel>
 
