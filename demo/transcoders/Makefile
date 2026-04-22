@@ -6,10 +6,11 @@ MODEL := example_model.xml
 SETTINGS := settings.xml
 TEMPLATE_SET := c-transcoders-demo
 OUT_DIR := generated
+TEST_APP := $(OUT_DIR)/test_transcoders
 
 CFLAGS := -std=c17 -Wall -Wextra -Werror -pedantic
 
-.PHONY: all validate generate compile clean
+.PHONY: all validate generate compile test clean
 
 all: compile
 
@@ -23,6 +24,10 @@ compile: generate
 	$(CC) $(CFLAGS) -I$(OUT_DIR) -c $(OUT_DIR)/icdfyit-transcoders.c -o $(OUT_DIR)/icdfyit-transcoders.o
 	$(CC) $(CFLAGS) -I$(OUT_DIR) -c $(OUT_DIR)/transcoders.c -o $(OUT_DIR)/transcoders.o
 	ar rcs $(OUT_DIR)/libtranscoders.a $(OUT_DIR)/icdfyit-transcoders.o $(OUT_DIR)/transcoders.o
+
+test: compile
+	$(CC) $(CFLAGS) -I$(OUT_DIR) test_transcoders.c $(OUT_DIR)/libtranscoders.a -o $(TEST_APP)
+	$(TEST_APP)
 
 clean:
 	rm -rf $(OUT_DIR)
