@@ -2,8 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="IcdFyIt.App.Views.ParameterAttributesDialog"
         Title="{Binding ParameterName, StringFormat='Parameter Attributes \u2013 {0}'}"
-        Width="380" Height="220"
-        MinWidth="320" MinHeight="200"
+        SizeToContent="WidthAndHeight"
+        MinWidth="320"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 

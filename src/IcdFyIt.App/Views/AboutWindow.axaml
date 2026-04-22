@@ -3,7 +3,8 @@
         xmlns:vm="using:IcdFyIt.App.ViewModels"
         x:Class="IcdFyIt.App.Views.AboutWindow"
         Title="About icdfyit"
-        Width="380" Height="220"
+        SizeToContent="WidthAndHeight"
+        MinWidth="280"
         CanResize="False"
         WindowStartupLocation="CenterOwner">
 

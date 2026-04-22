@@ -24,6 +24,11 @@ public sealed class ScreenshotRunner
     // Base window dimensions (logical pixels at scale 1.0), matched to the XAML declarations.
     // At a given scale the window is sized to base * scale so the LayoutTransformControl
     // scaled content fills the window exactly.
+    // Windows whose size is fixed at the base (1×) dimensions regardless of scale.
+    // This creates a "viewport" effect: the window shows the top-left region of
+    // the scaled UI, making it clear how much space controls occupy at each scale.
+    // Small dialogs that use SizeToContent="WidthAndHeight" are NOT listed here;
+    // they auto-size to their scaled content so all controls are always visible.
     private static readonly Dictionary<string, (double W, double H)> BaseSizes = new()
     {
         ["main"]              = (1024, 768),
@@ -32,19 +37,11 @@ public sealed class ScreenshotRunner
         ["header_types"]      = (950,  620),
         ["options"]           = (760,  540),
         ["export"]            = (560,  320),
-        ["about"]             = (380,  220),
-        // Dialogs
-        ["add_packet_type"]   = (340,  160),
-        ["add_data_type"]     = (340,  160),
-        ["add_parameter"]     = (340,  160),
-        ["unsaved_changes"]   = (400,  180),
-        ["validation"]        = (600,  400),
+        // Dialogs with fixed row counts use SizeToContent in their AXAML and are
+        // intentionally omitted here so their dimensions are not overridden.
         ["enum_values"]       = (480,  380),
         ["struct_fields"]     = (520,  420),
-        ["array_type"]        = (480,  340),
-        ["param_attributes"]  = (380,  220),
         ["select_header_type"]= (400,  220),
-        ["header_id_datatype"]= (380,  130),
     };
 
     private readonly string _modelPath;
@@ -277,19 +274,41 @@ public sealed class ScreenshotRunner
             {
                 window = factory();
 
-                // Set window dimensions to base * scale so the LayoutTransformControl
-                // scaled content fits exactly inside the window.
-                if (BaseSizes.TryGetValue(sizeKey, out var base_))
+                // Some VM constructors (e.g. MainWindowViewModel) read the saved options
+                // and call app.Resources["AppScale"] = <saved_value>, overwriting the scale
+                // we set before the capture loop.  Re-apply the correct scale here, after
+                // the factory window (and any VM constructors) have run, so that the window
+                // is shown and laid out with the right LayoutTransformControl scale.
+                ApplyScale(scale);
+
+                bool isConstrained = BaseSizes.TryGetValue(sizeKey, out var base_);
+
+                if (isConstrained)
                 {
-                    window.Width  = base_.W * scale;
-                    window.Height = base_.H * scale;
+                    // Main / large windows: keep at base (1×) dimensions to create a
+                    // "viewport" effect that clearly shows how scale affects content density.
+                    window.Width  = base_.W;
+                    window.Height = base_.H;
                 }
+                // Dialogs with SizeToContent: do not override Width/Height — the window
+                // will measure its content (scaled by LayoutTransformControl) and set its
+                // own size so all controls are always visible regardless of scale.
 
                 window.Show();
 
                 // Force a synchronous layout pass.
-                window.Measure(new Size(window.Width, window.Height));
-                window.Arrange(new Rect(new Size(window.Width, window.Height)));
+                if (isConstrained)
+                {
+                    window.Measure(new Size(base_.W, base_.H));
+                    window.Arrange(new Rect(new Size(base_.W, base_.H)));
+                }
+                else
+                {
+                    // Measure with no constraints so the LayoutTransformControl reports
+                    // the full scaled size, then arrange the window at that natural size.
+                    window.Measure(Size.Infinity);
+                    window.Arrange(new Rect(window.DesiredSize));
+                }
 
                 Capture(window, path);
 

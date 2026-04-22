@@ -2,8 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="IcdFyIt.App.Views.HeaderTypeIdDataTypeDialog"
         Title="{Binding EntryName, StringFormat='Set Data Type \u2013 {0}'}"
-        Width="380" Height="130"
-        MinWidth="300" MinHeight="110"
+        SizeToContent="WidthAndHeight"
+        MinWidth="300"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 

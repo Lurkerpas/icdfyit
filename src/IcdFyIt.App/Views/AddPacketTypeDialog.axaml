@@ -2,7 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="IcdFyIt.App.Views.AddPacketTypeDialog"
         Title="Add Packet Type"
-        Width="340" Height="160"
+        SizeToContent="WidthAndHeight"
+        MinWidth="300"
         CanResize="False"
         WindowStartupLocation="CenterOwner">
 

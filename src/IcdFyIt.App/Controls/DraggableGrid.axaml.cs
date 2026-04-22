@@ -249,8 +249,8 @@ public partial class DraggableGrid : UserControl
             var label = new TextBlock
             {
                 Text              = col.Header,
-                Foreground        = Brushes.White,
-                FontWeight        = FontWeight.SemiBold,
+                Foreground        = FgDim,
+                FontWeight        = FontWeight.Normal,
                 Margin            = new Thickness(6, 5, 14, 5), // leave room for gripper
                 VerticalAlignment = VerticalAlignment.Center
             };

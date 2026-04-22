@@ -2,7 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="IcdFyIt.App.Views.AddDataTypeDialog"
         Title="Add Data Type"
-        Width="340" Height="180"
+        SizeToContent="WidthAndHeight"
+        MinWidth="300"
         CanResize="False"
         WindowStartupLocation="CenterOwner">
 
@@ -10,7 +11,7 @@
         <LayoutTransformControl.LayoutTransform>
             <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
         </LayoutTransformControl.LayoutTransform>
-    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="16" RowSpacing="6">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="16" RowSpacing="6">
         <TextBlock Grid.Row="0" Text="Name:" />
         <TextBox  Grid.Row="1" x:Name="NameBox"
                   Text="{Binding Name}"
