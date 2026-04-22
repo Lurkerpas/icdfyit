@@ -653,6 +653,7 @@ bool icdt_${F(ht.Name)}_get_packet_type(
 % for hid in ht.Ids:
     int64_t ${header_param_name(hid)},
 % endfor
+    IcdUF_ByteBuffer* buffer,
     IcdT_PacketType* packetType,
     uint32_t* errorCode)
 {
@@ -662,8 +663,8 @@ bool icdt_${F(ht.Name)}_get_packet_type(
         return false;
     }
 
-    /* Destination pointer is required for result reporting. */
-    if (packetType == NULL)
+    /* Destination pointer and packet buffer are required for result reporting. */
+    if ((packetType == NULL) || (buffer == NULL))
     {
         return icdt_set_error(errorCode, ICDT_ERROR_NULL_ARGUMENT);
     }
@@ -678,6 +679,9 @@ hid_values = {str(e.IdRef): parse_int_literal(e.Value) for e in pt.HeaderIdValue
 missing = [hid.Name for hid in ht.Ids if str(hid.Id) not in hid_values]
 if len(missing) > 0:
     raise RuntimeError(f"Packet '{pt.Name}' is bound to Header Type '{ht.Name}' but is missing header ID values for: {', '.join(missing)}")
+indicator_indexes = [idx for idx, pf in enumerate(pt.Fields) if pf.IsTypeIndicator]
+has_indicators = len(indicator_indexes) > 0
+last_indicator_idx = max(indicator_indexes) if has_indicators else -1
 %>
     /* Check whether header IDs match Packet Type '${pt.Name}'. */
     if (
@@ -690,8 +694,39 @@ if len(missing) > 0:
 % endif
     )
     {
+% if has_indicators:
+        bool indicatorsMatch = true;
+        IcdUF_ByteBuffer probeBuffer = *buffer;
+
+% for idx, pf in enumerate(pt.Fields):
+% if idx <= last_indicator_idx:
+        ${declared_c_type(pf.Parameter.DataType)} decoded_${F(pt.Name)}_${F(pf.Name)};
+        if (indicatorsMatch && !icdt_${F(pf.Parameter.DataType.Name)}_decode(&probeBuffer, &decoded_${F(pt.Name)}_${F(pf.Name)}, errorCode))
+        {
+            indicatorsMatch = false;
+            /* Decode failures on candidate probe are treated as non-match. */
+            (void)icdt_set_success(errorCode);
+        }
+% if pf.IsTypeIndicator:
+        if (indicatorsMatch && (((int64_t)decoded_${F(pt.Name)}_${F(pf.Name)}) != ${parse_int_literal(pf.IndicatorValue)}LL))
+        {
+            indicatorsMatch = false;
+        }
+% else:
+        (void)decoded_${F(pt.Name)}_${F(pf.Name)};
+% endif
+
+% endif
+% endfor
+        if (indicatorsMatch)
+        {
+            *packetType = ${packet_type_enum_name(pt)};
+            return true;
+        }
+% else:
         *packetType = ${packet_type_enum_name(pt)};
         return true;
+% endif
     }
 
 % endif

@@ -333,6 +333,7 @@ bool icdt_${F(pt.Name)}_decode(IcdUF_ByteBuffer* buffer, ${T(pt.Name)}* value, u
 % for ht in model.HeaderTypes:
 /**
  * @brief Resolves packet type from Header Type '${ht.Name}' ID values.
+ * @param buffer Packet payload buffer at field start used for type-indicator disambiguation.
  * @param packetType Output resolved packet type.
  * @param errorCode Output error code.
  * @return true when a packet type match is found, false otherwise.
@@ -341,6 +342,7 @@ bool icdt_${F(ht.Name)}_get_packet_type(
 % for i, hid in enumerate(ht.Ids):
     int64_t ${header_param_name(hid)},
 % endfor
+    IcdUF_ByteBuffer* buffer,
     IcdT_PacketType* packetType,
     uint32_t* errorCode);
 

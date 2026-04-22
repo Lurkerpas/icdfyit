@@ -34,7 +34,7 @@
       </Scalar>
     </DataType>
 
-    <DataType xsi:type="EnumeratedType" Id="44444444-4444-4444-4444-444444444444" Name="Tc2Subservice" Endianness="BigEndian" BitSize="32">
+    <DataType xsi:type="EnumeratedType" Id="44444444-4444-4444-4444-444444444444" Name="Tc2FunctionId" Endianness="BigEndian" BitSize="32">
       <Values>
         <EnumeratedValue>
           <Name>SetThreshold</Name>
@@ -92,8 +92,8 @@
   </DataTypes>
 
   <Parameters>
-    <Parameter Id="c1111111-1111-1111-1111-111111111111" Name="Subservice" DataTypeRef="44444444-4444-4444-4444-444444444444" NumericId="1" Mnemonic="SS" Kind="Id">
-      <ShortDescription>PUS C service 2 subservice selector</ShortDescription>
+    <Parameter Id="c1111111-1111-1111-1111-111111111111" Name="FunctionId" DataTypeRef="44444444-4444-4444-4444-444444444444" NumericId="1" Mnemonic="FID" Kind="Id">
+      <ShortDescription>Service 2 function selector</ShortDescription>
       <Formula />
     </Parameter>
 
@@ -115,9 +115,9 @@
 
   <PacketTypes>
     <PacketType Id="d1111111-1111-1111-1111-111111111111" Name="tc2_set_threshold" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000">
-      <Description>PUS C service 2 telecommand to set threshold.</Description>
+      <Description>Service 2 telecommand to set threshold.</Description>
       <Fields>
-        <PacketField Name="Subservice" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="1" />
+        <PacketField Name="FunctionId" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="1" />
         <PacketField Name="RequestId" ParameterRef="c2222222-2222-2222-2222-222222222222" IsTypeIndicator="false" />
         <PacketField Name="Payload" ParameterRef="c3333333-3333-3333-3333-333333333333" IsTypeIndicator="false" />
       </Fields>
@@ -128,19 +128,19 @@
     </PacketType>
 
     <PacketType Id="d2222222-2222-2222-2222-222222222222" Name="tc2_request_history" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000">
-      <Description>PUS C service 2 telecommand to request history report.</Description>
+      <Description>Service 2 telecommand to request history report (same header IDs as tc2_set_threshold; selected by FunctionId indicator).</Description>
       <Fields>
-        <PacketField Name="Subservice" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="2" />
+        <PacketField Name="FunctionId" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="2" />
         <PacketField Name="RequestId" ParameterRef="c2222222-2222-2222-2222-222222222222" IsTypeIndicator="false" />
       </Fields>
       <HeaderIdValues>
         <Entry IdRef="a1111111-1111-1111-1111-111111111111" Value="2" />
-        <Entry IdRef="a2222222-2222-2222-2222-222222222222" Value="2" />
+        <Entry IdRef="a2222222-2222-2222-2222-222222222222" Value="1" />
       </HeaderIdValues>
     </PacketType>
 
     <PacketType Id="d3333333-3333-3333-3333-333333333333" Name="tm2_history_report" Kind="Telemetry" HeaderTypeRef="b0000000-0000-0000-0000-000000000000">
-      <Description>PUS C service 2 telemetry history report.</Description>
+      <Description>Service 2 telemetry history report.</Description>
       <Fields>
         <PacketField Name="Payload" ParameterRef="c4444444-4444-4444-4444-444444444444" IsTypeIndicator="false" />
       </Fields>
@@ -152,8 +152,8 @@
   </PacketTypes>
 
   <HeaderTypes>
-    <HeaderType Id="a0000000-0000-0000-0000-000000000000" Name="PUSC-TC">
-      <Description>PUS C telecommand header for service/subservice IDs.</Description>
+    <HeaderType Id="a0000000-0000-0000-0000-000000000000" Name="TelecommandHeader">
+      <Description>Telecommand header for routing IDs.</Description>
       <Ids>
         <HeaderTypeId Id="a1111111-1111-1111-1111-111111111111" Name="ST" DataTypeRef="11111111-1111-1111-1111-111111111111">
           <Description>Service Type</Description>
@@ -164,8 +164,8 @@
       </Ids>
     </HeaderType>
 
-    <HeaderType Id="b0000000-0000-0000-0000-000000000000" Name="PUSC-TM">
-      <Description>PUS C telemetry header for service/subservice IDs.</Description>
+    <HeaderType Id="b0000000-0000-0000-0000-000000000000" Name="TelemetryHeader">
+      <Description>Telemetry header for routing IDs.</Description>
       <Ids>
         <HeaderTypeId Id="b1111111-1111-1111-1111-111111111111" Name="ST" DataTypeRef="11111111-1111-1111-1111-111111111111">
           <Description>Service Type</Description>
