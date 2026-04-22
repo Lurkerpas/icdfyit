@@ -183,25 +183,34 @@ static bool test_header_resolvers(void)
     return true;
 }
 
-int main(void)
+typedef bool (*TestFunction)(void);
+
+static void run_test(const char* testName, TestFunction testFunction, int* passCount, int* failCount)
 {
-    if (!test_tc2_set_threshold())
+    printf("%s: ", testName);
+    fflush(stdout);
+
+    if (testFunction())
     {
-        return 1;
-    }
-    if (!test_tc2_request_history())
-    {
-        return 1;
-    }
-    if (!test_tm2_history_report())
-    {
-        return 1;
-    }
-    if (!test_header_resolvers())
-    {
-        return 1;
+        printf("PASS\n");
+        (*passCount)++;
+        return;
     }
 
-    printf("All transcoder packet tests passed.\n");
-    return 0;
+    printf("FAIL\n");
+    (*failCount)++;
+}
+
+int main(void)
+{
+    int passCount = 0;
+    int failCount = 0;
+
+    run_test("test_tc2_set_threshold", test_tc2_set_threshold, &passCount, &failCount);
+    run_test("test_tc2_request_history", test_tc2_request_history, &passCount, &failCount);
+    run_test("test_tm2_history_report", test_tm2_history_report, &passCount, &failCount);
+    run_test("test_header_resolvers", test_header_resolvers, &passCount, &failCount);
+
+    printf("Summary: PASS=%d FAIL=%d\n", passCount, failCount);
+    return (failCount == 0) ? 0 : 1;
 }
