@@ -1,0 +1,2 @@
+# Ignore generated outputs from CLI export and gcc build.
+generated/

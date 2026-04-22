@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <UndoDepth>64</UndoDepth>
+  <UiScale>1</UiScale>
+  <TemplateSets>
+    <TemplateSetConfig Name="c-transcoders-demo">
+      <Description>C transcoder demo template set (utility + generated transcoders).</Description>
+      <Templates>
+        <Template Name="utility-header">
+          <Description>Static utility transcoder header</Description>
+          <FilePath>../../templates/c-transcoders/icdfyit-transcoders.h</FilePath>
+          <OutputNamePattern>icdfyit-transcoders.h</OutputNamePattern>
+        </Template>
+        <Template Name="utility-source">
+          <Description>Static utility transcoder source</Description>
+          <FilePath>../../templates/c-transcoders/icdfyit-transcoders.c</FilePath>
+          <OutputNamePattern>icdfyit-transcoders.c</OutputNamePattern>
+        </Template>
+        <Template Name="model-header">
+          <Description>Model-specific transcoder header</Description>
+          <FilePath>../../templates/c-transcoders/transcoders.h.mako</FilePath>
+          <OutputNamePattern>transcoders.h</OutputNamePattern>
+        </Template>
+        <Template Name="model-source">
+          <Description>Model-specific transcoder source</Description>
+          <FilePath>../../templates/c-transcoders/transcoders.c.mako</FilePath>
+          <OutputNamePattern>transcoders.c</OutputNamePattern>
+        </Template>
+      </Templates>
+    </TemplateSetConfig>
+  </TemplateSets>
+  <RecentFiles />
+</Settings>

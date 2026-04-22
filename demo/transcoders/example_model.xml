@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DataModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SchemaVersion="1">
+  <DataTypes>
+    <DataType xsi:type="UnsignedIntegerType" Id="11111111-1111-1111-1111-111111111111" Name="uint8">
+      <Scalar>
+        <Endianness>BigEndian</Endianness>
+        <BitSize>8</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>255</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+
+    <DataType xsi:type="UnsignedIntegerType" Id="22222222-2222-2222-2222-222222222222" Name="uint16">
+      <Scalar>
+        <Endianness>BigEndian</Endianness>
+        <BitSize>16</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>65535</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+
+    <DataType xsi:type="BooleanType" Id="33333333-3333-3333-3333-333333333333" Name="bool8">
+      <Scalar>
+        <Endianness>BigEndian</Endianness>
+        <BitSize>8</BitSize>
+      </Scalar>
+    </DataType>
+
+    <DataType xsi:type="EnumeratedType" Id="44444444-4444-4444-4444-444444444444" Name="Tc2Subservice" Endianness="BigEndian" BitSize="32">
+      <Values>
+        <EnumeratedValue>
+          <Name>SetThreshold</Name>
+          <RawValues>
+            <int>1</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue>
+          <Name>RequestHistory</Name>
+          <RawValues>
+            <int>2</int>
+          </RawValues>
+        </EnumeratedValue>
+      </Values>
+    </DataType>
+
+    <DataType xsi:type="StructureType" Id="55555555-5555-5555-5555-555555555555" Name="Tc2SetThresholdPayload">
+      <Fields>
+        <StructureField DataTypeRef="11111111-1111-1111-1111-111111111111">
+          <Name>SensorId</Name>
+        </StructureField>
+        <StructureField DataTypeRef="33333333-3333-3333-3333-333333333333">
+          <Name>Enabled</Name>
+        </StructureField>
+        <StructureField DataTypeRef="22222222-2222-2222-2222-222222222222">
+          <Name>Threshold</Name>
+        </StructureField>
+      </Fields>
+    </DataType>
+
+    <DataType xsi:type="ArrayType" Id="66666666-6666-6666-6666-666666666666" Name="Tc2HistoryArray" ElementTypeRef="22222222-2222-2222-2222-222222222222">
+      <ArraySize>
+        <Endianness>BigEndian</Endianness>
+        <BitSize>32</BitSize>
+        <Range>
+          <Min>1</Min>
+          <Max>8</Max>
+        </Range>
+      </ArraySize>
+    </DataType>
+
+    <DataType xsi:type="StructureType" Id="77777777-7777-7777-7777-777777777777" Name="Tm2HistoryReportPayload">
+      <Fields>
+        <StructureField DataTypeRef="11111111-1111-1111-1111-111111111111">
+          <Name>RequestId</Name>
+        </StructureField>
+        <StructureField DataTypeRef="66666666-6666-6666-6666-666666666666">
+          <Name>Samples</Name>
+        </StructureField>
+        <StructureField DataTypeRef="33333333-3333-3333-3333-333333333333">
+          <Name>Success</Name>
+        </StructureField>
+      </Fields>
+    </DataType>
+  </DataTypes>
+
+  <Parameters>
+    <Parameter Id="c1111111-1111-1111-1111-111111111111" Name="Subservice" DataTypeRef="44444444-4444-4444-4444-444444444444" NumericId="1" Mnemonic="SS" Kind="Id">
+      <ShortDescription>PUS C service 2 subservice selector</ShortDescription>
+      <Formula />
+    </Parameter>
+
+    <Parameter Id="c2222222-2222-2222-2222-222222222222" Name="RequestId" DataTypeRef="11111111-1111-1111-1111-111111111111" NumericId="2" Mnemonic="RID" Kind="SoftwareSetting">
+      <ShortDescription>Request identifier</ShortDescription>
+      <Formula />
+    </Parameter>
+
+    <Parameter Id="c3333333-3333-3333-3333-333333333333" Name="SetThresholdPayload" DataTypeRef="55555555-5555-5555-5555-555555555555" NumericId="3" Mnemonic="SETP" Kind="SoftwareSetting">
+      <ShortDescription>Service 2 set-threshold command payload</ShortDescription>
+      <Formula />
+    </Parameter>
+
+    <Parameter Id="c4444444-4444-4444-4444-444444444444" Name="HistoryReportPayload" DataTypeRef="77777777-7777-7777-7777-777777777777" NumericId="4" Mnemonic="HREP" Kind="SoftwareAcquisition">
+      <ShortDescription>Service 2 report payload</ShortDescription>
+      <Formula />
+    </Parameter>
+  </Parameters>
+
+  <PacketTypes>
+    <PacketType Id="d1111111-1111-1111-1111-111111111111" Name="tc2_set_threshold" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000">
+      <Description>PUS C service 2 telecommand to set threshold.</Description>
+      <Fields>
+        <PacketField Name="Subservice" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="1" />
+        <PacketField Name="RequestId" ParameterRef="c2222222-2222-2222-2222-222222222222" IsTypeIndicator="false" />
+        <PacketField Name="Payload" ParameterRef="c3333333-3333-3333-3333-333333333333" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="a1111111-1111-1111-1111-111111111111" Value="2" />
+        <Entry IdRef="a2222222-2222-2222-2222-222222222222" Value="1" />
+      </HeaderIdValues>
+    </PacketType>
+
+    <PacketType Id="d2222222-2222-2222-2222-222222222222" Name="tc2_request_history" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000">
+      <Description>PUS C service 2 telecommand to request history report.</Description>
+      <Fields>
+        <PacketField Name="Subservice" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="2" />
+        <PacketField Name="RequestId" ParameterRef="c2222222-2222-2222-2222-222222222222" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="a1111111-1111-1111-1111-111111111111" Value="2" />
+        <Entry IdRef="a2222222-2222-2222-2222-222222222222" Value="2" />
+      </HeaderIdValues>
+    </PacketType>
+
+    <PacketType Id="d3333333-3333-3333-3333-333333333333" Name="tm2_history_report" Kind="Telemetry" HeaderTypeRef="b0000000-0000-0000-0000-000000000000">
+      <Description>PUS C service 2 telemetry history report.</Description>
+      <Fields>
+        <PacketField Name="Payload" ParameterRef="c4444444-4444-4444-4444-444444444444" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="b1111111-1111-1111-1111-111111111111" Value="2" />
+        <Entry IdRef="b2222222-2222-2222-2222-222222222222" Value="1" />
+      </HeaderIdValues>
+    </PacketType>
+  </PacketTypes>
+
+  <HeaderTypes>
+    <HeaderType Id="a0000000-0000-0000-0000-000000000000" Name="PUSC-TC">
+      <Description>PUS C telecommand header for service/subservice IDs.</Description>
+      <Ids>
+        <HeaderTypeId Id="a1111111-1111-1111-1111-111111111111" Name="ST" DataTypeRef="11111111-1111-1111-1111-111111111111">
+          <Description>Service Type</Description>
+        </HeaderTypeId>
+        <HeaderTypeId Id="a2222222-2222-2222-2222-222222222222" Name="SST" DataTypeRef="11111111-1111-1111-1111-111111111111">
+          <Description>Service Subtype</Description>
+        </HeaderTypeId>
+      </Ids>
+    </HeaderType>
+
+    <HeaderType Id="b0000000-0000-0000-0000-000000000000" Name="PUSC-TM">
+      <Description>PUS C telemetry header for service/subservice IDs.</Description>
+      <Ids>
+        <HeaderTypeId Id="b1111111-1111-1111-1111-111111111111" Name="ST" DataTypeRef="11111111-1111-1111-1111-111111111111">
+          <Description>Service Type</Description>
+        </HeaderTypeId>
+        <HeaderTypeId Id="b2222222-2222-2222-2222-222222222222" Name="SST" DataTypeRef="11111111-1111-1111-1111-111111111111">
+          <Description>Service Subtype</Description>
+        </HeaderTypeId>
+      </Ids>
+    </HeaderType>
+  </HeaderTypes>
+</DataModel>
