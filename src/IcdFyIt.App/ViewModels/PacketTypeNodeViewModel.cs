@@ -51,6 +51,18 @@ public partial class PacketTypeNodeViewModel : ObservableObject
         set { _packetType.Description = value; OnPropertyChanged(); OnEdited?.Invoke(); }
     }
 
+    public int NumericId
+    {
+        get => _packetType.NumericId;
+        set { _packetType.NumericId = value; OnPropertyChanged(); OnEdited?.Invoke(); }
+    }
+
+    public string? Mnemonic
+    {
+        get => _packetType.Mnemonic;
+        set { _packetType.Mnemonic = value; OnPropertyChanged(); OnEdited?.Invoke(); }
+    }
+
     public string Kind => _packetType.Kind.ToString();
 
     // ── Header Type association ───────────────────────────────────────────────

@@ -80,9 +80,19 @@ Circular references between Data Types (e.g., Structure A → Structure B → St
 
 ### 3.3 Packet Types
 
-A Packet Type is either **Telecommand** or **Telemetry**. It has a **name** (unique within the Data Model), an optional **description**, and is associated with a **Header Type** (nullable if the referent is deleted). For each ID defined in the associated Header Type the Packet Type stores a **fixed hex value** (ICD-DAT-413, ICD-DAT-414).
+A Packet Type is either **Telecommand** or **Telemetry**. It has a **name** (unique within the Data Model), a **numeric ID** (unique within the Data Model), an optional **mnemonic**, an optional **description**, and is associated with a **Header Type** (nullable if the referent is deleted). For each ID defined in the associated Header Type the Packet Type stores a **fixed hex value** (ICD-DAT-413, ICD-DAT-414).
 
 It contains an ordered list of Packet Fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| Name | string | required, unique within Data Model |
+| Description | string | optional |
+| ID | integer | required, unique within Data Model |
+| Mnemonic | string | optional |
+| Header Type | Header Type ref | required; nullable if referent is deleted |
+| Header ID Values | list of (ID name → hex string) | one entry per Header Type ID |
+| Fields | ordered list of Packet Fields | see below |
 
 | Field | Type | Notes |
 |---|---|---|
@@ -170,7 +180,7 @@ Delete commands capture the list of references that were nulled so that **undo r
 Scans the Data Model for constraint violations (ICD-FUN-52):
 
 - Null references (missing Data Type on Parameter, missing Parameter on Packet Field, missing Data Type on Header Type ID entry).
-- Duplicate names or IDs.
+- Duplicate names or IDs (Data Types, Parameters, Packet Types).
 - Circular Data Type references (ICD-FUN-42).
 - Type indicator fields not associated with Kind ID parameters.
 - Header Type ID entries referencing a Data Type that is not of kind ID.

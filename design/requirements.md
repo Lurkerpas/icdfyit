@@ -62,6 +62,8 @@ ICD-DAT-411: Packet Type shall have name. Packet Type names shall be unique with
 ICD-DAT-412: Packet Type shall have optional description.
 ICD-DAT-413: Packet Type shall be associated with a Header Type.
 ICD-DAT-414: Packet Type shall define fixed values for all IDs defined in the associated Header Type.
+ICD-DAT-415: Packet Type shall have a numeric ID. Packet Type numeric IDs shall be unique within the Data Model.
+ICD-DAT-416: Packet Type shall have an optional mnemonic.
 ICD-DAT-420: Packet Type shall have an ordered list of Packet Fields.
 ICD-DAT-430: Packet Field shall have name.
 ICD-DAT-440: Packet Field shall have optional description.

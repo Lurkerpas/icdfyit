@@ -18,6 +18,14 @@ public class PacketType
     [XmlAttribute]
     public PacketTypeKind Kind { get; set; }
 
+    /// <summary>Numeric ID, unique within the Data Model (ICD-DAT-415).</summary>
+    [XmlAttribute]
+    public int NumericId { get; set; }
+
+    /// <summary>Optional mnemonic string (ICD-DAT-416).</summary>
+    [XmlAttribute]
+    public string? Mnemonic { get; set; }
+
     /// <summary>Nullable: reference to a Header Type; may be null if deleted (ICD-DAT-413).</summary>
     [XmlIgnore]
     public HeaderType? HeaderType { get; set; }

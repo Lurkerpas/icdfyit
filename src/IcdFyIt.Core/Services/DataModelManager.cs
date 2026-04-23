@@ -151,7 +151,10 @@ public class DataModelManager
 
     public PacketType AddPacketType(string name, PacketTypeKind kind = PacketTypeKind.Telecommand)
     {
-        var pt = new PacketType { Name = name, Kind = kind };
+        var nextId = _model.PacketTypes.Count > 0
+            ? _model.PacketTypes.Max(p => p.NumericId) + 1
+            : 0;
+        var pt = new PacketType { Name = name, Kind = kind, NumericId = nextId };
         _undoRedoManager.Push(new AddEntityCommand<PacketType>(
             pt, _model.PacketTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker));
@@ -165,11 +168,16 @@ public class DataModelManager
 
     public PacketType DuplicatePacketType(PacketType source)
     {
+        var nextId = _model.PacketTypes.Count > 0
+            ? _model.PacketTypes.Max(p => p.NumericId) + 1
+            : 0;
         var copy = new PacketType
         {
             Name        = $"Copy of {source.Name}",
             Kind        = source.Kind,
             Description = source.Description,
+            NumericId   = nextId,
+            Mnemonic    = source.Mnemonic,
             HeaderType  = source.HeaderType,
         };
         foreach (var f in source.Fields)

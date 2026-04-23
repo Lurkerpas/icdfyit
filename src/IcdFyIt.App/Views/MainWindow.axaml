@@ -177,7 +177,7 @@
                                    Foreground="#CCCCCC" />
 
                         <Grid ColumnDefinitions="90,*"
-                              RowDefinitions="Auto,Auto,Auto,Auto"
+                              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                               RowSpacing="6">
 
                             <TextBlock Grid.Row="0" Grid.Column="0"
@@ -194,14 +194,24 @@
                                        TextWrapping="Wrap" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Text="ID:" VerticalAlignment="Center" />
+                            <TextBox   Grid.Row="2" Grid.Column="1"
+                                       Text="{Binding SelectedPacketType.NumericId}" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0"
+                                       Text="Mnemonic:" VerticalAlignment="Center" />
+                            <TextBox   Grid.Row="3" Grid.Column="1"
+                                       Text="{Binding SelectedPacketType.Mnemonic}" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0"
                                        Text="Kind:" VerticalAlignment="Center" />
-                            <TextBlock Grid.Row="2" Grid.Column="1"
+                            <TextBlock Grid.Row="4" Grid.Column="1"
                                        Text="{Binding SelectedPacketType.Kind}"
                                        VerticalAlignment="Center" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0"
+                            <TextBlock Grid.Row="5" Grid.Column="0"
                                        Text="Header Type:" VerticalAlignment="Center" />
-                            <DockPanel Grid.Row="3" Grid.Column="1">
+                            <DockPanel Grid.Row="5" Grid.Column="1">
                                 <Button DockPanel.Dock="Right" Content="…" Margin="4,0,0,0"
                                         Command="{Binding SelectHeaderTypeCommand}"
                                         ToolTip.Tip="Select Header Type" />

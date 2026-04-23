@@ -19,6 +19,7 @@ public class ModelValidator
         CheckDuplicateParameterNames(model, issues);
         CheckDuplicateParameterIds(model, issues);
         CheckDuplicatePacketTypeNames(model, issues);
+        CheckDuplicatePacketTypeIds(model, issues);
         CheckNullParameterDataTypes(model, issues);
         CheckNullPacketFieldParameters(model, issues);
         CheckTypeIndicatorKinds(model, issues);
@@ -68,6 +69,19 @@ public class ModelValidator
         foreach (var pt in model.PacketTypes)
             if (!seen.Add(pt.Name))
                 issues.Add(new ValidationIssue($"Duplicate packet type name: \"{pt.Name}\""));
+    }
+
+    private static void CheckDuplicatePacketTypeIds(DataModel model, List<ValidationIssue> issues)
+    {
+        var seen = new Dictionary<int, string>();
+        foreach (var pt in model.PacketTypes)
+        {
+            if (seen.TryGetValue(pt.NumericId, out var other))
+                issues.Add(new ValidationIssue(
+                    $"Duplicate packet type numeric ID {pt.NumericId}: \"{pt.Name}\" and \"{other}\""));
+            else
+                seen[pt.NumericId] = pt.Name;
+        }
     }
 
     private static void CheckNullParameterDataTypes(DataModel model, List<ValidationIssue> issues)
