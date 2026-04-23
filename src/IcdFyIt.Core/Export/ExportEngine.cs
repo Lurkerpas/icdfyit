@@ -66,12 +66,17 @@ public class ExportEngine
 
     private static string RenderFile(string filePath, DataModel model)
     {
+        var templateDir = Path.GetDirectoryName(filePath) ?? Directory.GetCurrentDirectory();
+
         using var scope = Py.CreateScope();
         scope.Set("__model__",    model.ToPython());
         scope.Set("__filename__", filePath.ToPython());
+        scope.Set("__template_dir__", templateDir.ToPython());
         scope.Exec(
             "from mako.template import Template\n" +
-            "__result__ = Template(filename=__filename__).render(model=__model__)\n");
+            "from mako.lookup import TemplateLookup\n" +
+            "__lookup__ = TemplateLookup(directories=[__template_dir__])\n" +
+            "__result__ = Template(filename=__filename__, lookup=__lookup__).render(model=__model__)\n");
         return scope.Get<string>("__result__") ?? string.Empty;
     }
 
