@@ -307,6 +307,11 @@ public partial class MainWindowViewModel : ObservableObject
         if (Application.Current is not { } app) return;
         app.Resources["AppScale"]       = value;
         app.Resources["AppMenuFontSize"] = value * 14.0;
+
+        // Persist the new scale so it is restored on next launch.
+        var opts = _optionsManager.Load();
+        opts.UiScale = value;
+        _optionsManager.Save(opts);
     }
 
     [RelayCommand]

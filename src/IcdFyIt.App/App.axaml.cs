@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input.Platform;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.ViewModels;
@@ -58,6 +59,9 @@ public partial class App : Application
             TaskScheduler.UnobservedTaskException += (_, e) =>
             {
                 e.SetObserved();
+                // Suppress known benign platform errors (e.g. missing DBus AppMenu service on Linux).
+                if (e.Exception.InnerExceptions.Any(ex => ex.Message.Contains("com.canonical.AppMenu")))
+                    return;
                 ShowFatalErrorDialog(mainWindow, e.Exception);
             };
 
@@ -339,23 +343,60 @@ public partial class App : Application
 
         Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var dialog = new Avalonia.Controls.Window
+            Window? dialog = null;
+
+            var textBlock = new Avalonia.Controls.SelectableTextBlock
+            {
+                Text        = message,
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                Margin      = new Avalonia.Thickness(12),
+            };
+
+            var copyButton = new Avalonia.Controls.Button
+            {
+                Content = "Copy to Clipboard",
+                Margin  = new Avalonia.Thickness(4),
+            };
+            copyButton.Click += async (_, _) =>
+            {
+                if (dialog is not null)
+                    await (TopLevel.GetTopLevel(dialog)?.Clipboard?.SetTextAsync(message) ?? Task.CompletedTask);
+            };
+
+            var closeButton = new Avalonia.Controls.Button
+            {
+                Content = "Close",
+                Margin  = new Avalonia.Thickness(4),
+            };
+            closeButton.Click += (_, _) => dialog?.Close();
+
+            dialog = new Avalonia.Controls.Window
             {
                 Title          = "Unexpected Error",
                 Width          = 600,
                 MinHeight      = 200,
                 SizeToContent  = Avalonia.Controls.SizeToContent.Height,
                 WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
-                Content        = new Avalonia.Controls.ScrollViewer
+                Content        = new Avalonia.Controls.DockPanel
                 {
-                    Content = new Avalonia.Controls.TextBlock
+                    Children =
                     {
-                        Text        = message,
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                        Margin      = new Avalonia.Thickness(12),
+                        new Avalonia.Controls.StackPanel
+                        {
+                            [Avalonia.Controls.DockPanel.DockProperty] = Avalonia.Controls.Dock.Bottom,
+                            Orientation = Avalonia.Layout.Orientation.Horizontal,
+                            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                            Margin = new Avalonia.Thickness(8),
+                            Children = { copyButton, closeButton }
+                        },
+                        new Avalonia.Controls.ScrollViewer
+                        {
+                            Content = textBlock
+                        }
                     }
                 }
             };
+
             if (owner is { IsVisible: true })
                 await dialog.ShowDialog(owner);
             else

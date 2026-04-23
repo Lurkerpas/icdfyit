@@ -24,6 +24,21 @@
                         <MenuItem Header="Duplicate" Command="{Binding DuplicateCommand}"/>
                         <MenuItem Header="Remove"    Command="{Binding RemoveCommand}"/>
                     </MenuItem>
+                    <MenuItem Header="Columns">
+                        <MenuItem Header="Name"        x:Name="NameColItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="Description" x:Name="DescColItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="IDs"         x:Name="IdsColItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
+                    </MenuItem>
+                    <MenuItem Header="Data">
+                        <MenuItem Header="Export CSV" Command="{Binding ExportCsvCommand}"/>
+                        <MenuItem Header="Import CSV" Command="{Binding ImportCsvCommand}"/>
+                    </MenuItem>
                 </Menu>
 
                 <Separator DockPanel.Dock="Left" Margin="4,4" Width="1" Background="#555"/>
@@ -57,15 +72,18 @@
 
                 <ctrl:DraggableGrid.Columns>
                     <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
-                    <ctrl:DraggableGridColumn Header="Name"
+                    <ctrl:DraggableGridColumn Name="Name"
+                                              Header="Name"
                                               Path="Name"
                                               Width="200"
                                               IsEditable="True"/>
-                    <ctrl:DraggableGridColumn Header="Description"
+                    <ctrl:DraggableGridColumn Name="Description"
+                                              Header="Description"
                                               Path="Description"
                                               Width="400"
                                               IsEditable="True"/>
-                    <ctrl:DraggableGridColumn Header="IDs"
+                    <ctrl:DraggableGridColumn Name="IDs"
+                                              Header="IDs"
                                               Path="IdCount"
                                               Width="60"/>
                 </ctrl:DraggableGrid.Columns>

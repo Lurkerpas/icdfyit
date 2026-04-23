@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.IO;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IcdFyIt.Core.Model;
@@ -73,6 +75,12 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
     /// <summary>Opens the data-type picker dialog for a given ID entry.</summary>
     public Func<HeaderTypeId, Task>? RequestEditIdDataType { get; set; }
 
+    /// <summary>Wired by the view to open a save-file dialog for CSV export.</summary>
+    public Func<Task<string?>>? RequestSaveCsvPath { get; set; }
+
+    /// <summary>Wired by the view to open an open-file dialog for CSV import.</summary>
+    public Func<Task<string?>>? RequestOpenCsvPath { get; set; }
+
     // ── Header Type CRUD ──────────────────────────────────────────────────────
 
     [RelayCommand]
@@ -104,6 +112,68 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
     }
 
     private bool HasSelectedRow => SelectedRow is not null;
+
+    // ── CSV import / export (ICD-IF-160) ──────────────────────────────────────
+
+    [RelayCommand]
+    private async Task ExportCsv()
+    {
+        var path = await (RequestSaveCsvPath?.Invoke() ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+
+        var sb = new StringBuilder();
+        sb.AppendLine("Name,Description");
+        foreach (var row in FilteredRows)
+            sb.AppendLine($"\"{Esc(row.Name)}\",\"{Esc(row.Description)}\"");
+        await File.WriteAllTextAsync(path, sb.ToString(), Encoding.UTF8);
+    }
+
+    [RelayCommand]
+    private async Task ImportCsv()
+    {
+        var path = await (RequestOpenCsvPath?.Invoke() ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+
+        var lines = await File.ReadAllLinesAsync(path);
+        foreach (var line in lines.Skip(1))
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            var f = ParseCsvLine(line);
+            if (f.Length < 1 || string.IsNullOrWhiteSpace(f[0])) continue;
+            if (_rows.Any(r => r.Name == f[0])) continue;
+
+            var ht  = _dataModelManager.AddHeaderType(f[0]);
+            var row = _rows.FirstOrDefault(r => r.Model == ht);
+            if (row is null) continue;
+            if (f.Length > 1 && !string.IsNullOrEmpty(f[1]))
+                row.Description = f[1];
+        }
+
+        FilterText = string.Empty;
+        _mainVm.NotifyModelEdited();
+    }
+
+    private static string Esc(string? s) => s?.Replace("\"", "\"\"") ?? string.Empty;
+
+    private static string[] ParseCsvLine(string line)
+    {
+        var fields = new List<string>();
+        var inQ    = false;
+        var cur    = new StringBuilder();
+        for (var i = 0; i < line.Length; i++)
+        {
+            var c = line[i];
+            if (c == '"')
+            {
+                if (inQ && i + 1 < line.Length && line[i + 1] == '"') { cur.Append('"'); i++; }
+                else inQ = !inQ;
+            }
+            else if (c == ',' && !inQ) { fields.Add(cur.ToString()); cur.Clear(); }
+            else cur.Append(c);
+        }
+        fields.Add(cur.ToString());
+        return [.. fields];
+    }
 
     // ── ID entry CRUD (direct model mutation, no undo) ────────────────────────
 
@@ -180,7 +250,7 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
         {
             if (filter.Length == 0
                 || row.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
-                || (row.Description?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true))
+                || row.Description.Contains(filter, StringComparison.OrdinalIgnoreCase))
                 FilteredRows.Add(row);
         }
         if (SelectedRow is null || !FilteredRows.Contains(SelectedRow))
