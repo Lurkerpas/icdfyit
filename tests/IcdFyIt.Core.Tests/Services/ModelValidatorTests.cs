@@ -9,7 +9,7 @@ public class ModelValidatorTests
 {
     private readonly ModelValidator _sut = new();
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void Validate_EmptyModel_ReturnsNoIssues()
     {
         var model = new DataModel();
@@ -19,7 +19,7 @@ public class ModelValidatorTests
         issues.Should().BeEmpty();
     }
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void Validate_DuplicateDataTypeName_ReturnsIssue()
     {
         var model = new DataModel();
@@ -31,7 +31,7 @@ public class ModelValidatorTests
         issues.Should().ContainSingle();
     }
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void Validate_DuplicateParameterName_ReturnsIssue()
     {
         var model = new DataModel();
@@ -40,6 +40,6 @@ public class ModelValidatorTests
 
         var issues = _sut.Validate(model);
 
-        issues.Should().ContainSingle();
+        issues.Should().Contain(i => i.Message.Contains("Duplicate parameter name"));
     }
 }

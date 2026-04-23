@@ -6,7 +6,7 @@ namespace IcdFyIt.Core.Tests.Model;
 
 public class DataModelTests
 {
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void NewDataModel_HasEmptyCollections()
     {
         var model = new DataModel();
@@ -16,7 +16,7 @@ public class DataModelTests
         model.PacketTypes.Should().BeEmpty();
     }
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void DataType_AssignedGuid_OnCreation()
     {
         var dt = new SignedIntegerType();
@@ -24,7 +24,7 @@ public class DataModelTests
         dt.Id.Should().NotBe(Guid.Empty);
     }
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void Parameter_AssignedGuid_OnCreation()
     {
         var p = new Parameter();
@@ -32,7 +32,7 @@ public class DataModelTests
         p.Id.Should().NotBe(Guid.Empty);
     }
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void PacketType_AssignedGuid_OnCreation()
     {
         var pt = new PacketType();

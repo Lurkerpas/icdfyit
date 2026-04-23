@@ -9,7 +9,7 @@ public class XmlPersistenceTests
 {
     private readonly XmlPersistence _sut = new();
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void SaveThenLoad_ProducesEquivalentModel()
     {
         var model = new DataModel();
@@ -30,7 +30,7 @@ public class XmlPersistenceTests
         }
     }
 
-    [Fact(Skip = "Not yet implemented")]
+    [Fact]
     public void Load_NewerSchemaVersion_Throws()
     {
         // Arrange: write a file with a schema version higher than CurrentSchemaVersion
