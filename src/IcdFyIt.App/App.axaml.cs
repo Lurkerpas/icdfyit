@@ -218,7 +218,11 @@ public partial class App : Application
                     : (Window)mainWindow;
                 var dialog = new ParameterAttributesDialog
                 {
-                    DataContext = new ParameterAttributesDialogViewModel(p, changeNotifier.DataTypes.ToList())
+                    DataContext = new ParameterAttributesDialogViewModel(
+                        p,
+                        changeNotifier.DataTypes.ToList(),
+                        changeNotifier.Memories.ToList(),
+                        changeNotifier.Parameters.ToList())
                 };
                 await dialog.ShowDialog(owner);
             };

@@ -65,8 +65,17 @@ public class XmlPersistence
         foreach (var p in model.Parameters)
             p.DataType = Resolve(p._storedDataTypeIdRef, typeById);
 
-        // PacketField → Parameter
+        // Parameter → Memory (optional)
+        var memoryById = model.Memories.ToDictionary(m => m.Id);
+        foreach (var p in model.Parameters)
+            p.Memory = Resolve(p._storedMemoryIdRef, memoryById);
+
+        // Parameter → ValidityParameter (optional, self-referential)
         var paramById = model.Parameters.ToDictionary(p => p.Id);
+        foreach (var p in model.Parameters)
+            p.ValidityParameter = Resolve(p._storedValidityParameterIdRef, paramById);
+
+        // PacketField → Parameter
         foreach (var pt in model.PacketTypes)
             foreach (var f in pt.Fields)
                 f.Parameter = Resolve(f._storedParameterIdRef, paramById);

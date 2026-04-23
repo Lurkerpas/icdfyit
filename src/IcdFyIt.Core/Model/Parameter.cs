@@ -46,5 +46,46 @@ public class Parameter
     /// <summary>Hex string value; only meaningful when Kind == FixedValue.</summary>
     public string? HexValue { get; set; }
 
+    // ── Memory association (ICD-DAT-270, ICD-DAT-271) ─────────────────────────
+
+    /// <summary>Optional reference to the Memory region this parameter resides in.</summary>
+    [XmlIgnore]
+    public Memory? Memory { get; set; }
+
+    [XmlAttribute("MemoryRef")]
+    public string? MemoryIdRef
+    {
+        get => Memory?.Id.ToString();
+        set => _storedMemoryIdRef = value;
+    }
+    internal string? _storedMemoryIdRef;
+
+    /// <summary>Byte offset within <see cref="Memory"/>; meaningful only when Memory is non-null.</summary>
+    [XmlAttribute]
+    public int MemoryOffset { get; set; }
+
+    // ── Validity parameter (ICD-DAT-280) ──────────────────────────────────────
+
+    /// <summary>Optional reference to a boolean Parameter that indicates whether this parameter is valid.</summary>
+    [XmlIgnore]
+    public Parameter? ValidityParameter { get; set; }
+
+    [XmlAttribute("ValidityParameterRef")]
+    public string? ValidityParameterIdRef
+    {
+        get => ValidityParameter?.Id.ToString();
+        set => _storedValidityParameterIdRef = value;
+    }
+    internal string? _storedValidityParameterIdRef;
+
+    // ── Alarm thresholds (ICD-DAT-290, ICD-DAT-291) ───────────────────────────
+
+    /// <summary>Low alarm threshold; meaningful only for numeric Data Types.</summary>
+    public double? AlarmLow { get; set; }
+
+    /// <summary>High alarm threshold; meaningful only for numeric Data Types.</summary>
+    public double? AlarmHigh { get; set; }
+
     public override string ToString() => Name;
 }
+

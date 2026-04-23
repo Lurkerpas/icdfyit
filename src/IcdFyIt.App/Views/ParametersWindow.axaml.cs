@@ -72,15 +72,20 @@ public partial class ParametersWindow : Window
         if (sender is not MenuItem mi) return;
         var colName = mi.Name switch
         {
-            "MnemonicItem"  => "Mnemonic",
-            "KindItem"      => "Kind",
-            "NumericIdItem" => "NumericId",
-            "ShortDescItem" => "ShortDescription",
-            "LongDescItem"  => "LongDescription",
-            "DataTypeItem"  => "DataType",
-            "FormulaItem"   => "Formula",
-            "HexValueItem"  => "HexValue",
-            _               => null
+            "MnemonicItem"      => "Mnemonic",
+            "KindItem"          => "Kind",
+            "NumericIdItem"     => "NumericId",
+            "ShortDescItem"     => "ShortDescription",
+            "LongDescItem"      => "LongDescription",
+            "DataTypeItem"      => "DataType",
+            "FormulaItem"       => "Formula",
+            "HexValueItem"      => "HexValue",
+            "MemoryItem"        => "Memory",
+            "MemoryOffsetItem"  => "MemoryOffset",
+            "ValidityParamItem" => "ValidityParam",
+            "AlarmLowItem"      => "AlarmLow",
+            "AlarmHighItem"     => "AlarmHigh",
+            _                   => null
         };
         if (colName is not null)
             ParamsGrid.SetColumnVisible(colName, mi.IsChecked);

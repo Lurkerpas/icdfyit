@@ -57,6 +57,21 @@
                         <MenuItem Header="Hex Value"         x:Name="HexValueItem"
                                   ToggleType="CheckBox" IsChecked="True"
                                   Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="Memory"            x:Name="MemoryItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="Memory Offset"     x:Name="MemoryOffsetItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="Validity Parameter" x:Name="ValidityParamItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="Alarm Low"         x:Name="AlarmLowItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="Alarm High"        x:Name="AlarmHighItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
                     </MenuItem>
 
                     <!-- CSV import / export -->
@@ -170,6 +185,42 @@
                                           Width="180"
                                           IsEditable="True"
                                           Name="LongDescription"/>
+
+                <!-- Memory (read-only; set via dialog) -->
+                <ctrl:DraggableGridColumn Header="Memory"
+                                          Path="MemoryName"
+                                          Width="120"
+                                          Name="Memory"/>
+
+                <!-- Memory Offset -->
+                <ctrl:DraggableGridColumn Header="Offset"
+                                          Path="MemoryOffset"
+                                          Width="70"
+                                          IsEditable="True"
+                                          IsEnabledPath="HasMemory"
+                                          Name="MemoryOffset"/>
+
+                <!-- Validity Parameter (read-only; set via dialog) -->
+                <ctrl:DraggableGridColumn Header="Validity Parameter"
+                                          Path="ValidityParameterName"
+                                          Width="140"
+                                          Name="ValidityParam"/>
+
+                <!-- Alarm Low -->
+                <ctrl:DraggableGridColumn Header="Alarm Low"
+                                          Path="AlarmLow"
+                                          Width="90"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsNumericApplicable"
+                                          Name="AlarmLow"/>
+
+                <!-- Alarm High -->
+                <ctrl:DraggableGridColumn Header="Alarm High"
+                                          Path="AlarmHigh"
+                                          Width="90"
+                                          IsEditable="True"
+                                          IsEnabledPath="IsNumericApplicable"
+                                          Name="AlarmHigh"/>
 
             </ctrl:DraggableGrid.Columns>
         </ctrl:DraggableGrid>

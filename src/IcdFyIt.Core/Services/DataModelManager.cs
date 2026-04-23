@@ -134,15 +134,20 @@ public class DataModelManager
             : 0;
         var copy = new Parameter
         {
-            Name             = $"Copy of {source.Name}",
-            Kind             = source.Kind,
-            DataType         = source.DataType,
-            NumericId        = nextId,
-            Mnemonic         = source.Mnemonic,
-            ShortDescription = source.ShortDescription,
-            LongDescription  = source.LongDescription,
-            Formula          = source.Formula,
-            HexValue         = source.HexValue,
+            Name                = $"Copy of {source.Name}",
+            Kind                = source.Kind,
+            DataType            = source.DataType,
+            NumericId           = nextId,
+            Mnemonic            = source.Mnemonic,
+            ShortDescription    = source.ShortDescription,
+            LongDescription     = source.LongDescription,
+            Formula             = source.Formula,
+            HexValue            = source.HexValue,
+            Memory              = source.Memory,
+            MemoryOffset        = source.MemoryOffset,
+            ValidityParameter   = source.ValidityParameter,
+            AlarmLow            = source.AlarmLow,
+            AlarmHigh           = source.AlarmHigh,
         };
         _undoRedoManager.Push(new AddEntityCommand<Parameter>(
             copy, _model.Parameters, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
@@ -249,9 +254,7 @@ public class DataModelManager
     }
 
     public void RemoveMemory(Memory memory)
-        => _undoRedoManager.Push(new AddEntityCommand<Memory>(
-            memory, _model.Memories, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
-            _dirtyTracker) { IsRemove = true });
+        => _undoRedoManager.Push(new RemoveMemoryCommand(memory, _model, _changeNotifier, _dirtyTracker));
 
     public void MoveMemory(Memory memory, int newIndex)
     {
@@ -464,6 +467,7 @@ public class DataModelManager
         private readonly ChangeNotifier _notifier;
         private readonly DirtyTracker _dirty;
         private readonly List<PacketField> _fieldRefs = new();
+        private readonly List<Parameter> _validityRefs = new();
 
         public RemoveParameterCommand(Parameter parameter, DataModel model,
             ChangeNotifier notifier, DirtyTracker dirty)
@@ -480,6 +484,13 @@ public class DataModelManager
                     _fieldRefs.Add(f);
                     f.Parameter = null;
                 }
+            // Null out ValidityParameter references on sibling parameters.
+            _validityRefs.Clear();
+            foreach (var p in _model.Parameters.Where(p => p.ValidityParameter == _parameter))
+            {
+                _validityRefs.Add(p);
+                p.ValidityParameter = null;
+            }
             _model.Parameters.Remove(_parameter);
             _notifier.NotifyRemoved(_parameter);
             _dirty.MarkDirty();
@@ -490,6 +501,47 @@ public class DataModelManager
             _model.Parameters.Add(_parameter);
             _notifier.NotifyAdded(_parameter);
             foreach (var f in _fieldRefs) f.Parameter = _parameter;
+            foreach (var p in _validityRefs) p.ValidityParameter = _parameter;
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible removal of a Memory: nullifies all Parameter.Memory references
+    /// so Undo can restore them (ICD-FUN-53).
+    /// </summary>
+    private sealed class RemoveMemoryCommand : IUndoableCommand
+    {
+        private readonly Memory _memory;
+        private readonly DataModel _model;
+        private readonly ChangeNotifier _notifier;
+        private readonly DirtyTracker _dirty;
+        private readonly List<(Parameter Param, int Offset)> _paramRefs = new();
+
+        public RemoveMemoryCommand(Memory memory, DataModel model,
+            ChangeNotifier notifier, DirtyTracker dirty)
+        {
+            _memory = memory; _model = model; _notifier = notifier; _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            _paramRefs.Clear();
+            foreach (var p in _model.Parameters.Where(p => p.Memory == _memory))
+            {
+                _paramRefs.Add((p, p.MemoryOffset));
+                p.Memory = null;
+            }
+            _model.Memories.Remove(_memory);
+            _notifier.NotifyRemoved(_memory);
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            _model.Memories.Add(_memory);
+            _notifier.NotifyAdded(_memory);
+            foreach (var (p, offset) in _paramRefs) { p.Memory = _memory; p.MemoryOffset = offset; }
             _dirty.MarkDirty();
         }
     }

@@ -4,7 +4,7 @@
         Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="{Binding ParameterName, StringFormat='Parameter Attributes \u2013 {0}'}"
         SizeToContent="WidthAndHeight"
-        MinWidth="320"
+        MinWidth="360"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 
@@ -18,7 +18,8 @@
                 HorizontalAlignment="Right" Margin="0,10,0,0"
                 IsDefault="True" Click="OnCloseClicked"/>
 
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="140,*"
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+              ColumnDefinitions="150,*"
               VerticalAlignment="Top">
 
             <!-- Kind -->
@@ -43,6 +44,63 @@
                              MinimumPrefixLength="0"
                              PlaceholderText="(none)"
                              Margin="0,4,0,4"/>
+
+            <!-- Separator -->
+            <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="0,6"/>
+
+            <!-- Memory -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Memory:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <AutoCompleteBox Grid.Row="4" Grid.Column="1"
+                             ItemsSource="{Binding AvailableMemories}"
+                             SelectedItem="{Binding Memory, Mode=TwoWay}"
+                             FilterMode="Contains"
+                             MinimumPrefixLength="0"
+                             PlaceholderText="(none)"
+                             Margin="0,4,0,4"/>
+
+            <!-- Memory Offset -->
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Memory Offset:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox   Grid.Row="5" Grid.Column="1"
+                       Text="{Binding MemoryOffset, Mode=TwoWay}"
+                       IsEnabled="{Binding HasMemory}"
+                       Margin="0,4,0,4"/>
+
+            <!-- Separator -->
+            <Separator Grid.Row="6" Grid.ColumnSpan="2" Margin="0,6"/>
+
+            <!-- Validity Parameter -->
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Validity Parameter:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <AutoCompleteBox Grid.Row="7" Grid.Column="1"
+                             ItemsSource="{Binding AvailableParameters}"
+                             SelectedItem="{Binding ValidityParameter, Mode=TwoWay}"
+                             FilterMode="Contains"
+                             MinimumPrefixLength="0"
+                             PlaceholderText="(none)"
+                             Margin="0,4,0,4"/>
+
+            <!-- Separator -->
+            <Separator Grid.Row="8" Grid.ColumnSpan="2" Margin="0,6"/>
+
+            <!-- Alarm Low -->
+            <TextBlock Grid.Row="9" Grid.Column="0" Text="Alarm Low:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox   Grid.Row="9" Grid.Column="1"
+                       Text="{Binding AlarmLow, Mode=TwoWay}"
+                       IsEnabled="{Binding IsNumericApplicable}"
+                       PlaceholderText="(none)"
+                       Margin="0,4,0,4"/>
+
+            <!-- Alarm High -->
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="Alarm High:"
+                       VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox   Grid.Row="10" Grid.Column="1"
+                       Text="{Binding AlarmHigh, Mode=TwoWay}"
+                       IsEnabled="{Binding IsNumericApplicable}"
+                       PlaceholderText="(none)"
+                       Margin="0,4,0,4"/>
 
         </Grid>
 

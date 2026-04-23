@@ -67,6 +67,11 @@ Circular references between Data Types (e.g., Structure A → Structure B → St
 | ID | integer | required, unique within Data Model |
 | Mnemonic | string | optional |
 | Kind | enum | see below |
+| Memory | Memory ref | optional; the memory region this parameter resides in |
+| Memory Offset | integer | byte offset within Memory; meaningful only when Memory is set |
+| Validity Parameter | Parameter ref | optional; a boolean parameter that indicates whether this parameter is valid |
+| Alarm Low | double | optional; low alarm threshold; only meaningful for numeric data types |
+| Alarm High | double | optional; high alarm threshold; only meaningful for numeric data types |
 
 **Parameter Kind** values and kind-specific data:
 

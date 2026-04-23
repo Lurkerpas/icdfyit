@@ -58,6 +58,11 @@ ICD-DAT-256: Parameter Kind can be fixed value.
 ICD-DAT-257: Parameter of fixed value Kind shall have its value defined using hexadecimal string.
 ICD-DAT-258: Parameter Kind can be ID.
 ICD-DAT-259: Parameter Kind can be placeholder. Placeholders are meant to be set and interpreted by custom code.
+ICD-DAT-270: Parameter may optionally be associated with a Memory entity.
+ICD-DAT-271: If a Parameter is associated with a Memory, it shall have a byte offset within that Memory.
+ICD-DAT-280: Parameter may optionally reference a validity Parameter. The validity Parameter shall have a Boolean Data Type.
+ICD-DAT-290: Numeric Parameters (Signed Integer, Unsigned Integer, Float) may have a low alarm threshold.
+ICD-DAT-291: Numeric Parameters (Signed Integer, Unsigned Integer, Float) may have a high alarm threshold.
 ICD-DAT-410: Packet Type can be either Telecommand or Telemetry.
 ICD-DAT-411: Packet Type shall have name. Packet Type names shall be unique within the Data Model.
 ICD-DAT-412: Packet Type shall have optional description.

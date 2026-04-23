@@ -228,7 +228,10 @@ public sealed class ScreenshotRunner
             await CaptureAsync(dir, "16_param_attributes_dialog", scale, "param_attributes", () =>
             {
                 var allTypes = _changeNotifier.DataTypes.ToList();
-                var vm = new ParameterAttributesDialogViewModel(param, allTypes);
+                var vm = new ParameterAttributesDialogViewModel(
+                    param, allTypes,
+                    _changeNotifier.Memories.ToList(),
+                    _changeNotifier.Parameters.ToList());
                 return new ParameterAttributesDialog { DataContext = vm };
             });
 

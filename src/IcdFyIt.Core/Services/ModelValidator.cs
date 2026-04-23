@@ -32,6 +32,8 @@ public class ModelValidator
         CheckTypeIndicatorValues(model, issues);
         CheckDuplicateMemoryNames(model, issues);
         CheckDuplicateMemoryIds(model, issues);
+        CheckValidityParameterKind(model, issues);
+        CheckAlarmThresholdsOnNonNumeric(model, issues);
 
         return issues;
     }
@@ -216,6 +218,26 @@ public class ModelValidator
                     $"Duplicate memory numeric ID {m.NumericId}: \"{m.Name}\" and \"{other}\""));
             else
                 seen[m.NumericId] = m.Name;
+        }
+    }
+
+    private static void CheckValidityParameterKind(DataModel model, List<ValidationIssue> issues)
+    {
+        foreach (var p in model.Parameters.Where(p => p.ValidityParameter is not null))
+            if (p.ValidityParameter!.DataType?.Kind != BaseType.Boolean)
+                issues.Add(new ValidationIssue(
+                    $"Parameter \"{p.Name}\" validity parameter \"{p.ValidityParameter.Name}\" " +
+                    $"must have a Boolean data type (ICD-DAT-280)."));
+    }
+
+    private static void CheckAlarmThresholdsOnNonNumeric(DataModel model, List<ValidationIssue> issues)
+    {
+        foreach (var p in model.Parameters)
+        {
+            var isNumeric = p.DataType?.Kind is BaseType.SignedInteger or BaseType.UnsignedInteger or BaseType.Float;
+            if (!isNumeric && (p.AlarmLow.HasValue || p.AlarmHigh.HasValue))
+                issues.Add(new ValidationIssue(
+                    $"Parameter \"{p.Name}\" has alarm thresholds but its data type is not numeric (ICD-DAT-290)."));
         }
     }
 }
