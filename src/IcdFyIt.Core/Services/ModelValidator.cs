@@ -25,6 +25,9 @@ public class ModelValidator
         CheckCircularDataTypeRefs(model, issues);
         CheckDuplicateHeaderTypeNames(model, issues);
         CheckHeaderTypeIdNullDataTypes(model, issues);
+        CheckHeaderTypeIdDataTypeKind(model, issues);
+        CheckMissingHeaderIdValues(model, issues);
+        CheckTypeIndicatorValues(model, issues);
 
         return issues;
     }
@@ -88,6 +91,14 @@ public class ModelValidator
                     $"Type indicator field \"{f.Name}\" in \"{pt.Name}\" must reference a parameter of Kind ID (ICD-DAT-461)"));
     }
 
+    private static void CheckTypeIndicatorValues(DataModel model, List<ValidationIssue> issues)
+    {
+        foreach (var pt in model.PacketTypes)
+            foreach (var f in pt.Fields.Where(f => f.IsTypeIndicator && string.IsNullOrEmpty(f.IndicatorValue)))
+                issues.Add(new ValidationIssue(
+                    $"Type indicator field \"{f.Name}\" in \"{pt.Name}\" has no indicator value defined (ICD-DAT-462)"));
+    }
+
     private static void CheckCircularDataTypeRefs(DataModel model, List<ValidationIssue> issues)
     {
         foreach (var dt in model.DataTypes)
@@ -130,5 +141,37 @@ public class ModelValidator
             foreach (var id in ht.Ids.Where(id => id.DataType is null))
                 issues.Add(new ValidationIssue(
                     $"Header type \"{ht.Name}\" ID entry \"{id.Name}\" has no data type assigned"));
+    }
+
+    private static void CheckHeaderTypeIdDataTypeKind(DataModel model, List<ValidationIssue> issues)
+    {
+        // A data type referenced by a Header Type ID entry must be used by at least one
+        // Parameter of Kind ID — parameters of Kind ID represent identification fields
+        // whose data type is appropriate for use as a header discriminator (ICD-DAT-730).
+        var idKindDataTypeIds = model.Parameters
+            .Where(p => p.Kind == ParameterKind.Id && p.DataType is not null)
+            .Select(p => p.DataType!.Id)
+            .ToHashSet();
+
+        foreach (var ht in model.HeaderTypes)
+            foreach (var htId in ht.Ids.Where(id => id.DataType is not null))
+                if (!idKindDataTypeIds.Contains(htId.DataType!.Id))
+                    issues.Add(new ValidationIssue(
+                        $"Header type \"{ht.Name}\" ID entry \"{htId.Name}\" references data type \"{htId.DataType!.Name}\" " +
+                        $"which is not used by any parameter of Kind ID (ICD-DAT-730)"));
+    }
+
+    private static void CheckMissingHeaderIdValues(DataModel model, List<ValidationIssue> issues)
+    {
+        foreach (var pt in model.PacketTypes)
+        {
+            if (pt.HeaderType is null) continue;
+            var definedIdRefs = pt.HeaderIdValues.Select(v => v.IdRef).ToHashSet();
+            foreach (var htId in pt.HeaderType.Ids)
+                if (!definedIdRefs.Contains(htId.Id) ||
+                    string.IsNullOrEmpty(pt.HeaderIdValues.First(v => v.IdRef == htId.Id).Value))
+                    issues.Add(new ValidationIssue(
+                        $"Packet type \"{pt.Name}\" has no fixed value defined for header ID \"{htId.Name}\" (ICD-DAT-414)"));
+        }
     }
 }
