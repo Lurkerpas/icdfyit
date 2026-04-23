@@ -70,6 +70,9 @@ public class DataModelManager
         _model.HeaderTypes.Clear();
         _model.HeaderTypes.AddRange(_changeNotifier.HeaderTypes);
 
+        _model.Memories.Clear();
+        _model.Memories.AddRange(_changeNotifier.Memories);
+
         _persistence.Save(_model, filePath);
         CurrentFilePath = filePath;
         _dirtyTracker.MarkClean();
@@ -227,6 +230,54 @@ public class DataModelManager
             });
         _undoRedoManager.Push(new AddEntityCommand<HeaderType>(
             copy, _model.HeaderTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker));
+        return copy;
+    }
+
+    // ── Memory CRUD ────────────────────────────────────────────────────────────
+
+    public Memory AddMemory(string name)
+    {
+        var nextId = _model.Memories.Count > 0
+            ? _model.Memories.Max(m => m.NumericId) + 1
+            : 0;
+        var m = new Memory { Name = name, NumericId = nextId };
+        _undoRedoManager.Push(new AddEntityCommand<Memory>(
+            m, _model.Memories, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker));
+        return m;
+    }
+
+    public void RemoveMemory(Memory memory)
+        => _undoRedoManager.Push(new AddEntityCommand<Memory>(
+            memory, _model.Memories, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
+            _dirtyTracker) { IsRemove = true });
+
+    public void MoveMemory(Memory memory, int newIndex)
+    {
+        _changeNotifier.MoveMemory(memory, newIndex);
+        _dirtyTracker.MarkDirty();
+    }
+
+    public Memory DuplicateMemory(Memory source)
+    {
+        var nextId = _model.Memories.Count > 0
+            ? _model.Memories.Max(m => m.NumericId) + 1
+            : 0;
+        var copy = new Memory
+        {
+            Name        = $"Copy of {source.Name}",
+            NumericId   = nextId,
+            Mnemonic    = source.Mnemonic,
+            Size        = source.Size,
+            Address     = source.Address,
+            Description = source.Description,
+            Alignment   = source.Alignment,
+            IsWritable  = source.IsWritable,
+            IsReadable  = source.IsReadable,
+        };
+        _undoRedoManager.Push(new AddEntityCommand<Memory>(
+            copy, _model.Memories, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker));
         return copy;
     }

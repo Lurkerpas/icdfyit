@@ -71,6 +71,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Opens (or focuses) the Header Types window.</summary>
     public Action? ShowHeaderTypesWindow { get; set; }
 
+    /// <summary>Opens (or focuses) the Memories window.</summary>
+    public Action? ShowMemoriesWindow { get; set; }
+
     /// <summary>Opens the Options window.</summary>
     public Action? ShowOptionsWindow { get; set; }
 
@@ -345,6 +348,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenHeaderTypes() => ShowHeaderTypesWindow?.Invoke();
+
+    [RelayCommand]
+    private void OpenMemories() => ShowMemoriesWindow?.Invoke();
 
     [RelayCommand]
     private void OpenExportWindow() => ShowExportWindow?.Invoke();

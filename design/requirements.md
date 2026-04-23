@@ -20,6 +20,7 @@ ICD-FUN-90: When exporting, Software shall render each template in the following
 ICD-FUN-100: Options Window shall have Save and Cancel buttons. Save persists options; Cancel discards changes made since the window was opened.
 ICD-FUN-101: Options shall be stored in a settings.xml file located in the working directory.
 ICD-FUN-110: Software shall allow to define (add, delete, modify) Header Types.
+ICD-FUN-120: Software shall allow to define (add, delete, modify) Memory entities.
 
 # Data requirements
 ICD-DAT-10: Data Type shall have name. Data Type names shall be unique within the Data Model.
@@ -83,6 +84,17 @@ ICD-DAT-710: Header Type shall have a name.
 ICD-DAT-720: Header Type shall have a description.
 ICD-DAT-730: Header Type shall have an odered list of IDs, each with associated name, description and Data Type of kind ID.
 
+# Memory requirements
+ICD-DAT-510: Memory shall have a name. Memory names shall be unique within the Data Model.
+ICD-DAT-511: Memory shall have a numeric ID. Memory numeric IDs shall be unique within the Data Model.
+ICD-DAT-512: Memory shall have an optional mnemonic.
+ICD-DAT-513: Memory shall have a size (integer).
+ICD-DAT-514: Memory shall have an optional address (string, typically hexadecimal).
+ICD-DAT-515: Memory shall have an optional description.
+ICD-DAT-516: Memory shall have an alignment (integer, default 1).
+ICD-DAT-517: Memory shall have an IsWritable flag (boolean).
+ICD-DAT-518: Memory shall have an IsReadable flag (boolean).
+
 # Interface requirements
 ICD-IF-10: Software shall be multiwindow, with the main window, and auxiliary windows.
 ICD-IF-20: Auxiliary windows shall be non-modal, enabling concurrent work across all windows.
@@ -119,6 +131,9 @@ ICD-IF-200: Application shall maintain a log file named log{date-time}.txt in th
 ICD-IF-201: Log files older than one day shall be automatically deleted on application startup.
 ICD-IF-210: Header Types Window shall allow to view, edit, create and delete Header Types.
 ICD-IF-220: Header Types Window shall present Header Types with their metadata.
+ICD-IF-250: Memories Window shall allow to view, edit, create and delete Memory entities.
+ICD-IF-251: Memories Window shall present Memory entities in a spreadsheet-style grid with filtering and column visibility toggles.
+ICD-IF-252: Memories Window shall support CSV import and export.
 
 # Design requirements
 ICD-DES-10: Software shall be written in portable .NET C#.

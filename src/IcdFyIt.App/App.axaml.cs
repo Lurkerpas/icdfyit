@@ -46,6 +46,8 @@ public partial class App : Application
             var parametersVm   = new ParametersWindowViewModel(dataModelManager, changeNotifier,
                                                                dirtyTracker, mainVm);
             var headerTypesVm  = new HeaderTypesWindowViewModel(dataModelManager, changeNotifier, mainVm);
+            var memoriesVm     = new MemoriesWindowViewModel(dataModelManager, changeNotifier,
+                                                            dirtyTracker, mainVm);
             var optionsVm      = new OptionsWindowViewModel(optionsManager);
             var exportVm       = new ExportWindowViewModel(dataModelManager, optionsManager, exportEngine);
 
@@ -236,6 +238,9 @@ public partial class App : Application
             // ── Header Types window lifecycle ──────────────────────────────────
             HeaderTypesWindow? headerTypesWindow = null;
 
+            // ── Memories window lifecycle ──────────────────────────────────────
+            MemoriesWindow? memoriesWindow = null;
+
             headerTypesVm.RequestEditIdDataType = async (entry) =>
             {
                 Window owner = (headerTypesWindow is { IsVisible: true })
@@ -259,6 +264,28 @@ public partial class App : Application
                 headerTypesWindow = new HeaderTypesWindow();
                 headerTypesWindow.DataContext = headerTypesVm;
                 headerTypesWindow.Show(mainWindow);
+            };
+
+            mainVm.ShowMemoriesWindow = () =>
+            {
+                if (memoriesWindow is { IsVisible: true })
+                {
+                    memoriesWindow.Activate();
+                    return;
+                }
+                memoriesWindow = new MemoriesWindow();
+                memoriesWindow.DataContext = memoriesVm;
+
+                memoriesVm.RequestAddMemory = async () =>
+                {
+                    Window owner = (memoriesWindow is { IsVisible: true })
+                        ? (Window)memoriesWindow
+                        : (Window)mainWindow;
+                    var dialog = new AddMemoryDialog();
+                    return await dialog.ShowDialog<string?>(owner);
+                };
+
+                memoriesWindow.Show(mainWindow);
             };
 
             mainVm.RequestSelectHeaderType = async (packetType, availableTypes) =>

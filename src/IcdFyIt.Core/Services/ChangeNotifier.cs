@@ -14,6 +14,7 @@ public class ChangeNotifier
     public ObservableCollection<Parameter> Parameters { get; } = new();
     public ObservableCollection<PacketType> PacketTypes { get; } = new();
     public ObservableCollection<HeaderType> HeaderTypes { get; } = new();
+    public ObservableCollection<Memory> Memories { get; } = new();
 
     /// <summary>Replaces all observable collections from the supplied model (called after New/Open).</summary>
     public void ReloadFrom(DataModel model)
@@ -29,6 +30,9 @@ public class ChangeNotifier
 
         HeaderTypes.Clear();
         foreach (var ht in model.HeaderTypes) HeaderTypes.Add(ht);
+
+        Memories.Clear();
+        foreach (var m in model.Memories) Memories.Add(m);
     }
 
     public void NotifyAdded(DataType dataType) => DataTypes.Add(dataType);
@@ -48,4 +52,13 @@ public class ChangeNotifier
 
     public void NotifyAdded(HeaderType headerType) => HeaderTypes.Add(headerType);
     public void NotifyRemoved(HeaderType headerType) => HeaderTypes.Remove(headerType);
+
+    public void NotifyAdded(Memory memory) => Memories.Add(memory);
+    public void NotifyRemoved(Memory memory) => Memories.Remove(memory);
+    public void MoveMemory(Memory memory, int newIndex)
+    {
+        var oldIndex = Memories.IndexOf(memory);
+        if (oldIndex >= 0 && oldIndex != newIndex)
+            Memories.Move(oldIndex, Math.Clamp(newIndex, 0, Memories.Count - 1));
+    }
 }

@@ -30,6 +30,8 @@ public class ModelValidator
         CheckHeaderTypeIdDataTypeKind(model, issues);
         CheckMissingHeaderIdValues(model, issues);
         CheckTypeIndicatorValues(model, issues);
+        CheckDuplicateMemoryNames(model, issues);
+        CheckDuplicateMemoryIds(model, issues);
 
         return issues;
     }
@@ -193,6 +195,27 @@ public class ModelValidator
                     string.IsNullOrEmpty(pt.HeaderIdValues.First(v => v.IdRef == htId.Id).Value))
                     issues.Add(new ValidationIssue(
                         $"Packet type \"{pt.Name}\" has no fixed value defined for header ID \"{htId.Name}\" (ICD-DAT-414)"));
+        }
+    }
+
+    private static void CheckDuplicateMemoryNames(DataModel model, List<ValidationIssue> issues)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var m in model.Memories)
+            if (!seen.Add(m.Name))
+                issues.Add(new ValidationIssue($"Duplicate memory name: \"{m.Name}\""));
+    }
+
+    private static void CheckDuplicateMemoryIds(DataModel model, List<ValidationIssue> issues)
+    {
+        var seen = new Dictionary<int, string>();
+        foreach (var m in model.Memories)
+        {
+            if (seen.TryGetValue(m.NumericId, out var other))
+                issues.Add(new ValidationIssue(
+                    $"Duplicate memory numeric ID {m.NumericId}: \"{m.Name}\" and \"{other}\""));
+            else
+                seen[m.NumericId] = m.Name;
         }
     }
 }

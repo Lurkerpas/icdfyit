@@ -20,4 +20,6 @@ public class DataModel
     public List<PacketType> PacketTypes { get; set; } = new();
 
     public List<HeaderType> HeaderTypes { get; set; } = new();
+
+    public List<Memory> Memories { get; set; } = new();
 }

@@ -380,16 +380,19 @@ public partial class DraggableGrid : UserControl
             return handle;
         }
 
-        // Checkbox (read-only)
+        // Checkbox — read-only display, or interactive two-way when IsEditable is set
         if (col.ColumnType == DraggableGridColumnType.Checkbox)
         {
             var cb = new CheckBox
             {
-                IsEnabled         = false,
+                IsEnabled         = col.IsEditable,
                 Margin            = new Thickness(6, 2),
                 VerticalAlignment = VerticalAlignment.Center
             };
-            cb.Bind(CheckBox.IsCheckedProperty, new Binding(col.Path));
+            var bindingMode = col.IsEditable ? BindingMode.TwoWay : BindingMode.OneWay;
+            cb.Bind(CheckBox.IsCheckedProperty, new Binding(col.Path) { Mode = bindingMode });
+            if (col.IsEditable)
+                cb.IsCheckedChanged += (_, _) => EditEnded?.Invoke(this, EventArgs.Empty);
             return cb;
         }
 

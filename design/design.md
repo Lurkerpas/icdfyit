@@ -141,11 +141,29 @@ Each **Template**:
 
 Template Sets are stored in `settings.xml`, separate from the Data Model XML (ICD-DES-81).
 
+### 3.6 Memories
+
+A Memory represents a named hardware or software memory region. It carries:
+
+| Field | Type | Notes |
+|---|---|---|
+| Name | string | required, unique within Data Model |
+| Numeric ID | integer | required, unique within Data Model |
+| Mnemonic | string | optional |
+| Size | integer | required; unit is implementation-defined (e.g. bytes) |
+| Address | string | optional; typically a hex address string |
+| Description | string | optional |
+| Alignment | integer | required; default 1 |
+| Is Writable | boolean | whether the region is writable |
+| Is Readable | boolean | whether the region is readable |
+
+Memories are independent entities with no cross-references to other Data Model entities. They are presented in the Memories window (ICD-IF-250).
+
 ## 4. Component Design
 
 ### 4.1 `DataModel`
 
-Central domain object aggregating all Data Types, Parameters, Packet Types, and Header Types. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time as a variable named `model`.
+Central domain object aggregating all Data Types, Parameters, Packet Types, Header Types, and Memories. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time as a variable named `model`.
 
 References between entities (e.g., Parameter → Data Type, Packet Field → Parameter, Packet Type → Header Type, Header Type ID → Data Type) are stored as GUID-based nullable references. When a referenced entity is deleted, all references to it are set to null (ICD-FUN-51). The UI tolerates null references gracefully (displaying a placeholder or blank), allowing the user to select a replacement later.
 
