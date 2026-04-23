@@ -4,13 +4,12 @@ namespace IcdFyIt.Core.Infrastructure;
 
 /// <summary>
 /// Loads and saves <see cref="AppOptions"/> to/from settings.xml (ICD-FUN-101).
-/// The settings file lives in the OS-appropriate user-profile directory.
+/// The settings file lives in the working directory of the running process.
 /// </summary>
 public class OptionsManager
 {
     private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "icdfyit",
+        Directory.GetCurrentDirectory(),
         "settings.xml");
 
     /// <summary>Directory that contains settings.xml; used to resolve relative template paths.</summary>
@@ -36,7 +35,6 @@ public class OptionsManager
     /// <summary>Persists options to disk (ICD-FUN-100).</summary>
     public void Save(AppOptions options)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
         using var stream = new FileStream(SettingsPath, FileMode.Create, FileAccess.Write, FileShare.None);
         Serializer.Serialize(stream, options);
     }
