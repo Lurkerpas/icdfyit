@@ -35,6 +35,8 @@ public partial class App : Application
             var dataModelManager = new DataModelManager(changeNotifier, dirtyTracker, undoRedoManager);
             var optionsManager   = new OptionsManager();
             var exportEngine     = new ExportEngine();
+            // Apply persisted undo depth (ICD-IF-170, NC-04)
+            undoRedoManager.MaxDepth = optionsManager.Load().UndoDepth;
             dataModelManager.New();
 
             // ── ViewModels ─────────────────────────────────────────────────────
@@ -303,7 +305,8 @@ public partial class App : Application
                 optionsWindow.Show(mainWindow);
             };
 
-            optionsVm.OnScaleSaved = scale => mainVm.AppScale = scale;
+            optionsVm.OnScaleSaved      = scale => mainVm.AppScale = scale;
+            optionsVm.OnUndoDepthSaved  = depth => undoRedoManager.MaxDepth = depth;
 
             // ── Export window lifecycle ────────────────────────────────────────
             ExportWindow? exportWindow = null;

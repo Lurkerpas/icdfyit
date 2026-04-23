@@ -116,14 +116,7 @@ public class DataModelManager
     }
 
     public void RemoveParameter(Parameter parameter)
-    {
-        foreach (var pt in _model.PacketTypes)
-            foreach (var f in pt.Fields.Where(f => f.Parameter == parameter))
-                f.Parameter = null;
-        _undoRedoManager.Push(new AddEntityCommand<Parameter>(
-            parameter, _model.Parameters, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
-            _dirtyTracker) { IsRemove = true });
-    }
+        => _undoRedoManager.Push(new RemoveParameterCommand(parameter, _model, _changeNotifier, _dirtyTracker));
 
     public void MoveParameter(Parameter parameter, int newIndex)
     {
@@ -208,13 +201,7 @@ public class DataModelManager
     }
 
     public void RemoveHeaderType(HeaderType headerType)
-    {
-        foreach (var pt in _model.PacketTypes.Where(pt => pt.HeaderType == headerType))
-            pt.HeaderType = null;
-        _undoRedoManager.Push(new AddEntityCommand<HeaderType>(
-            headerType, _model.HeaderTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
-            _dirtyTracker) { IsRemove = true });
-    }
+        => _undoRedoManager.Push(new RemoveHeaderTypeCommand(headerType, _model, _changeNotifier, _dirtyTracker));
 
     public HeaderType DuplicateHeaderType(HeaderType source)
     {
@@ -243,6 +230,49 @@ public class DataModelManager
 
     public void Undo() => _undoRedoManager.Undo();
     public void Redo() => _undoRedoManager.Redo();
+
+    // ── Change events for sub-entity mutations (NC-07, NC-08) ─────────────────
+
+    /// <summary>Fired when a HeaderType's Ids list changes (add/remove). Used by VMs to sync IdRows.</summary>
+    public event Action<HeaderType>? HeaderTypeIdsChanged;
+
+    /// <summary>Fired when a PacketType's Fields list changes (add/remove/move). Used by VMs to sync Fields.</summary>
+    public event Action<PacketType>? PacketFieldsChanged;
+
+    // ── HeaderTypeId CRUD (ICD-IF-170, NC-07) ─────────────────────────────────
+
+    public HeaderTypeId AddHeaderTypeId(HeaderType headerType)
+    {
+        var id = new HeaderTypeId { Name = "NewId" };
+        _undoRedoManager.Push(new AddHeaderTypeIdCommand(id, headerType,
+            () => HeaderTypeIdsChanged?.Invoke(headerType), _dirtyTracker));
+        return id;
+    }
+
+    public void RemoveHeaderTypeId(HeaderType headerType, HeaderTypeId id)
+        => _undoRedoManager.Push(new AddHeaderTypeIdCommand(id, headerType,
+            () => HeaderTypeIdsChanged?.Invoke(headerType), _dirtyTracker) { IsRemove = true });
+
+    // ── PacketField CRUD (ICD-IF-170, NC-08) ──────────────────────────────────
+
+    public PacketField AddPacketField(PacketType packetType)
+    {
+        var field = new PacketField { Name = "NewField" };
+        _undoRedoManager.Push(new AddPacketFieldCommand(field, packetType,
+            () => PacketFieldsChanged?.Invoke(packetType), _dirtyTracker));
+        return field;
+    }
+
+    public void RemovePacketField(PacketType packetType, PacketField field)
+        => _undoRedoManager.Push(new AddPacketFieldCommand(field, packetType,
+            () => PacketFieldsChanged?.Invoke(packetType), _dirtyTracker) { IsRemove = true });
+
+    public void MovePacketField(PacketType packetType, int fromIndex, int toIndex)
+    {
+        if (fromIndex == toIndex) return;
+        _undoRedoManager.Push(new MovePacketFieldCommand(packetType, fromIndex, toIndex,
+            () => PacketFieldsChanged?.Invoke(packetType), _dirtyTracker));
+    }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -360,6 +390,209 @@ public class DataModelManager
             foreach (var (at, old) in _arrayRefs) at.ElementType = old;
             foreach (var (p, old) in _paramRefs)  p.DataType = old;
 
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible removal of a Parameter: captures all packet-field cross-references
+    /// so Undo can restore them (ICD-FUN-53, NC-05).
+    /// </summary>
+    private sealed class RemoveParameterCommand : IUndoableCommand
+    {
+        private readonly Parameter _parameter;
+        private readonly DataModel _model;
+        private readonly ChangeNotifier _notifier;
+        private readonly DirtyTracker _dirty;
+        private readonly List<PacketField> _fieldRefs = new();
+
+        public RemoveParameterCommand(Parameter parameter, DataModel model,
+            ChangeNotifier notifier, DirtyTracker dirty)
+        {
+            _parameter = parameter; _model = model; _notifier = notifier; _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            _fieldRefs.Clear();
+            foreach (var pt in _model.PacketTypes)
+                foreach (var f in pt.Fields.Where(f => f.Parameter == _parameter))
+                {
+                    _fieldRefs.Add(f);
+                    f.Parameter = null;
+                }
+            _model.Parameters.Remove(_parameter);
+            _notifier.NotifyRemoved(_parameter);
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            _model.Parameters.Add(_parameter);
+            _notifier.NotifyAdded(_parameter);
+            foreach (var f in _fieldRefs) f.Parameter = _parameter;
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible removal of a HeaderType: captures all packet-type header-type references
+    /// so Undo can restore them (ICD-FUN-53, NC-06).
+    /// </summary>
+    private sealed class RemoveHeaderTypeCommand : IUndoableCommand
+    {
+        private readonly HeaderType _headerType;
+        private readonly DataModel _model;
+        private readonly ChangeNotifier _notifier;
+        private readonly DirtyTracker _dirty;
+        private readonly List<PacketType> _affectedPacketTypes = new();
+
+        public RemoveHeaderTypeCommand(HeaderType headerType, DataModel model,
+            ChangeNotifier notifier, DirtyTracker dirty)
+        {
+            _headerType = headerType; _model = model; _notifier = notifier; _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            _affectedPacketTypes.Clear();
+            foreach (var pt in _model.PacketTypes.Where(pt => pt.HeaderType == _headerType))
+            {
+                _affectedPacketTypes.Add(pt);
+                pt.HeaderType = null;
+            }
+            _model.HeaderTypes.Remove(_headerType);
+            _notifier.NotifyRemoved(_headerType);
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            _model.HeaderTypes.Add(_headerType);
+            _notifier.NotifyAdded(_headerType);
+            foreach (var pt in _affectedPacketTypes) pt.HeaderType = _headerType;
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible add/remove of a HeaderTypeId entry (ICD-IF-170, NC-07).
+    /// Set <see cref="IsRemove"/> = true to make Execute a removal.
+    /// </summary>
+    private sealed class AddHeaderTypeIdCommand : IUndoableCommand
+    {
+        private readonly HeaderTypeId _id;
+        private readonly HeaderType _headerType;
+        private readonly Action _notify;
+        private readonly DirtyTracker _dirty;
+        private int _savedIndex = -1;
+
+        public bool IsRemove { get; init; }
+
+        public AddHeaderTypeIdCommand(HeaderTypeId id, HeaderType headerType,
+            Action notify, DirtyTracker dirty)
+        {
+            _id = id; _headerType = headerType; _notify = notify; _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            if (IsRemove) { _savedIndex = _headerType.Ids.IndexOf(_id); _headerType.Ids.Remove(_id); }
+            else { _headerType.Ids.Add(_id); }
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            if (IsRemove)
+            {
+                if (_savedIndex >= 0 && _savedIndex <= _headerType.Ids.Count)
+                    _headerType.Ids.Insert(_savedIndex, _id);
+                else
+                    _headerType.Ids.Add(_id);
+            }
+            else { _headerType.Ids.Remove(_id); }
+            _notify();
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible add/remove of a PacketField (ICD-IF-170, NC-08).
+    /// Set <see cref="IsRemove"/> = true to make Execute a removal.
+    /// </summary>
+    private sealed class AddPacketFieldCommand : IUndoableCommand
+    {
+        private readonly PacketField _field;
+        private readonly PacketType _packetType;
+        private readonly Action _notify;
+        private readonly DirtyTracker _dirty;
+        private int _savedIndex = -1;
+
+        public bool IsRemove { get; init; }
+
+        public AddPacketFieldCommand(PacketField field, PacketType packetType,
+            Action notify, DirtyTracker dirty)
+        {
+            _field = field; _packetType = packetType; _notify = notify; _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            if (IsRemove) { _savedIndex = _packetType.Fields.IndexOf(_field); _packetType.Fields.Remove(_field); }
+            else { _packetType.Fields.Add(_field); }
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            if (IsRemove)
+            {
+                if (_savedIndex >= 0 && _savedIndex <= _packetType.Fields.Count)
+                    _packetType.Fields.Insert(_savedIndex, _field);
+                else
+                    _packetType.Fields.Add(_field);
+            }
+            else { _packetType.Fields.Remove(_field); }
+            _notify();
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible reorder of a PacketField within its PacketType (ICD-IF-170, NC-08).
+    /// </summary>
+    private sealed class MovePacketFieldCommand : IUndoableCommand
+    {
+        private readonly PacketType _packetType;
+        private readonly int _from;
+        private readonly int _to;
+        private readonly Action _notify;
+        private readonly DirtyTracker _dirty;
+
+        public MovePacketFieldCommand(PacketType packetType, int from, int to,
+            Action notify, DirtyTracker dirty)
+        {
+            _packetType = packetType; _from = from; _to = to; _notify = notify; _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            var field = _packetType.Fields[_from];
+            _packetType.Fields.RemoveAt(_from);
+            _packetType.Fields.Insert(_to, field);
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            var field = _packetType.Fields[_to];
+            _packetType.Fields.RemoveAt(_to);
+            _packetType.Fields.Insert(_from, field);
+            _notify();
             _dirty.MarkDirty();
         }
     }

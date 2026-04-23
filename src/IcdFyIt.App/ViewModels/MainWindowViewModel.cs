@@ -439,7 +439,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private PacketTypeNodeViewModel CreateNode(PacketType pt)
     {
-        var node = new PacketTypeNodeViewModel(pt, _changeNotifier.Parameters);
+        var node = new PacketTypeNodeViewModel(pt, _changeNotifier.Parameters, _dataModelManager);
         node.OnEdited = MarkEdited;
         return node;
     }

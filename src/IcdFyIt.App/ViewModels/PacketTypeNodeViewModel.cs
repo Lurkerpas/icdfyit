@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using IcdFyIt.Core.Model;
+using IcdFyIt.Core.Services;
 
 namespace IcdFyIt.App.ViewModels;
 
@@ -12,17 +13,23 @@ public partial class PacketTypeNodeViewModel : ObservableObject
 {
     private readonly PacketType               _packetType;
     private readonly IReadOnlyList<Parameter> _availableParameters;
+    private readonly DataModelManager         _dataModelManager;
 
     /// <summary>Invoked after any property change so the window can mark the model dirty.</summary>
     public Action? OnEdited { get; set; }
 
-    public PacketTypeNodeViewModel(PacketType packetType, IReadOnlyList<Parameter> availableParameters)
+    public PacketTypeNodeViewModel(PacketType packetType, IReadOnlyList<Parameter> availableParameters,
+        DataModelManager dataModelManager)
     {
         _packetType          = packetType;
         _availableParameters = availableParameters;
+        _dataModelManager    = dataModelManager;
 
         Fields = new ObservableCollection<PacketFieldRowViewModel>(
             packetType.Fields.Select(f => MakeRow(f)));
+
+        // Rebuild Fields when undo/redo mutates this packet type's field list (NC-08).
+        _dataModelManager.PacketFieldsChanged += OnPacketFieldsChanged;
 
         // Populate Header ID value rows (HeaderType is already resolved when reloading).
         RefreshHeaderType();
@@ -77,16 +84,15 @@ public partial class PacketTypeNodeViewModel : ObservableObject
 
     public void AddField()
     {
-        var field = new PacketField { Name = "NewField" };
-        _packetType.Fields.Add(field);
-        Fields.Add(MakeRow(field));
+        _dataModelManager.AddPacketField(_packetType);
+        // Fields rebuilt via PacketFieldsChanged event
         OnEdited?.Invoke();
     }
 
     public void RemoveField(PacketFieldRowViewModel row)
     {
-        _packetType.Fields.Remove(row.Model);
-        Fields.Remove(row);
+        _dataModelManager.RemovePacketField(_packetType, row.Model);
+        // Fields rebuilt via PacketFieldsChanged event
         OnEdited?.Invoke();
     }
 
@@ -99,10 +105,22 @@ public partial class PacketTypeNodeViewModel : ObservableObject
         var insertAt = above ? toIdx : toIdx + 1;
         if (insertAt > fromIdx) insertAt--;
 
-        Fields.Move(fromIdx, insertAt);
-        _packetType.Fields.RemoveAt(fromIdx);
-        _packetType.Fields.Insert(insertAt, dragged.Model);
+        _dataModelManager.MovePacketField(_packetType, fromIdx, insertAt);
+        // Fields rebuilt via PacketFieldsChanged event
         OnEdited?.Invoke();
+    }
+
+    private void OnPacketFieldsChanged(PacketType pt)
+    {
+        if (pt != _packetType) return;
+        RebuildFields();
+    }
+
+    private void RebuildFields()
+    {
+        Fields.Clear();
+        foreach (var f in _packetType.Fields)
+            Fields.Add(MakeRow(f));
     }
 
     // ── Private ───────────────────────────────────────────────────────────────

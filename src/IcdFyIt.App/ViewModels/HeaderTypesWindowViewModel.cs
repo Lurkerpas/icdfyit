@@ -35,6 +35,7 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
             _rows.Add(CreateRow(ht));
 
         _changeNotifier.HeaderTypes.CollectionChanged += OnHeaderTypesCollectionChanged;
+        _dataModelManager.HeaderTypeIdsChanged += OnHeaderTypeIdsChanged;
         RefreshFilteredRows();
     }
 
@@ -175,17 +176,15 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
         return [.. fields];
     }
 
-    // ── ID entry CRUD (direct model mutation, no undo) ────────────────────────
+    // ── ID entry CRUD (routed via DataModelManager for undo support, NC-07) ────
 
     [RelayCommand(CanExecute = nameof(HasSelectedRow))]
     private void AddId()
     {
         if (SelectedRow is null) return;
-        var entry = new HeaderTypeId { Name = "NewId" };
-        SelectedRow.Model.Ids.Add(entry);
-        var row = new HeaderTypeIdRowViewModel(entry) { OnEdited = _mainVm.NotifyModelEdited };
-        IdRows.Add(row);
-        SelectedIdRow = row;
+        _dataModelManager.AddHeaderTypeId(SelectedRow.Model);
+        // IdRows rebuilt via HeaderTypeIdsChanged event
+        SelectedIdRow = IdRows.Count > 0 ? IdRows[^1] : null;
         SelectedRow.NotifyIdCountChanged();
         _mainVm.NotifyModelEdited();
     }
@@ -194,8 +193,8 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
     private void RemoveId()
     {
         if (SelectedRow is null || SelectedIdRow is null) return;
-        SelectedRow.Model.Ids.Remove(SelectedIdRow.Model);
-        IdRows.Remove(SelectedIdRow);
+        _dataModelManager.RemoveHeaderTypeId(SelectedRow.Model, SelectedIdRow.Model);
+        // IdRows rebuilt via HeaderTypeIdsChanged event
         SelectedIdRow = IdRows.Count > 0 ? IdRows[^1] : null;
         SelectedRow.NotifyIdCountChanged();
         _mainVm.NotifyModelEdited();
@@ -215,6 +214,16 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
     // ── Dirty notification ────────────────────────────────────────────────────
 
     public void MarkEdited() => _mainVm.NotifyModelEdited();
+
+    // ── Sub-entity sync ───────────────────────────────────────────────────────
+
+    /// <summary>Syncs <see cref="IdRows"/> when undo/redo mutates the selected header type's Ids list.</summary>
+    private void OnHeaderTypeIdsChanged(HeaderType ht)
+    {
+        if (SelectedRow?.Model != ht) return;
+        RebuildIdRows(ht);
+        SelectedRow.NotifyIdCountChanged();
+    }
 
     // ── Collection sync ───────────────────────────────────────────────────────
 

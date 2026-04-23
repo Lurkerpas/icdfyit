@@ -19,6 +19,9 @@ public partial class OptionsWindowViewModel : ObservableObject
     /// <summary>Called after Save with the new UiScale value so the main VM can apply it.</summary>
     public Action<double>? OnScaleSaved { get; set; }
 
+    /// <summary>Called after Save with the new UndoDepth value so the caller can apply it.</summary>
+    public Action<int>? OnUndoDepthSaved { get; set; }
+
     /// <summary>Invoked by Save/Cancel commands to request the window to close.</summary>
     public Action? RequestClose { get; set; }
 
@@ -115,6 +118,7 @@ public partial class OptionsWindowViewModel : ObservableObject
         opts.TemplateSets = TemplateSets.Select(vm => vm.Model).ToList();
         _optionsManager.Save(opts);
         OnScaleSaved?.Invoke(UiScale);
+        OnUndoDepthSaved?.Invoke(UndoDepth);
         RequestClose?.Invoke();
     }
 
