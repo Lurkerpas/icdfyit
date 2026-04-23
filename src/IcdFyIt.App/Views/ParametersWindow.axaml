@@ -4,6 +4,7 @@
         xmlns:cvt="using:IcdFyIt.App.Converters"
         xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.ParametersWindow"
+        Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="Parameters"
         Width="1100" Height="640"
         MinWidth="700" MinHeight="400">

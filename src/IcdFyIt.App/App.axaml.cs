@@ -8,6 +8,7 @@ using IcdFyIt.App.Views;
 using IcdFyIt.Core.Export;
 using IcdFyIt.Core.Infrastructure;
 using IcdFyIt.Core.Services;
+using System.IO;
 
 namespace IcdFyIt.App;
 
@@ -22,6 +23,10 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // ── Logging ────────────────────────────────────────────────────────
+            LogManager.Initialise(Directory.GetCurrentDirectory());
+            desktop.Exit += (_, _) => LogManager.Shutdown();
+
             // ── Service layer (singletons) ──────────────────────────────────────
             var changeNotifier   = new ChangeNotifier();
             var dirtyTracker     = new DirtyTracker();
@@ -45,6 +50,16 @@ public partial class App : Application
             var mainWindow = new MainWindow();
             mainWindow.DataContext = mainVm;
             desktop.MainWindow = mainWindow;
+
+            // ── Global unhandled exception handlers (ICD-IF-190) ──────────────
+            AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+                ShowFatalErrorDialog(mainWindow, e.ExceptionObject as Exception);
+
+            TaskScheduler.UnobservedTaskException += (_, e) =>
+            {
+                e.SetObserved();
+                ShowFatalErrorDialog(mainWindow, e.Exception);
+            };
 
             // ── File-dialog delegates ──────────────────────────────────────────
             mainVm.OpenFileDialog = async () =>
@@ -314,5 +329,37 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static void ShowFatalErrorDialog(Window? owner, Exception? ex)
+    {
+        var message = ex is not null
+            ? $"An unexpected error occurred:\n\n{ex.Message}\n\n{ex.StackTrace}"
+            : "An unexpected error occurred.";
+
+        Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            var dialog = new Avalonia.Controls.Window
+            {
+                Title          = "Unexpected Error",
+                Width          = 600,
+                MinHeight      = 200,
+                SizeToContent  = Avalonia.Controls.SizeToContent.Height,
+                WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
+                Content        = new Avalonia.Controls.ScrollViewer
+                {
+                    Content = new Avalonia.Controls.TextBlock
+                    {
+                        Text        = message,
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        Margin      = new Avalonia.Thickness(12),
+                    }
+                }
+            };
+            if (owner is { IsVisible: true })
+                await dialog.ShowDialog(owner);
+            else
+                dialog.Show();
+        });
     }
 }

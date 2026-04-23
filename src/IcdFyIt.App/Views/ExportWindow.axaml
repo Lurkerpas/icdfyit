@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:IcdFyIt.App.ViewModels"
         x:Class="IcdFyIt.App.Views.ExportWindow"
+        Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="Export"
         Width="560" Height="320"
         MinWidth="450" MinHeight="260">

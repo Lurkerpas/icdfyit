@@ -3,6 +3,7 @@
         xmlns:vm="using:IcdFyIt.App.ViewModels"
         xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.HeaderTypesWindow"
+        Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="Header Types"
         Width="950" Height="620"
         MinWidth="600" MinHeight="400">

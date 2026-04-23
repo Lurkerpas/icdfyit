@@ -13,7 +13,7 @@ public class HeaderType
     [XmlAttribute]
     public string Name { get; set; } = string.Empty;
 
-    public string? Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>Ordered list of ID entries defined by this Header Type (ICD-DAT-730).</summary>
     public List<HeaderTypeId> Ids { get; set; } = new();

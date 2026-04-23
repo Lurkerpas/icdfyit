@@ -36,7 +36,7 @@ public class DataModelManager
 
     // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-    /// <summary>Discards the current model and starts a new empty one (ICD-FUN-10).</summary>
+    /// <summary>Discards the current model and starts a new empty one (ICD-FUN-50).</summary>
     public void New()
     {
         _model = new DataModel();
@@ -133,12 +133,15 @@ public class DataModelManager
 
     public Parameter DuplicateParameter(Parameter source)
     {
+        var nextId = _model.Parameters.Count > 0
+            ? _model.Parameters.Max(p => p.NumericId) + 1
+            : 0;
         var copy = new Parameter
         {
             Name             = $"Copy of {source.Name}",
             Kind             = source.Kind,
             DataType         = source.DataType,
-            NumericId        = source.NumericId,
+            NumericId        = nextId,
             Mnemonic         = source.Mnemonic,
             ShortDescription = source.ShortDescription,
             LongDescription  = source.LongDescription,
@@ -174,6 +177,7 @@ public class DataModelManager
             Name        = $"Copy of {source.Name}",
             Kind        = source.Kind,
             Description = source.Description,
+            HeaderType  = source.HeaderType,
         };
         foreach (var f in source.Fields)
             copy.Fields.Add(new PacketField
@@ -184,6 +188,8 @@ public class DataModelManager
                 IsTypeIndicator = f.IsTypeIndicator,
                 IndicatorValue  = f.IndicatorValue,
             });
+        foreach (var v in source.HeaderIdValues)
+            copy.HeaderIdValues.Add(new HeaderIdValue { IdRef = v.IdRef, Value = v.Value });
         _undoRedoManager.Push(new AddEntityCommand<PacketType>(
             copy, _model.PacketTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker));

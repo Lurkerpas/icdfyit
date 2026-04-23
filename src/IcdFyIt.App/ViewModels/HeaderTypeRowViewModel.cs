@@ -20,10 +20,10 @@ public partial class HeaderTypeRowViewModel : ObservableObject
         set { Model.Name = value; OnPropertyChanged(); OnEdited?.Invoke(); }
     }
 
-    public string? Description
+    public string Description
     {
         get => Model.Description;
-        set { Model.Description = value; OnPropertyChanged(); OnEdited?.Invoke(); }
+        set { Model.Description = value ?? string.Empty; OnPropertyChanged(); OnEdited?.Invoke(); }
     }
 
     public int IdCount => Model.Ids.Count;

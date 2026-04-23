@@ -4,6 +4,7 @@
         xmlns:conv="using:Avalonia.Data.Converters"
         xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.MainWindow"
+        Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="{Binding Title}"
         Width="1024" Height="768"
         MinWidth="800" MinHeight="600">
@@ -27,6 +28,8 @@
                 <Separator />
                 <MenuItem Header="_Save"     Command="{Binding SaveDocumentCommand}" />
                 <MenuItem Header="Save _As…" Command="{Binding SaveDocumentAsCommand}" />
+                <Separator />
+                <MenuItem Header="E_xit"     Command="{Binding ExitCommand}" />
             </MenuItem>
             <MenuItem Header="_Edit">
                 <MenuItem Header="_Undo"     Command="{Binding UndoCommand}" />

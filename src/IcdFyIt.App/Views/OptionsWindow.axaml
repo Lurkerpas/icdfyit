@@ -3,6 +3,7 @@
         xmlns:vm="using:IcdFyIt.App.ViewModels"
         xmlns:ctrl="using:IcdFyIt.App.Controls"
         x:Class="IcdFyIt.App.Views.OptionsWindow"
+        Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="Options"
         Width="760" Height="540"
         MinWidth="600" MinHeight="420">

@@ -24,6 +24,7 @@ public class ModelValidator
         CheckTypeIndicatorKinds(model, issues);
         CheckCircularDataTypeRefs(model, issues);
         CheckDuplicateHeaderTypeNames(model, issues);
+        CheckHeaderTypeDescriptions(model, issues);
         CheckHeaderTypeIdNullDataTypes(model, issues);
         CheckHeaderTypeIdDataTypeKind(model, issues);
         CheckMissingHeaderIdValues(model, issues);
@@ -133,6 +134,12 @@ public class ModelValidator
         foreach (var ht in model.HeaderTypes)
             if (!seen.Add(ht.Name))
                 issues.Add(new ValidationIssue($"Duplicate header type name: \"{ht.Name}\""));
+    }
+
+    private static void CheckHeaderTypeDescriptions(DataModel model, List<ValidationIssue> issues)
+    {
+        foreach (var ht in model.HeaderTypes.Where(ht => string.IsNullOrEmpty(ht.Description)))
+            issues.Add(new ValidationIssue($"Header type \"{ht.Name}\" has no description (ICD-DAT-720)"));
     }
 
     private static void CheckHeaderTypeIdNullDataTypes(DataModel model, List<ValidationIssue> issues)

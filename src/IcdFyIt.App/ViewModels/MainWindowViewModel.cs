@@ -364,6 +364,14 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void Exit()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is
+            Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.MainWindow?.Close();
+    }
+
+    [RelayCommand]
     private async Task RunValidation()
     {
         var validator = new ModelValidator();

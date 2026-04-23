@@ -11,14 +11,16 @@ public static class LogManager
     /// <summary>Call once at application start to configure the global Serilog logger.</summary>
     public static void Initialise(string logDirectory)
     {
-        string logPath = Path.Combine(logDirectory, "icdfyit-.log");
+        // Delete any pre-existing log files so that only one log survives (ICD-IF-201).
+        foreach (var old in Directory.GetFiles(logDirectory, "log*.txt"))
+            try { File.Delete(old); } catch { /* best-effort */ }
+
+        string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        string logPath   = Path.Combine(logDirectory, $"log{timestamp}.txt");
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.File(
-                logPath,
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 1)
+            .WriteTo.File(logPath)
             .CreateLogger();
     }
 

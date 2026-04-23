@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="IcdFyIt.App.Views.ArrayTypeDialog"
+        Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="{Binding TypeName, StringFormat='Array Type – {0}'}"
         SizeToContent="WidthAndHeight"
         MinWidth="320"
