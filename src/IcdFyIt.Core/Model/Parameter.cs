@@ -1,4 +1,5 @@
 using System.Xml.Serialization;
+using IcdFyIt.Core.Infrastructure;
 
 namespace IcdFyIt.Core.Model;
 
@@ -31,8 +32,23 @@ public class Parameter
     }
     internal string? _storedDataTypeIdRef;
 
-    [XmlAttribute]
-    public int NumericId { get; set; }
+    // ── NumericId ─────────────────────────────────────────────────────────────
+    private int _numericId;
+    private string? _numericIdStr;
+
+    [XmlIgnore]
+    public int NumericId
+    {
+        get => _numericId;
+        set { _numericId = value; _numericIdStr = null; }
+    }
+
+    [XmlAttribute("NumericId")]
+    public string NumericIdStr
+    {
+        get => _numericIdStr ?? _numericId.ToString();
+        set { _numericIdStr = value; _numericId = HexInt.Parse(value); }
+    }
 
     [XmlAttribute]
     public string? Mnemonic { get; set; }
@@ -61,8 +77,23 @@ public class Parameter
     internal string? _storedMemoryIdRef;
 
     /// <summary>Byte offset within <see cref="Memory"/>; meaningful only when Memory is non-null.</summary>
-    [XmlAttribute]
-    public int MemoryOffset { get; set; }
+    // ── MemoryOffset ──────────────────────────────────────────────────────────
+    private int _memoryOffset;
+    private string? _memoryOffsetStr;
+
+    [XmlIgnore]
+    public int MemoryOffset
+    {
+        get => _memoryOffset;
+        set { _memoryOffset = value; _memoryOffsetStr = null; }
+    }
+
+    [XmlAttribute("MemoryOffset")]
+    public string MemoryOffsetStr
+    {
+        get => _memoryOffsetStr ?? _memoryOffset.ToString();
+        set { _memoryOffsetStr = value; _memoryOffset = HexInt.Parse(value); }
+    }
 
     // ── Validity parameter (ICD-DAT-280) ──────────────────────────────────────
 

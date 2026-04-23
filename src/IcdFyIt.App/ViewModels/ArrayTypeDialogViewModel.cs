@@ -39,10 +39,10 @@ public partial class ArrayTypeDialogViewModel : ObservableObject
 
     // ── Array size descriptor ────────────────────────────────────────────────
 
-    public int SizeBitSize
+    public string SizeBitSize
     {
-        get => _type.ArraySize!.BitSize;
-        set { _type.ArraySize!.BitSize = value; OnPropertyChanged(); }
+        get => _type.ArraySize!.BitSizeStr;
+        set { _type.ArraySize!.BitSizeStr = value; OnPropertyChanged(); }
     }
 
     public double SizeMin

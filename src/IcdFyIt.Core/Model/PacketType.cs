@@ -1,4 +1,5 @@
 using System.Xml.Serialization;
+using IcdFyIt.Core.Infrastructure;
 
 namespace IcdFyIt.Core.Model;
 
@@ -19,8 +20,23 @@ public class PacketType
     public PacketTypeKind Kind { get; set; }
 
     /// <summary>Numeric ID, unique within the Data Model (ICD-DAT-415).</summary>
-    [XmlAttribute]
-    public int NumericId { get; set; }
+    // ── NumericId ─────────────────────────────────────────────────────────────
+    private int _numericId;
+    private string? _numericIdStr;
+
+    [XmlIgnore]
+    public int NumericId
+    {
+        get => _numericId;
+        set { _numericId = value; _numericIdStr = null; }
+    }
+
+    [XmlAttribute("NumericId")]
+    public string NumericIdStr
+    {
+        get => _numericIdStr ?? _numericId.ToString();
+        set { _numericIdStr = value; _numericId = HexInt.Parse(value); }
+    }
 
     /// <summary>Optional mnemonic string (ICD-DAT-416).</summary>
     [XmlAttribute]

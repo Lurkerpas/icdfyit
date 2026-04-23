@@ -26,7 +26,7 @@ public partial class ParameterAttributesDialogViewModel : ObservableObject
         AvailableParameters = availableParameters.Where(p => p != parameter).ToList();
 
         _selectedKind     = parameter.Kind;
-        _memoryOffset     = parameter.MemoryOffset;
+        _memoryOffset     = parameter.MemoryOffsetStr;
         _alarmLow         = parameter.AlarmLow?.ToString() ?? string.Empty;
         _alarmHigh        = parameter.AlarmHigh?.ToString() ?? string.Empty;
     }
@@ -80,9 +80,9 @@ public partial class ParameterAttributesDialogViewModel : ObservableObject
     public bool HasMemory => _parameter.Memory is not null;
 
     [ObservableProperty]
-    private int _memoryOffset;
+    private string _memoryOffset;
 
-    partial void OnMemoryOffsetChanged(int value) => _parameter.MemoryOffset = value;
+    partial void OnMemoryOffsetChanged(string value) => _parameter.MemoryOffsetStr = value;
 
     // ── Validity parameter ────────────────────────────────────────────────────
 

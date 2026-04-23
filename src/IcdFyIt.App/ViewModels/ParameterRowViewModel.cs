@@ -31,10 +31,10 @@ public partial class ParameterRowViewModel : ObservableObject
         set { Model.Mnemonic = value; OnPropertyChanged(); }
     }
 
-    public int NumericId
+    public string NumericId
     {
-        get => Model.NumericId;
-        set { Model.NumericId = value; OnPropertyChanged(); }
+        get => Model.NumericIdStr;
+        set { Model.NumericIdStr = value; OnPropertyChanged(); }
     }
 
     public string? ShortDescription
@@ -63,10 +63,10 @@ public partial class ParameterRowViewModel : ObservableObject
         set { Model.HexValue = value; OnPropertyChanged(); }
     }
 
-    public int MemoryOffset
+    public string MemoryOffset
     {
-        get => Model.MemoryOffset;
-        set { Model.MemoryOffset = value; OnPropertyChanged(); }
+        get => Model.MemoryOffsetStr;
+        set { Model.MemoryOffsetStr = value; OnPropertyChanged(); }
     }
 
     public string? AlarmLow

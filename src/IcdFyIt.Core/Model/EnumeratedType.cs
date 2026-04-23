@@ -1,4 +1,5 @@
 using System.Xml.Serialization;
+using IcdFyIt.Core.Infrastructure;
 
 namespace IcdFyIt.Core.Model;
 
@@ -15,8 +16,22 @@ public sealed class EnumeratedType : DataType
     public Endianness Endianness { get; set; } = Endianness.LittleEndian;
 
     /// <summary>Wire-size of the encoded enumeration value in bits.</summary>
-    [XmlAttribute]
-    public int BitSize { get; set; } = 32;
+    private int _bitSize = 32;
+    private string? _bitSizeStr;
+
+    [XmlIgnore]
+    public int BitSize
+    {
+        get => _bitSize;
+        set { _bitSize = value; _bitSizeStr = null; }
+    }
+
+    [XmlAttribute("BitSize")]
+    public string BitSizeStr
+    {
+        get => _bitSizeStr ?? _bitSize.ToString();
+        set { _bitSizeStr = value; _bitSize = HexInt.Parse(value); }
+    }
 
     public List<EnumeratedValue> Values { get; set; } = new();
 }

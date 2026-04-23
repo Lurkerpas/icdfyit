@@ -157,7 +157,7 @@ public partial class DataTypesWindowViewModel : ObservableObject
             if (row is null) continue;
 
             if (f.Length > 2 && Enum.TryParse<Endianness>(f[2], out var end)) row.Endianness = end;
-            if (f.Length > 3 && int.TryParse(f[3], out var bs))              row.BitSize     = bs;
+            if (f.Length > 3 && !string.IsNullOrEmpty(f[3])) row.BitSize              = f[3];
             if (f.Length > 4 && double.TryParse(f[4], NumberStyles.Any, CultureInfo.InvariantCulture, out var rmin)) row.RangeMin = rmin;
             if (f.Length > 5 && double.TryParse(f[5], NumberStyles.Any, CultureInfo.InvariantCulture, out var rmax)) row.RangeMax = rmax;
             if (f.Length > 6 && !string.IsNullOrEmpty(f[6])) row.Unit                = f[6];

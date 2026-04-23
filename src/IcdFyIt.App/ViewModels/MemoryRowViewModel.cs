@@ -22,10 +22,10 @@ public partial class MemoryRowViewModel : ObservableObject
         set { Model.Name = value; OnPropertyChanged(); }
     }
 
-    public int NumericId
+    public string NumericId
     {
-        get => Model.NumericId;
-        set { Model.NumericId = value; OnPropertyChanged(); }
+        get => Model.NumericIdStr;
+        set { Model.NumericIdStr = value; OnPropertyChanged(); }
     }
 
     public string? Mnemonic
@@ -34,10 +34,10 @@ public partial class MemoryRowViewModel : ObservableObject
         set { Model.Mnemonic = value; OnPropertyChanged(); }
     }
 
-    public int Size
+    public string Size
     {
-        get => Model.Size;
-        set { Model.Size = value; OnPropertyChanged(); }
+        get => Model.SizeStr;
+        set { Model.SizeStr = value; OnPropertyChanged(); }
     }
 
     public string? Address
@@ -52,10 +52,10 @@ public partial class MemoryRowViewModel : ObservableObject
         set { Model.Description = value; OnPropertyChanged(); }
     }
 
-    public int Alignment
+    public string Alignment
     {
-        get => Model.Alignment;
-        set { Model.Alignment = value; OnPropertyChanged(); }
+        get => Model.AlignmentStr;
+        set { Model.AlignmentStr = value; OnPropertyChanged(); OnEdited?.Invoke(); }
     }
 
     public bool IsWritable

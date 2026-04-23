@@ -21,6 +21,7 @@ ICD-FUN-100: Options Window shall have Save and Cancel buttons. Save persists op
 ICD-FUN-101: Options shall be stored in a settings.xml file located in the working directory.
 ICD-FUN-110: Software shall allow to define (add, delete, modify) Header Types.
 ICD-FUN-120: Software shall allow to define (add, delete, modify) Memory entities.
+ICD-FUN-130: All numeric input fields (sizes, offsets, IDs, raw values) shall accept both decimal and hexadecimal notation. Hexadecimal values shall be prefixed with "0x" (e.g., "0x400", "0xFF"). If a value is entered in hexadecimal, it shall be displayed in hexadecimal notation after saving and reloading the Data Model.
 
 # Data requirements
 ICD-DAT-10: Data Type shall have name. Data Type names shall be unique within the Data Model.

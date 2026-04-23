@@ -170,7 +170,7 @@ public partial class ParametersWindowViewModel : ObservableObject
                 row.Model.Kind = kind;
                 row.RefreshAfterAttributesEdit();
             }
-            if (f.Length > 3 && int.TryParse(f[3], out var id))   row.NumericId        = id;
+            if (f.Length > 3 && !string.IsNullOrEmpty(f[3])) row.NumericId        = f[3];
             if (f.Length > 4 && !string.IsNullOrEmpty(f[4]))  row.ShortDescription = f[4];
             if (f.Length > 6 && !string.IsNullOrEmpty(f[6]))  row.Formula          = f[6];
             if (f.Length > 7 && !string.IsNullOrEmpty(f[7]))  row.HexValue         = f[7];

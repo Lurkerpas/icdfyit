@@ -91,16 +91,16 @@ public partial class DataTypeRowViewModel : ObservableObject
         }
     }
 
-    public int? BitSize
+    public string? BitSize
     {
-        get => Model is EnumeratedType et ? et.BitSize : GetScalar()?.BitSize;
+        get => Model is EnumeratedType et ? et.BitSizeStr : GetScalar()?.BitSizeStr;
         set
         {
-            if (!value.HasValue) return;
-            if (Model is EnumeratedType et) { et.BitSize = value.Value; OnPropertyChanged(); return; }
+            if (value is null) return;
+            if (Model is EnumeratedType et) { et.BitSizeStr = value; OnPropertyChanged(); return; }
             var s = GetScalar();
             if (s is null) return;
-            s.BitSize = value.Value;
+            s.BitSizeStr = value;
             OnPropertyChanged();
         }
     }

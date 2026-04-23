@@ -137,12 +137,12 @@ public partial class MemoriesWindowViewModel : ObservableObject
             var row = _rows.FirstOrDefault(r => r.Model == m);
             if (row is null) continue;
 
-            if (f.Length > 1 && int.TryParse(f[1], out var id))     row.NumericId   = id;
+            if (f.Length > 1 && !string.IsNullOrEmpty(f[1]))         row.NumericId   = f[1];
             if (f.Length > 2 && !string.IsNullOrEmpty(f[2]))         row.Mnemonic    = f[2];
-            if (f.Length > 3 && int.TryParse(f[3], out var size))    row.Size        = size;
+            if (f.Length > 3 && !string.IsNullOrEmpty(f[3]))         row.Size        = f[3];
             if (f.Length > 4 && !string.IsNullOrEmpty(f[4]))         row.Address     = f[4];
             if (f.Length > 5 && !string.IsNullOrEmpty(f[5]))         row.Description = f[5];
-            if (f.Length > 6 && int.TryParse(f[6], out var align))   row.Alignment   = align;
+            if (f.Length > 6 && !string.IsNullOrEmpty(f[6]))         row.Alignment   = f[6];
             if (f.Length > 7 && bool.TryParse(f[7], out var wr))     row.IsWritable  = wr;
             if (f.Length > 8 && bool.TryParse(f[8], out var rd))     row.IsReadable  = rd;
         }

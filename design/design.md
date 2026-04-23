@@ -35,6 +35,17 @@ The application follows the **MVVM** pattern. All windows share a common service
 
 Every entity (Data Type, Parameter, Packet Type, Header Type) carries a **GUID**, automatically assigned on creation, used for internal identification and reference serialization (ICD-FUN-41).
 
+### 3.0 Hexadecimal Notation (ICD-FUN-130)
+
+All numeric input fields (sizes, offsets, IDs, and raw values) accept both decimal and hexadecimal notation. Hexadecimal values must be prefixed with `0x` (e.g., `0x400`, `0xFF`). The original notation is preserved through save/reload: if the user enters `0x400`, the field continues to display `0x400` after the model is saved and reopened.
+
+**Implementation:** Each numeric model field uses a dual property pattern:
+- An `[XmlIgnore] int Foo` property holds the parsed integer, used by internal logic (duplicate checks, auto-increment).
+- A companion `[XmlAttribute("Foo")] string FooStr` (or `[XmlElement("Foo")] string FooStr` for XML-element fields) is what XmlSerializer reads/writes; it stores the user's original notation verbatim.
+- When code sets `Foo` programmatically (e.g., auto-generated IDs), `FooStr` falls back to decimal display.
+
+Affected fields: `Memory.NumericId`, `Memory.Size`, `Memory.Alignment`; `Parameter.NumericId`, `Parameter.MemoryOffset`; `PacketType.NumericId`; `ScalarProperties.BitSize`; `EnumeratedType.BitSize`; `ArraySizeDescriptor.BitSize`; `EnumeratedValue.RawValues` (via `RawValuesDisplay`).
+
 ### 3.1 Data Types
 
 Each Data Type has a **name** (unique within the Data Model) and a **base type** discriminator. Properties that apply depend on the base type:

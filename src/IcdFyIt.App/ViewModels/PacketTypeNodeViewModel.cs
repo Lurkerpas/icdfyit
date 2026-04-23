@@ -51,10 +51,10 @@ public partial class PacketTypeNodeViewModel : ObservableObject
         set { _packetType.Description = value; OnPropertyChanged(); OnEdited?.Invoke(); }
     }
 
-    public int NumericId
+    public string NumericId
     {
-        get => _packetType.NumericId;
-        set { _packetType.NumericId = value; OnPropertyChanged(); OnEdited?.Invoke(); }
+        get => _packetType.NumericIdStr;
+        set { _packetType.NumericIdStr = value; OnPropertyChanged(); OnEdited?.Invoke(); }
     }
 
     public string? Mnemonic
