@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.Controls;
+using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -11,6 +12,7 @@ public partial class ParametersWindow : Window
     public ParametersWindow()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
 
         // Avalonia disconnects ContextMenu bindings while the popup is closed;
         // force a refresh when it opens so CanExecute values are current.

@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using IcdFyIt.App.Controls;
+using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -15,6 +16,7 @@ public partial class StructureFieldsDialog : Window
     public StructureFieldsDialog()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
 
         // CellFactory for the Data Type column (AutoCompleteBox — safe in DraggableGrid on X11)
         FieldsGrid.Columns.First(c => c.Name == "DataType").CellFactory = _ =>

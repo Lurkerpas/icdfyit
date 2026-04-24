@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using IcdFyIt.App.Controls;
+using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -12,6 +13,7 @@ public partial class OptionsWindow : Window
     public OptionsWindow()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
 
         // CellFactory for the Browse button column
         TemplatesGrid.Columns.First(c => c.Name == "Browse").CellFactory = _ =>

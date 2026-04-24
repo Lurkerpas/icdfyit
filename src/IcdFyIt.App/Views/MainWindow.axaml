@@ -62,6 +62,8 @@
                         <MenuItem Header="_Large"     Command="{Binding SetSizeLargeCommand}" />
                         <MenuItem Header="_Very Large" Command="{Binding SetSizeVeryLargeCommand}" />
                     </MenuItem>
+                    <Separator />
+                    <MenuItem Header="_Reset Sizes to Default" Click="OnResetSizesToDefaultClicked" />
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="_Tools">

@@ -94,6 +94,9 @@ public partial class DraggableGrid : UserControl
     /// <summary>Current pixel widths indexed by <see cref="Columns"/> list index.</summary>
     private double[] _colWidths = Array.Empty<double>();
 
+    /// <summary>Default pixel widths from XAML, used by layout reset.</summary>
+    private double[] _defaultColWidths = Array.Empty<double>();
+
     /// <summary>Maps visible-column index → Columns-list index.</summary>
     private int[] _visibleToAllIdx = Array.Empty<int>();
 
@@ -169,10 +172,13 @@ public partial class DraggableGrid : UserControl
         if (_colWidths.Length != Columns.Count)
         {
             _colWidths = new double[Columns.Count];
+            _defaultColWidths = new double[Columns.Count];
             for (int i = 0; i < Columns.Count; i++)
             {
                 var gl = Columns[i].Width;
-                _colWidths[i] = gl.GridUnitType == GridUnitType.Pixel ? gl.Value : 100.0;
+                var width = gl.GridUnitType == GridUnitType.Pixel ? gl.Value : 100.0;
+                _colWidths[i] = width;
+                _defaultColWidths[i] = width;
             }
         }
 
@@ -511,6 +517,45 @@ public partial class DraggableGrid : UserControl
             if ((uint)visIdx < (uint)rowDefs.Length)
                 rowDefs[visIdx].Width = gl;
     }
+
+    /// <summary>Returns current pixel widths for all columns (visible and hidden).</summary>
+    public IReadOnlyList<double> GetColumnWidths()
+        => _colWidths.ToArray();
+
+    /// <summary>Returns default pixel widths loaded from XAML.</summary>
+    public IReadOnlyList<double> GetDefaultColumnWidths()
+        => _defaultColWidths.ToArray();
+
+    /// <summary>Applies pixel widths to all columns and updates visible header/row columns live.</summary>
+    public void SetColumnWidths(IReadOnlyList<double>? widths)
+    {
+        if (widths is null || widths.Count == 0 || _colWidths.Length == 0) return;
+
+        var count = Math.Min(widths.Count, _colWidths.Length);
+        for (int i = 0; i < count; i++)
+        {
+            var w = widths[i];
+            if (double.IsNaN(w) || double.IsInfinity(w) || w < 24) continue;
+            _colWidths[i] = w;
+        }
+
+        for (int visIdx = 0; visIdx < _visibleToAllIdx.Length; visIdx++)
+        {
+            int allIdx = _visibleToAllIdx[visIdx];
+            var gl = new GridLength(_colWidths[allIdx], GridUnitType.Pixel);
+
+            if (_headerColDefs is not null && (uint)visIdx < (uint)_headerColDefs.Length)
+                _headerColDefs[visIdx].Width = gl;
+
+            foreach (var rowDefs in _rowColDefs)
+                if ((uint)visIdx < (uint)rowDefs.Length)
+                    rowDefs[visIdx].Width = gl;
+        }
+    }
+
+    /// <summary>Resets all columns to their initial XAML widths.</summary>
+    public void ResetColumnWidthsToDefault()
+        => SetColumnWidths(_defaultColWidths);
 
     // ── Selection ─────────────────────────────────────────────────────────────
 

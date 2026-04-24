@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.Controls;
+using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -11,6 +12,7 @@ public partial class MemoriesWindow : Window
     public MemoriesWindow()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
 
         MemoriesGrid.ContextMenu!.Opened += (_, _) =>
             (DataContext as MemoriesWindowViewModel)?.ForceCanEditNotify();

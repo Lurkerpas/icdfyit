@@ -1,9 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 using IcdFyIt.App.Controls;
+using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -15,6 +17,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
 
         // Wire TreeView selection so only packet-type leaf nodes update SelectedPacketType.
         PacketTypeTree.SelectionChanged += (_, _) =>
@@ -120,5 +123,10 @@ public partial class MainWindow : Window
             Close();
         }
         // else: cancelled — stay open.
+    }
+
+    private void OnResetSizesToDefaultClicked(object? sender, RoutedEventArgs e)
+    {
+        LayoutPersistenceManager.ResetToDefaultsForOpenWindows();
     }
 }

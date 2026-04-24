@@ -31,4 +31,14 @@ public class AppOptions
     [XmlArray]
     [XmlArrayItem("File")]
     public List<string> RecentFiles { get; set; } = new();
+
+    /// <summary>Persisted window sizes keyed by window type name.</summary>
+    [XmlArray]
+    [XmlArrayItem("Window")]
+    public List<WindowSizeOption> WindowSizes { get; set; } = new();
+
+    /// <summary>Persisted DraggableGrid column widths keyed by window/grid identity.</summary>
+    [XmlArray]
+    [XmlArrayItem("Grid")]
+    public List<GridColumnSizeOption> GridColumnSizes { get; set; } = new();
 }

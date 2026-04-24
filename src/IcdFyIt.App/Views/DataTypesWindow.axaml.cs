@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.Controls;
 using IcdFyIt.App.Converters;
+using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -18,6 +19,7 @@ public partial class DataTypesWindow : Window
     public DataTypesWindow()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
 
         // CellFactory for the Endianness column (RadioButtons, no popup — safe on X11)
         TypesGrid.Columns.First(c => c.Name == "Endianness").CellFactory = _ =>

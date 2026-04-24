@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using IcdFyIt.App.Controls;
+using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
 
 namespace IcdFyIt.App.Views;
@@ -11,6 +12,7 @@ public partial class HeaderTypesWindow : Window
     public HeaderTypesWindow()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
 
         HeaderTypesGrid.EditEnded += (_, _) =>
             (DataContext as HeaderTypesWindowViewModel)?.MarkEdited();

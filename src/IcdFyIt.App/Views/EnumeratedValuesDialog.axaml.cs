@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using IcdFyIt.App.Services;
 
 namespace IcdFyIt.App.Views;
 
@@ -12,6 +13,7 @@ public partial class EnumeratedValuesDialog : Window
     public EnumeratedValuesDialog()
     {
         InitializeComponent();
+        LayoutPersistenceManager.Register(this);
     }
 
     private void OnCloseClicked(object? sender, RoutedEventArgs e) => Close();
