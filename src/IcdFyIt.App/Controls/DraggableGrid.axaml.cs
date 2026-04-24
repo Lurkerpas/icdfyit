@@ -185,15 +185,23 @@ public partial class DraggableGrid : UserControl
         _root.Children.Add(_headerBorder);
 
         _rowsPanel = new StackPanel();
-        var scroll = new ScrollViewer
+        var rowsScroll = new ScrollViewer
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Content = _rowsPanel
         };
-        Grid.SetRow(scroll, 1);
-        _root.Children.Add(scroll);
+        Grid.SetRow(rowsScroll, 1);
+        _root.Children.Add(rowsScroll);
 
-        Content = _root;
+        var horizontalScroll = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            Content = _root
+        };
+
+        Content = horizontalScroll;
         RebuildRows();
     }
 
