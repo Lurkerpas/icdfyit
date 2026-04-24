@@ -111,10 +111,20 @@
       <ShortDescription>Service 2 report payload</ShortDescription>
       <Formula />
     </Parameter>
+
+    <Parameter Id="c5555555-5555-5555-5555-555555555555" Name="Header_ST" DataTypeRef="11111111-1111-1111-1111-111111111111" NumericId="10" Mnemonic="ST" Kind="Id">
+      <ShortDescription>Header Service Type ID (uint8)</ShortDescription>
+      <Formula />
+    </Parameter>
+
+    <Parameter Id="c6666666-6666-6666-6666-666666666666" Name="Header_SST" DataTypeRef="11111111-1111-1111-1111-111111111111" NumericId="11" Mnemonic="SST" Kind="Id">
+      <ShortDescription>Header Service Subtype ID (uint8)</ShortDescription>
+      <Formula />
+    </Parameter>
   </Parameters>
 
   <PacketTypes>
-    <PacketType Id="d1111111-1111-1111-1111-111111111111" Name="tc2_set_threshold" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000">
+    <PacketType Id="d1111111-1111-1111-1111-111111111111" Name="tc2_set_threshold" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000" NumericId="1">
       <Description>Service 2 telecommand to set threshold.</Description>
       <Fields>
         <PacketField Name="FunctionId" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="1" />
@@ -127,7 +137,7 @@
       </HeaderIdValues>
     </PacketType>
 
-    <PacketType Id="d2222222-2222-2222-2222-222222222222" Name="tc2_request_history" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000">
+    <PacketType Id="d2222222-2222-2222-2222-222222222222" Name="tc2_request_history" Kind="Telecommand" HeaderTypeRef="a0000000-0000-0000-0000-000000000000" NumericId="2">
       <Description>Service 2 telecommand to request history report (same header IDs as tc2_set_threshold; selected by FunctionId indicator).</Description>
       <Fields>
         <PacketField Name="FunctionId" ParameterRef="c1111111-1111-1111-1111-111111111111" IsTypeIndicator="true" IndicatorValue="2" />
@@ -139,7 +149,7 @@
       </HeaderIdValues>
     </PacketType>
 
-    <PacketType Id="d3333333-3333-3333-3333-333333333333" Name="tm2_history_report" Kind="Telemetry" HeaderTypeRef="b0000000-0000-0000-0000-000000000000">
+    <PacketType Id="d3333333-3333-3333-3333-333333333333" Name="tm2_history_report" Kind="Telemetry" HeaderTypeRef="b0000000-0000-0000-0000-000000000000" NumericId="3">
       <Description>Service 2 telemetry history report.</Description>
       <Fields>
         <PacketField Name="Payload" ParameterRef="c4444444-4444-4444-4444-444444444444" IsTypeIndicator="false" />
