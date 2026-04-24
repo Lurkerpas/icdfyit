@@ -9,9 +9,14 @@ public class UndoRedoManager
 {
     private readonly LinkedList<IUndoableCommand> _undoStack = new();
     private readonly Stack<IUndoableCommand> _redoStack = new();
+    private int _maxDepth = 64;
 
     /// <summary>Maximum number of undoable commands retained (ICD-FUN-51). Default: 64.</summary>
-    public int MaxDepth { get; set; } = 64;
+    public int MaxDepth
+    {
+        get => _maxDepth;
+        set => _maxDepth = Math.Max(1, value);
+    }
 
     public bool CanUndo => _undoStack.Count > 0;
     public bool CanRedo => _redoStack.Count > 0;

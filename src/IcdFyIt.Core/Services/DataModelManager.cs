@@ -123,8 +123,18 @@ public class DataModelManager
 
     public void MoveParameter(Parameter parameter, int newIndex)
     {
-        _changeNotifier.MoveParameter(parameter, newIndex);
-        _dirtyTracker.MarkDirty();
+        var fromIndex = _changeNotifier.Parameters.IndexOf(parameter);
+        if (fromIndex < 0) return;
+
+        var toIndex = Math.Clamp(newIndex, 0, _changeNotifier.Parameters.Count - 1);
+        if (fromIndex == toIndex) return;
+
+        _undoRedoManager.Push(new MoveParameterCommand(
+            parameter,
+            fromIndex,
+            toIndex,
+            _changeNotifier,
+            _dirtyTracker));
     }
 
     public Parameter DuplicateParameter(Parameter source)
@@ -258,8 +268,18 @@ public class DataModelManager
 
     public void MoveMemory(Memory memory, int newIndex)
     {
-        _changeNotifier.MoveMemory(memory, newIndex);
-        _dirtyTracker.MarkDirty();
+        var fromIndex = _changeNotifier.Memories.IndexOf(memory);
+        if (fromIndex < 0) return;
+
+        var toIndex = Math.Clamp(newIndex, 0, _changeNotifier.Memories.Count - 1);
+        if (fromIndex == toIndex) return;
+
+        _undoRedoManager.Push(new MoveMemoryCommand(
+            memory,
+            fromIndex,
+            toIndex,
+            _changeNotifier,
+            _dirtyTracker));
     }
 
     public Memory DuplicateMemory(Memory source)
@@ -704,6 +724,82 @@ public class DataModelManager
             _packetType.Fields.RemoveAt(_to);
             _packetType.Fields.Insert(_from, field);
             _notify();
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible reorder of a Parameter within the observable collection.
+    /// </summary>
+    private sealed class MoveParameterCommand : IUndoableCommand
+    {
+        private readonly Parameter _parameter;
+        private readonly int _from;
+        private readonly int _to;
+        private readonly ChangeNotifier _notifier;
+        private readonly DirtyTracker _dirty;
+
+        public MoveParameterCommand(
+            Parameter parameter,
+            int from,
+            int to,
+            ChangeNotifier notifier,
+            DirtyTracker dirty)
+        {
+            _parameter = parameter;
+            _from = from;
+            _to = to;
+            _notifier = notifier;
+            _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            _notifier.MoveParameter(_parameter, _to);
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            _notifier.MoveParameter(_parameter, _from);
+            _dirty.MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Reversible reorder of a Memory within the observable collection.
+    /// </summary>
+    private sealed class MoveMemoryCommand : IUndoableCommand
+    {
+        private readonly Memory _memory;
+        private readonly int _from;
+        private readonly int _to;
+        private readonly ChangeNotifier _notifier;
+        private readonly DirtyTracker _dirty;
+
+        public MoveMemoryCommand(
+            Memory memory,
+            int from,
+            int to,
+            ChangeNotifier notifier,
+            DirtyTracker dirty)
+        {
+            _memory = memory;
+            _from = from;
+            _to = to;
+            _notifier = notifier;
+            _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            _notifier.MoveMemory(_memory, _to);
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            _notifier.MoveMemory(_memory, _from);
             _dirty.MarkDirty();
         }
     }

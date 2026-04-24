@@ -15,6 +15,8 @@ public partial class AboutWindowViewModel : ObservableObject
 
     public string License => "AGPL-3.0";
 
+    public Action? RequestClose { get; set; }
+
     [RelayCommand]
-    private void Close() => throw new NotImplementedException();
+    private void Close() => RequestClose?.Invoke();
 }

@@ -3,6 +3,7 @@ using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using IcdFyIt.App.ViewModels;
 using System.Linq;
+using Serilog;
 
 namespace IcdFyIt.App.Views;
 
@@ -21,11 +22,18 @@ public partial class ValidationDialog : Window
 
     private async void OnCopyToClipboardClicked(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is not ValidationDialogViewModel vm) return;
-        var text = string.Join(System.Environment.NewLine,
-            vm.Issues.Select(i => i.Message));
-        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-        if (clipboard is not null)
-            await clipboard.SetTextAsync(text);
+        try
+        {
+            if (DataContext is not ValidationDialogViewModel vm) return;
+            var text = string.Join(System.Environment.NewLine,
+                vm.Issues.Select(i => i.Message));
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard is not null)
+                await clipboard.SetTextAsync(text);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to copy validation issues to clipboard");
+        }
     }
 }

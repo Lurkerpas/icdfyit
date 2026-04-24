@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using IcdFyIt.Core.Infrastructure;
 using IcdFyIt.Core.Model;
 using Python.Runtime;
+using Serilog;
 
 namespace IcdFyIt.Core.Export;
 
@@ -132,7 +133,11 @@ public class ExportEngine
             p.WaitForExit(5_000);
             return p.ExitCode == 0;
         }
-        catch { return false; }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to probe Python executable '{PythonExecutable}'", exeName);
+            return false;
+        }
     }
 
     private static string RunPythonCommand(string exeName, string script)

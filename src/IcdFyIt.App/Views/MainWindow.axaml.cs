@@ -3,10 +3,10 @@ using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using CommunityToolkit.Mvvm.Input;
 using IcdFyIt.App.Controls;
 using IcdFyIt.App.Services;
 using IcdFyIt.App.ViewModels;
+using Serilog;
 
 namespace IcdFyIt.App.Views;
 
@@ -102,27 +102,36 @@ public partial class MainWindow : Window
 
         // Cancel synchronously, then handle asynchronously.
         e.Cancel = true;
-        HandleClosingAsync(vm);
+        _ = HandleClosingAsync(vm);
     }
 
-    private async void HandleClosingAsync(MainWindowViewModel vm)
+    private async Task HandleClosingAsync(MainWindowViewModel vm)
     {
-        var dialog = new UnsavedChangesDialog();
-        var result = await dialog.ShowDialog<string?>(this);
+        try
+        {
+            var dialog = new UnsavedChangesDialog();
+            var result = await dialog.ShowDialog<string?>(this);
 
-        if (result == "save")
-        {
-            if (vm.SaveDocumentCommand is IAsyncRelayCommand asyncCmd)
-                await asyncCmd.ExecuteAsync(null);
-            _allowClose = true;
-            Close();
+            if (result == "save")
+            {
+                var saved = await vm.TrySaveForCloseAsync();
+                if (!saved || vm.IsDirty)
+                    return;
+
+                _allowClose = true;
+                Close();
+            }
+            else if (result == "discard")
+            {
+                _allowClose = true;
+                Close();
+            }
+            // else: cancelled — stay open.
         }
-        else if (result == "discard")
+        catch (Exception ex)
         {
-            _allowClose = true;
-            Close();
+            Log.Error(ex, "Failed while processing main-window close guard");
         }
-        // else: cancelled — stay open.
     }
 
     private void OnResetSizesToDefaultClicked(object? sender, RoutedEventArgs e)

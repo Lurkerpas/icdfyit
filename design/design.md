@@ -155,7 +155,7 @@ Each **Template**:
 | File Path | string | absolute or relative path to a Mako template file |
 | Output Name Pattern | string | Mako expression rendered to produce the output file name |
 
-Template Sets are stored in `settings.xml`, separate from the Data Model XML (ICD-DES-81).
+Template Sets are stored in `settings.xml`, separate from the Data Model XML (ICD-DES-81). The settings file is located in a system-managed per-user application data directory.
 
 ### 3.6 Memories
 
@@ -246,7 +246,7 @@ Orchestrates template rendering (ICD-FUN-90). The Python.NET runtime (pythonnet 
 
 ### 4.5 Options Manager
 
-Persists user options (e.g., default paths, UI preferences, undo depth) and Template Set definitions (ICD-DES-81) to `settings.xml` in the working directory (ICD-FUN-101). Options are loaded at startup. The Options Window provides explicit **Save** and **Cancel** buttons (ICD-FUN-100): Save persists all changes; Cancel discards them. Each option carries a default value and tooltip description.
+Persists user options (e.g., default paths, UI preferences, undo depth) and Template Set definitions (ICD-DES-81) to `settings.xml` in a system-managed per-user application data directory (ICD-FUN-101). Options are loaded at startup. If `settings.xml` is corrupted or cannot be deserialized, the failure is logged and default options are used for that run (ICD-FUN-102). The Options Window provides explicit **Save** and **Cancel** buttons (ICD-FUN-100): Save persists all changes; Cancel discards them. Each option carries a default value and tooltip description.
 
 ### 4.6 Error Handling & Logging (`LogManager`)
 
@@ -277,7 +277,7 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 - **Menu bar**: New / Open / Save, Validate Model, Exit, Options, Windows (Data Types, Parameters, Header Types, Export), Help / About.
 - **Content area**: tree-on-left listing Telecommand and Telemetry packet types, detail panel on-right showing the selected packet's field list and metadata. Panels are resizable with splitters.
 - **Packet Type CRUD**: toolbar or context menu to add, delete, and modify Packet Types and their Packet Fields (ICD-IF-61).
-- **Close guard**: When the user attempts to close the application (or start a new/open operation) while unsaved changes exist, a confirmation dialog offers Save, Discard, or Cancel (ICD-IF-180).
+- **Close guard**: When the user attempts to close the application (or start a new/open operation) while unsaved changes exist, a confirmation dialog offers Save, Discard, or Cancel (ICD-IF-180). If Save is selected, close continues only when save has been successfully committed.
 - **Help**: opens the project's GitHub page (README) in the default web browser (ICD-IF-52).
 - **About**: presents a modal window with application information; content to be decided later (ICD-IF-51).
 

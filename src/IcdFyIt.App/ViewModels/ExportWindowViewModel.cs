@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using IcdFyIt.Core.Export;
 using IcdFyIt.Core.Infrastructure;
 using IcdFyIt.Core.Services;
+using Serilog;
 
 namespace IcdFyIt.App.ViewModels;
 
@@ -101,6 +102,7 @@ public partial class ExportWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "Export failed for template set '{TemplateSet}'", SelectedTemplateSet?.Name);
             StatusMessage = $"Export failed: {ex.Message}";
         }
         finally

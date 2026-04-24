@@ -128,6 +128,11 @@ public partial class PacketTypeNodeViewModel : ObservableObject
         RebuildFields();
     }
 
+    public void Detach()
+    {
+        _dataModelManager.PacketFieldsChanged -= OnPacketFieldsChanged;
+    }
+
     private void RebuildFields()
     {
         Fields.Clear();

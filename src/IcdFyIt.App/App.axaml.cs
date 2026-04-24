@@ -120,7 +120,9 @@ public partial class App : Application
 
             mainVm.ShowAboutWindowDialog = async () =>
             {
-                var dialog = new AboutWindow { DataContext = new AboutWindowViewModel() };
+                var vm = new AboutWindowViewModel();
+                var dialog = new AboutWindow { DataContext = vm };
+                vm.RequestClose = dialog.Close;
                 await dialog.ShowDialog(mainWindow);
             };
 

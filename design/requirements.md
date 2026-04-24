@@ -18,7 +18,8 @@ ICD-FUN-90: When exporting, Software shall render each template in the following
 - File Content shall be rendered using templating engine, from the template content.
 - File Content shall be saved under the File Name located in the user-selected output folder.
 ICD-FUN-100: Options Window shall have Save and Cancel buttons. Save persists options; Cancel discards changes made since the window was opened.
-ICD-FUN-101: Options shall be stored in a settings.xml file located in the working directory.
+ICD-FUN-101: Options shall be stored in a settings.xml file located in a system-managed per-user, per-application settings directory.
+ICD-FUN-102: If settings.xml is corrupted or cannot be deserialized, Software shall log the error and continue with default options.
 ICD-FUN-110: Software shall allow to define (add, delete, modify) Header Types.
 ICD-FUN-120: Software shall allow to define (add, delete, modify) Memory entities.
 ICD-FUN-130: All numeric input fields (sizes, offsets, IDs, raw values) shall accept both decimal and hexadecimal notation. Hexadecimal values shall be prefixed with "0x" (e.g., "0x400", "0xFF"). If a value is entered in hexadecimal, it shall be displayed in hexadecimal notation after saving and reloading the Data Model.
@@ -129,8 +130,8 @@ ICD-IF-130: Data Types Window shall allow to view, edit, create and delete data 
 ICD-IF-140: Data shall propagate reactively across controls and windows without the user needing to explicitly refresh anything (e.g., when new Data Type is defined in the Data Types window, it should be immediately available in the Parameters Window for use in Parameters).
 ICD-IF-150: If data is presented in a grid/spreadsheet form, it shall be possible to hide selected columns.
 ICD-IF-160: If data is presented in a grid/spreadsheet form, it shall be possible to import/export it from/to CSV.
-ICD-IF-170: It shall be possible to undo/redo add, delete, modify operations on the Data Model entities. The undo/redo stack shall be global (shared across all entity types), with a configurable maximum depth (default: 64).
-ICD-IF-180: Application shall notify the user if it is about to be closed, but there are unsaved changes. The user shall be able to save, discard, or cancel the close operation.
+ICD-IF-170: It shall be possible to undo/redo add, delete, modify and reorder operations on the Data Model entities. The undo/redo stack shall be global (shared across all entity types), with a configurable maximum depth (default: 64).
+ICD-IF-180: Application shall notify the user if it is about to be closed, but there are unsaved changes. The user shall be able to save, discard, or cancel the close operation. If Save is selected, close shall proceed only after the save operation is successfully committed.
 ICD-IF-190: Errors shall be presented to the user in a modal window with a human-readable message and, if available, a stack trace.
 ICD-IF-191: Validation results shall be presented as a list of issues in a dialog. The list shall be selectable and copyable to the clipboard.
 ICD-IF-200: Application shall maintain a log file named log{date-time}.txt in the working directory, recording all actions and errors for post-mortem troubleshooting.

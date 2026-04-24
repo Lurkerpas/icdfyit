@@ -156,7 +156,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         var result = await RequestConfirmDiscardChanges();
         if (result is null) return false;           // cancel
-        if (result == "save") await SaveDocumentCore();
+        if (result == "save") return await SaveDocumentCore();
         return true;
     }
 
@@ -208,20 +208,29 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveDocumentAs()
     {
-        var path = await (SaveFileDialog?.Invoke(_dataModelManager.CurrentFilePath)
-            ?? Task.FromResult<string?>(null));
-        if (path is null) return;
-        _dataModelManager.Save(path);
-        RefreshTitle();
+        await SaveDocumentAsCore();
     }
 
-    private async Task SaveDocumentCore()
+    public Task<bool> TrySaveForCloseAsync() => SaveDocumentCore();
+
+    private async Task<bool> SaveDocumentAsCore()
+    {
+        var path = await (SaveFileDialog?.Invoke(_dataModelManager.CurrentFilePath)
+            ?? Task.FromResult<string?>(null));
+        if (path is null) return false;
+        _dataModelManager.Save(path);
+        RefreshTitle();
+        return true;
+    }
+
+    private async Task<bool> SaveDocumentCore()
     {
         var path = _dataModelManager.CurrentFilePath
             ?? await (SaveFileDialog?.Invoke(null) ?? Task.FromResult<string?>(null));
-        if (path is null) return;
+        if (path is null) return false;
         _dataModelManager.Save(path);
         RefreshTitle();
+        return true;
     }
 
     // ── Edit commands ──────────────────────────────────────────────────────────
@@ -418,6 +427,10 @@ public partial class MainWindowViewModel : ObservableObject
                 break;
 
             case NotifyCollectionChangedAction.Reset:
+                foreach (var node in Telecommands.ToList())
+                    node.Detach();
+                foreach (var node in Telemetries.ToList())
+                    node.Detach();
                 Telecommands.Clear();
                 Telemetries.Clear();
                 SelectedPacketType = null;
@@ -438,9 +451,20 @@ public partial class MainWindowViewModel : ObservableObject
     private void RemoveNodeFromCollections(PacketType pt)
     {
         var tc = Telecommands.FirstOrDefault(n => n.Model == pt);
-        if (tc is not null) { Telecommands.Remove(tc); if (SelectedPacketType == tc) SelectedPacketType = null; return; }
+        if (tc is not null)
+        {
+            tc.Detach();
+            Telecommands.Remove(tc);
+            if (SelectedPacketType == tc) SelectedPacketType = null;
+            return;
+        }
         var tm = Telemetries.FirstOrDefault(n => n.Model == pt);
-        if (tm is not null) { Telemetries.Remove(tm);  if (SelectedPacketType == tm) SelectedPacketType = null; }
+        if (tm is not null)
+        {
+            tm.Detach();
+            Telemetries.Remove(tm);
+            if (SelectedPacketType == tm) SelectedPacketType = null;
+        }
     }
 
     private PacketTypeNodeViewModel CreateNode(PacketType pt)
