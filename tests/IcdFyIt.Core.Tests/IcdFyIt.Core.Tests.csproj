@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\IcdFyIt.Core\IcdFyIt.Core.csproj" />
+    <ProjectReference Include="..\..\src\IcdFyIt.App\IcdFyIt.App.csproj" />
   </ItemGroup>
 
 </Project>

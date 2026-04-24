@@ -26,9 +26,10 @@ run:
 report:
 	dotnet run --project $(REPORTER_PROJECT) -- --model demo/testmodel.xml --output reports/GuiReport
 
-## Execute the test suite
+## Execute the test suite and list each executed test
 test:
-	dotnet test $(SOLUTION)
+	@echo "Running tests (showing each executed test)..."
+	dotnet test $(SOLUTION) --logger "console;verbosity=detailed"
 
 ## Generate HTML documentation into $(DOCS_DIR)/
 docs:
