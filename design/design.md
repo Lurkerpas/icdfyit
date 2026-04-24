@@ -10,7 +10,8 @@ icdfyit is a cross-platform desktop application for authoring Interface Control 
 ┌───────────────────────────────────────────────────────────────┐
 │                       Avalonia UI Layer                       │
 │  MainWindow · DataTypesWindow · ParametersWindow             │
-│  HeaderTypesWindow · ExportWindow · OptionsWindow            │
+│  HeaderTypesWindow · MemoriesWindow · MetadataWindow          │
+│  ExportWindow · OptionsWindow                                │
 │  ValidationDialog                                            │
 ├───────────────────────────────────────────────────────────────┤
 │                       ViewModel Layer                         │
@@ -21,7 +22,8 @@ icdfyit is a cross-platform desktop application for authoring Interface Control 
 │  ChangeNotifier · DirtyTracker                               │
 ├───────────────────────────────────────────────────────────────┤
 │                       Domain / Model Layer                    │
-│  DataType · Parameter · PacketType · HeaderType (all GUIDs)  │
+│  DataType · Parameter · PacketType · HeaderType · Memory      │
+│  IcdMetadata · MetadataField                                  │
 ├──────────────┬──────────────┬─────────────────────────────────┤
 │  Persistence │ Export Engine │ Infrastructure                  │
 │  XmlPersist  │ MakoRenderer │ OptionsManager · LogManager    │
@@ -175,11 +177,32 @@ A Memory represents a named hardware or software memory region. It carries:
 
 Memories are independent entities with no cross-references to other Data Model entities. They are presented in the Memories window (ICD-IF-250).
 
+### 3.7 ICD Metadata
+
+The Data Model contains document-level ICD metadata with built-in properties:
+
+| Field | Type | Notes |
+|---|---|---|
+| Name | string | optional, free-form |
+| Version | string | optional, free-form |
+| Date | string | optional, free-form |
+| Status | string | optional, free-form |
+| Description | string | optional, free-form |
+
+In addition, metadata contains an ordered set of user-defined fields represented as name:value string pairs.
+
+| Field | Type | Notes |
+|---|---|---|
+| Name | string | required for practical use; editable |
+| Value | string | editable |
+
+User-defined metadata fields are standalone entries and carry GUIDs for stable identity and undo/redo tracking.
+
 ## 4. Component Design
 
 ### 4.1 `DataModel`
 
-Central domain object aggregating all Data Types, Parameters, Packet Types, Header Types, and Memories. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time as a variable named `model`.
+Central domain object aggregating all Data Types, Parameters, Packet Types, Header Types, Memories, and ICD Metadata. Passed to the serialization and export subsystems as a single unit. Exposed to Mako templates at render time as a variable named `model`.
 
 References between entities (e.g., Parameter → Data Type, Packet Field → Parameter, Packet Type → Header Type, Header Type ID → Data Type) are stored as GUID-based nullable references. When a referenced entity is deleted, all references to it are set to null (ICD-FUN-51). The UI tolerates null references gracefully (displaying a placeholder or blank), allowing the user to select a replacement later.
 
@@ -325,6 +348,14 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 ### 5.8 Cross-Window Reactivity
 
 All windows bind to the service layer via `ChangeNotifier`. Avalonia's data-binding and `INotifyPropertyChanged`/`ObservableCollection<T>` ensure that changes propagate reactively across controls and windows — e.g., a Data Type created in the Data Types Window is immediately available in drop-downs in the Parameters Window and elsewhere, with no manual refresh (ICD-IF-140).
+
+### 5.9 Metadata Window
+
+- Presents ICD metadata in a DraggableGrid with `Field`, `Value`, and `Type` columns.
+- Built-in metadata rows (`name`, `version`, `date`, `status`, `description`) are always present.
+- Supports add, duplicate, remove, and reorder for user-defined metadata fields.
+- Supports CSV export/import.
+- Uses the global undo/redo stack through `DataModelManager` command operations.
 
 ## 6. Project Structure
 

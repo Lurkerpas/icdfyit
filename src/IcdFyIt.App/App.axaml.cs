@@ -48,6 +48,7 @@ public partial class App : Application
             var headerTypesVm  = new HeaderTypesWindowViewModel(dataModelManager, changeNotifier, mainVm);
             var memoriesVm     = new MemoriesWindowViewModel(dataModelManager, changeNotifier,
                                                             dirtyTracker, mainVm);
+            var metadataVm     = new MetadataWindowViewModel(dataModelManager, changeNotifier, mainVm);
             var optionsVm      = new OptionsWindowViewModel(optionsManager);
             var exportVm       = new ExportWindowViewModel(dataModelManager, optionsManager, exportEngine);
 
@@ -247,6 +248,9 @@ public partial class App : Application
             // ── Memories window lifecycle ──────────────────────────────────────
             MemoriesWindow? memoriesWindow = null;
 
+            // ── Metadata window lifecycle ──────────────────────────────────────
+            MetadataWindow? metadataWindow = null;
+
             headerTypesVm.RequestEditIdDataType = async (entry) =>
             {
                 Window owner = (headerTypesWindow is { IsVisible: true })
@@ -292,6 +296,19 @@ public partial class App : Application
                 };
 
                 memoriesWindow.Show(mainWindow);
+            };
+
+            mainVm.ShowMetadataWindow = () =>
+            {
+                if (metadataWindow is { IsVisible: true })
+                {
+                    metadataWindow.Activate();
+                    return;
+                }
+
+                metadataWindow = new MetadataWindow();
+                metadataWindow.DataContext = metadataVm;
+                metadataWindow.Show(mainWindow);
             };
 
             mainVm.RequestSelectHeaderType = async (packetType, availableTypes) =>

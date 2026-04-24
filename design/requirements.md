@@ -22,6 +22,7 @@ ICD-FUN-101: Options shall be stored in a settings.xml file located in a system-
 ICD-FUN-102: If settings.xml is corrupted or cannot be deserialized, Software shall log the error and continue with default options.
 ICD-FUN-110: Software shall allow to define (add, delete, modify) Header Types.
 ICD-FUN-120: Software shall allow to define (add, delete, modify) Memory entities.
+ICD-FUN-121: Software shall allow to define and edit ICD metadata.
 ICD-FUN-130: All numeric input fields (sizes, offsets, IDs, raw values) shall accept both decimal and hexadecimal notation. Hexadecimal values shall be prefixed with "0x" (e.g., "0x400", "0xFF"). If a value is entered in hexadecimal, it shall be displayed in hexadecimal notation after saving and reloading the Data Model.
 
 # Data requirements
@@ -91,6 +92,15 @@ ICD-DAT-710: Header Type shall have a name.
 ICD-DAT-720: Header Type shall have a description.
 ICD-DAT-730: Header Type shall have an odered list of IDs, each with associated name, description and Data Type of kind ID.
 
+# Metadata requirements
+ICD-DAT-810: Data Model shall contain document-level ICD metadata.
+ICD-DAT-811: ICD metadata shall contain Name (string).
+ICD-DAT-812: ICD metadata shall contain Version (string).
+ICD-DAT-813: ICD metadata shall contain Date (string).
+ICD-DAT-814: ICD metadata shall contain Status (string).
+ICD-DAT-815: ICD metadata shall contain Description (string).
+ICD-DAT-816: ICD metadata shall contain a set of user-defined fields represented as Name:Value string pairs.
+
 # Memory requirements
 ICD-DAT-510: Memory shall have a name. Memory names shall be unique within the Data Model.
 ICD-DAT-511: Memory shall have a numeric ID. Memory numeric IDs shall be unique within the Data Model.
@@ -141,6 +151,10 @@ ICD-IF-220: Header Types Window shall present Header Types with their metadata.
 ICD-IF-250: Memories Window shall allow to view, edit, create and delete Memory entities.
 ICD-IF-251: Memories Window shall present Memory entities in a spreadsheet-style grid with filtering and column visibility toggles.
 ICD-IF-252: Memories Window shall support CSV import and export.
+ICD-IF-260: Metadata Window shall allow to view and edit ICD metadata.
+ICD-IF-261: Metadata in the Metadata Window shall be presented as a grid.
+ICD-IF-262: Metadata Window shall support add, delete, duplicate and reorder operations for user-defined metadata fields.
+ICD-IF-263: Metadata Window shall support CSV import and export.
 
 # Design requirements
 ICD-DES-10: Software shall be written in portable .NET C#.

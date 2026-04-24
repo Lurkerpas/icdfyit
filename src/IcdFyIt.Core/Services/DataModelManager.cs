@@ -3,6 +3,15 @@ using IcdFyIt.Core.Persistence;
 
 namespace IcdFyIt.Core.Services;
 
+public enum MetadataBuiltInField
+{
+    Name,
+    Version,
+    Date,
+    Status,
+    Description,
+}
+
 /// <summary>
 /// Orchestrates the data model lifecycle: New, Open, Save, and all entity CRUD operations.
 /// Internally coordinates <see cref="ChangeNotifier"/>, <see cref="DirtyTracker"/>,
@@ -72,6 +81,9 @@ public class DataModelManager
 
         _model.Memories.Clear();
         _model.Memories.AddRange(_changeNotifier.Memories);
+
+        _model.Metadata.Fields.Clear();
+        _model.Metadata.Fields.AddRange(_changeNotifier.MetadataFields);
 
         _persistence.Save(_model, filePath);
         CurrentFilePath = filePath;
@@ -305,6 +317,107 @@ public class DataModelManager
         return copy;
     }
 
+    // ── ICD Metadata CRUD ─────────────────────────────────────────────────────
+
+    public MetadataField AddMetadataField(string name)
+    {
+        var field = new MetadataField { Name = name, Value = string.Empty };
+        _undoRedoManager.Push(new AddMetadataFieldCommand(
+            field,
+            _model.Metadata.Fields,
+            _changeNotifier,
+            () => MetadataChanged?.Invoke(),
+            _dirtyTracker));
+        return field;
+    }
+
+    public void RemoveMetadataField(MetadataField field)
+        => _undoRedoManager.Push(new AddMetadataFieldCommand(
+            field,
+            _model.Metadata.Fields,
+            _changeNotifier,
+            () => MetadataChanged?.Invoke(),
+            _dirtyTracker)
+        {
+            IsRemove = true
+        });
+
+    public MetadataField DuplicateMetadataField(MetadataField source)
+    {
+        var copy = new MetadataField
+        {
+            Name = $"Copy of {source.Name}",
+            Value = source.Value,
+        };
+        _undoRedoManager.Push(new AddMetadataFieldCommand(
+            copy,
+            _model.Metadata.Fields,
+            _changeNotifier,
+            () => MetadataChanged?.Invoke(),
+            _dirtyTracker));
+        return copy;
+    }
+
+    public void MoveMetadataField(MetadataField field, int newIndex)
+    {
+        var fromIndex = _changeNotifier.MetadataFields.IndexOf(field);
+        if (fromIndex < 0) return;
+
+        var toIndex = Math.Clamp(newIndex, 0, _changeNotifier.MetadataFields.Count - 1);
+        if (fromIndex == toIndex) return;
+
+        _undoRedoManager.Push(new MoveMetadataFieldCommand(
+            field,
+            fromIndex,
+            toIndex,
+            _changeNotifier,
+            () => MetadataChanged?.Invoke(),
+            _dirtyTracker));
+    }
+
+    public void UpdateMetadataFieldName(MetadataField field, string newName)
+    {
+        if (field.Name == newName) return;
+        _undoRedoManager.Push(new SetMetadataFieldPropertyCommand(
+            field,
+            isName: true,
+            newValue: newName,
+            () => MetadataChanged?.Invoke(),
+            _dirtyTracker));
+    }
+
+    public void UpdateMetadataFieldValue(MetadataField field, string newValue)
+    {
+        if (field.Value == newValue) return;
+        _undoRedoManager.Push(new SetMetadataFieldPropertyCommand(
+            field,
+            isName: false,
+            newValue: newValue,
+            () => MetadataChanged?.Invoke(),
+            _dirtyTracker));
+    }
+
+    public string GetMetadataValue(MetadataBuiltInField field) => field switch
+    {
+        MetadataBuiltInField.Name => _model.Metadata.Name,
+        MetadataBuiltInField.Version => _model.Metadata.Version,
+        MetadataBuiltInField.Date => _model.Metadata.Date,
+        MetadataBuiltInField.Status => _model.Metadata.Status,
+        MetadataBuiltInField.Description => _model.Metadata.Description,
+        _ => string.Empty,
+    };
+
+    public void SetMetadataValue(MetadataBuiltInField field, string value)
+    {
+        if (GetMetadataValue(field) == value) return;
+        _undoRedoManager.Push(new SetMetadataValueCommand(
+            _model.Metadata,
+            field,
+            value,
+            () => MetadataChanged?.Invoke(),
+            _dirtyTracker));
+    }
+
     // ── Undo / Redo ────────────────────────────────────────────────────────────
 
     public bool CanUndo => _undoRedoManager.CanUndo;
@@ -320,6 +433,9 @@ public class DataModelManager
 
     /// <summary>Fired when a PacketType's Fields list changes (add/remove/move). Used by VMs to sync Fields.</summary>
     public event Action<PacketType>? PacketFieldsChanged;
+
+    /// <summary>Fired when document-level metadata changes.</summary>
+    public event Action? MetadataChanged;
 
     // ── HeaderTypeId CRUD (ICD-IF-170, NC-07) ─────────────────────────────────
 
@@ -800,6 +916,222 @@ public class DataModelManager
         public void Undo()
         {
             _notifier.MoveMemory(_memory, _from);
+            _dirty.MarkDirty();
+        }
+    }
+
+    private sealed class SetMetadataValueCommand : IUndoableCommand
+    {
+        private readonly IcdMetadata _metadata;
+        private readonly MetadataBuiltInField _field;
+        private readonly string _newValue;
+        private readonly string _oldValue;
+        private readonly Action _notify;
+        private readonly DirtyTracker _dirty;
+
+        public SetMetadataValueCommand(
+            IcdMetadata metadata,
+            MetadataBuiltInField field,
+            string newValue,
+            Action notify,
+            DirtyTracker dirty)
+        {
+            _metadata = metadata;
+            _field = field;
+            _newValue = newValue;
+            _notify = notify;
+            _dirty = dirty;
+            _oldValue = GetCurrent();
+        }
+
+        public void Execute()
+        {
+            SetCurrent(_newValue);
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            SetCurrent(_oldValue);
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        private string GetCurrent() => _field switch
+        {
+            MetadataBuiltInField.Name => _metadata.Name,
+            MetadataBuiltInField.Version => _metadata.Version,
+            MetadataBuiltInField.Date => _metadata.Date,
+            MetadataBuiltInField.Status => _metadata.Status,
+            MetadataBuiltInField.Description => _metadata.Description,
+            _ => string.Empty,
+        };
+
+        private void SetCurrent(string value)
+        {
+            switch (_field)
+            {
+                case MetadataBuiltInField.Name:
+                    _metadata.Name = value;
+                    break;
+                case MetadataBuiltInField.Version:
+                    _metadata.Version = value;
+                    break;
+                case MetadataBuiltInField.Date:
+                    _metadata.Date = value;
+                    break;
+                case MetadataBuiltInField.Status:
+                    _metadata.Status = value;
+                    break;
+                case MetadataBuiltInField.Description:
+                    _metadata.Description = value;
+                    break;
+            }
+        }
+    }
+
+    private sealed class AddMetadataFieldCommand : IUndoableCommand
+    {
+        private readonly MetadataField _field;
+        private readonly List<MetadataField> _modelList;
+        private readonly ChangeNotifier _notifier;
+        private readonly Action _notify;
+        private readonly DirtyTracker _dirty;
+        private int _savedIndex = -1;
+
+        public bool IsRemove { get; init; }
+
+        public AddMetadataFieldCommand(
+            MetadataField field,
+            List<MetadataField> modelList,
+            ChangeNotifier notifier,
+            Action notify,
+            DirtyTracker dirty)
+        {
+            _field = field;
+            _modelList = modelList;
+            _notifier = notifier;
+            _notify = notify;
+            _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            if (IsRemove)
+            {
+                _savedIndex = _modelList.IndexOf(_field);
+                _modelList.Remove(_field);
+                _notifier.NotifyRemoved(_field);
+            }
+            else
+            {
+                _modelList.Add(_field);
+                _notifier.NotifyAdded(_field);
+            }
+
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            if (IsRemove)
+            {
+                if (_savedIndex >= 0 && _savedIndex <= _modelList.Count)
+                    _modelList.Insert(_savedIndex, _field);
+                else
+                    _modelList.Add(_field);
+                _notifier.NotifyAdded(_field);
+            }
+            else
+            {
+                _modelList.Remove(_field);
+                _notifier.NotifyRemoved(_field);
+            }
+
+            _notify();
+            _dirty.MarkDirty();
+        }
+    }
+
+    private sealed class MoveMetadataFieldCommand : IUndoableCommand
+    {
+        private readonly MetadataField _field;
+        private readonly int _from;
+        private readonly int _to;
+        private readonly ChangeNotifier _notifier;
+        private readonly Action _notify;
+        private readonly DirtyTracker _dirty;
+
+        public MoveMetadataFieldCommand(
+            MetadataField field,
+            int from,
+            int to,
+            ChangeNotifier notifier,
+            Action notify,
+            DirtyTracker dirty)
+        {
+            _field = field;
+            _from = from;
+            _to = to;
+            _notifier = notifier;
+            _notify = notify;
+            _dirty = dirty;
+        }
+
+        public void Execute()
+        {
+            _notifier.MoveMetadataField(_field, _to);
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            _notifier.MoveMetadataField(_field, _from);
+            _notify();
+            _dirty.MarkDirty();
+        }
+    }
+
+    private sealed class SetMetadataFieldPropertyCommand : IUndoableCommand
+    {
+        private readonly MetadataField _field;
+        private readonly bool _isName;
+        private readonly string _newValue;
+        private readonly string _oldValue;
+        private readonly Action _notify;
+        private readonly DirtyTracker _dirty;
+
+        public SetMetadataFieldPropertyCommand(
+            MetadataField field,
+            bool isName,
+            string newValue,
+            Action notify,
+            DirtyTracker dirty)
+        {
+            _field = field;
+            _isName = isName;
+            _newValue = newValue;
+            _notify = notify;
+            _dirty = dirty;
+            _oldValue = isName ? field.Name : field.Value;
+        }
+
+        public void Execute()
+        {
+            if (_isName) _field.Name = _newValue;
+            else _field.Value = _newValue;
+            _notify();
+            _dirty.MarkDirty();
+        }
+
+        public void Undo()
+        {
+            if (_isName) _field.Name = _oldValue;
+            else _field.Value = _oldValue;
+            _notify();
             _dirty.MarkDirty();
         }
     }

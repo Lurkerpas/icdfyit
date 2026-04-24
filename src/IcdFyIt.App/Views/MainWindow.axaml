@@ -51,6 +51,7 @@
                 <MenuItem Header="_Parameters…"   Command="{Binding OpenParametersCommand}" />
                 <MenuItem Header="_Header Types…" Command="{Binding OpenHeaderTypesCommand}" />
                 <MenuItem Header="_Memories…"     Command="{Binding OpenMemoriesCommand}" />
+                <MenuItem Header="M_etadata…"     Command="{Binding OpenMetadataCommand}" />
                 <Separator />
                 <MenuItem Header="_Appearance">
                     <MenuItem Header="_Increase Size" Command="{Binding IncreaseSizeCommand}" />

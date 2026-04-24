@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctrl="using:IcdFyIt.App.Controls"
+        x:Class="IcdFyIt.App.Views.MetadataWindow"
+        Icon="avares://IcdFyIt.App/Assets/icon.png"
+        Title="Metadata"
+        Width="980" Height="620"
+        MinWidth="680" MinHeight="400">
+
+    <LayoutTransformControl>
+        <LayoutTransformControl.LayoutTransform>
+            <ScaleTransform ScaleX="{DynamicResource AppScale}" ScaleY="{DynamicResource AppScale}" />
+        </LayoutTransformControl.LayoutTransform>
+        <DockPanel>
+
+            <Border DockPanel.Dock="Top" Background="#2D2D30" Padding="0,1">
+                <DockPanel LastChildFill="False">
+                    <Menu DockPanel.Dock="Left" Background="Transparent" VerticalAlignment="Center">
+                        <MenuItem Header="Edit">
+                            <MenuItem Header="Add Field"  Command="{Binding AddFieldCommand}"/>
+                            <MenuItem Header="Duplicate"  Command="{Binding DuplicateFieldCommand}"/>
+                            <MenuItem Header="Remove"     Command="{Binding RemoveFieldCommand}"/>
+                        </MenuItem>
+                        <MenuItem Header="Data">
+                            <MenuItem Header="Export CSV" Command="{Binding ExportCsvCommand}"/>
+                            <MenuItem Header="Import CSV" Command="{Binding ImportCsvCommand}"/>
+                        </MenuItem>
+                    </Menu>
+
+                    <Separator DockPanel.Dock="Left" Margin="4,4" Width="1" Background="#555"/>
+
+                    <TextBlock DockPanel.Dock="Left" Text="Filter:" VerticalAlignment="Center"
+                               Foreground="#CCCCCC" Margin="6,0,4,0"/>
+                    <TextBox DockPanel.Dock="Left"
+                             Text="{Binding FilterText, Mode=TwoWay}"
+                             PlaceholderText="Search field or value…"
+                             Width="220" Margin="0,2,8,2" VerticalAlignment="Center"/>
+                </DockPanel>
+            </Border>
+
+            <ctrl:DraggableGrid x:Name="MetadataGrid"
+                                ItemsSource="{Binding FilteredRows}"
+                                SelectedItem="{Binding SelectedRow, Mode=TwoWay}">
+
+                <ctrl:DraggableGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Add Field" Command="{Binding AddFieldCommand}"/>
+                        <MenuItem Header="Duplicate" Command="{Binding DuplicateFieldCommand}"/>
+                        <MenuItem Header="Remove"    Command="{Binding RemoveFieldCommand}"/>
+                    </ContextMenu>
+                </ctrl:DraggableGrid.ContextMenu>
+
+                <ctrl:DraggableGrid.Columns>
+                    <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
+                    <ctrl:DraggableGridColumn Header="Field"
+                                              Path="Name"
+                                              Width="240"
+                                              IsEditable="True"/>
+                    <ctrl:DraggableGridColumn Header="Value"
+                                              Path="Value"
+                                              Width="420"
+                                              IsEditable="True"/>
+                    <ctrl:DraggableGridColumn Header="Type"
+                                              Path="KindDisplay"
+                                              Width="100"
+                                              IsEditable="False"/>
+                </ctrl:DraggableGrid.Columns>
+            </ctrl:DraggableGrid>
+
+        </DockPanel>
+    </LayoutTransformControl>
+</Window>

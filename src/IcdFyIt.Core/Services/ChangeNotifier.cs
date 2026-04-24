@@ -15,6 +15,7 @@ public class ChangeNotifier
     public ObservableCollection<PacketType> PacketTypes { get; } = new();
     public ObservableCollection<HeaderType> HeaderTypes { get; } = new();
     public ObservableCollection<Memory> Memories { get; } = new();
+    public ObservableCollection<MetadataField> MetadataFields { get; } = new();
 
     /// <summary>Replaces all observable collections from the supplied model (called after New/Open).</summary>
     public void ReloadFrom(DataModel model)
@@ -33,6 +34,9 @@ public class ChangeNotifier
 
         Memories.Clear();
         foreach (var m in model.Memories) Memories.Add(m);
+
+        MetadataFields.Clear();
+        foreach (var f in model.Metadata.Fields) MetadataFields.Add(f);
     }
 
     public void NotifyAdded(DataType dataType) => DataTypes.Add(dataType);
@@ -60,5 +64,14 @@ public class ChangeNotifier
         var oldIndex = Memories.IndexOf(memory);
         if (oldIndex >= 0 && oldIndex != newIndex)
             Memories.Move(oldIndex, Math.Clamp(newIndex, 0, Memories.Count - 1));
+    }
+
+    public void NotifyAdded(MetadataField field) => MetadataFields.Add(field);
+    public void NotifyRemoved(MetadataField field) => MetadataFields.Remove(field);
+    public void MoveMetadataField(MetadataField field, int newIndex)
+    {
+        var oldIndex = MetadataFields.IndexOf(field);
+        if (oldIndex >= 0 && oldIndex != newIndex)
+            MetadataFields.Move(oldIndex, Math.Clamp(newIndex, 0, MetadataFields.Count - 1));
     }
 }

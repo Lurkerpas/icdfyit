@@ -35,6 +35,9 @@ public class XmlPersistence
         using (var reader = XmlReader.Create(filePath))
             model = (DataModel)Serializer.Deserialize(reader)!;
 
+        model.Metadata ??= new IcdMetadata();
+        model.Metadata.Fields ??= new List<MetadataField>();
+
         if (model.SchemaVersion > CurrentSchemaVersion)
             throw new NotSupportedException(
                 $"File schema version {model.SchemaVersion} is newer than the " +

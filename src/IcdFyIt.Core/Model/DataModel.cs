@@ -22,4 +22,6 @@ public class DataModel
     public List<HeaderType> HeaderTypes { get; set; } = new();
 
     public List<Memory> Memories { get; set; } = new();
+
+    public IcdMetadata Metadata { get; set; } = new();
 }

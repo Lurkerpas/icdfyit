@@ -74,6 +74,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Opens (or focuses) the Memories window.</summary>
     public Action? ShowMemoriesWindow { get; set; }
 
+    /// <summary>Opens (or focuses) the Metadata window.</summary>
+    public Action? ShowMetadataWindow { get; set; }
+
     /// <summary>Opens the Options window.</summary>
     public Action? ShowOptionsWindow { get; set; }
 
@@ -360,6 +363,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenMemories() => ShowMemoriesWindow?.Invoke();
+
+    [RelayCommand]
+    private void OpenMetadata() => ShowMetadataWindow?.Invoke();
 
     [RelayCommand]
     private void OpenExportWindow() => ShowExportWindow?.Invoke();
