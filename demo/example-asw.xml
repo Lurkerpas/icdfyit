@@ -1,0 +1,442 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DataModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SchemaVersion="1">
+  <DataTypes>
+    <DataType xsi:type="UnsignedIntegerType" Id="db55c095-753b-4a98-bca6-82de6f46ccc1" Name="uint8">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>8</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>255</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="UnsignedIntegerType" Id="1f6e1a41-b379-4682-b48b-e24cc12ee2be" Name="uint16">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>16</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>65535</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="SignedIntegerType" Id="46995367-87c7-4bf3-80c9-a67f1df16653" Name="voltage">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>16</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>-32768</Min>
+          <Max>32767</Max>
+        </Range>
+        <Unit>V</Unit>
+        <CalibrationFormula>x*0.16-4.3</CalibrationFormula>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="UnsignedIntegerType" Id="12cac84a-3c64-43eb-89b3-9531eb23ddb4" Name="error-code">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>32</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>2147483647</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="UnsignedIntegerType" Id="9b8cc34c-c5a5-4722-8b72-8f11c8e2c00a" Name="ID">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>8</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>255</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="EnumeratedType" Id="c4a9f4a4-bf97-4852-9343-ab3bb4598242" Name="asw-state" Endianness="LittleEndian" BitSize="32">
+      <Values>
+        <EnumeratedValue RawValuesDisplay="0">
+          <Name>off</Name>
+          <RawValues>
+            <int>0</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="1">
+          <Name>initializing</Name>
+          <RawValues>
+            <int>1</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="2">
+          <Name>idle</Name>
+          <RawValues>
+            <int>2</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="3">
+          <Name>operational</Name>
+          <RawValues>
+            <int>3</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="10">
+          <Name>safe</Name>
+          <RawValues>
+            <int>10</int>
+          </RawValues>
+        </EnumeratedValue>
+      </Values>
+    </DataType>
+    <DataType xsi:type="BooleanType" Id="7c82d57d-bb01-4bf9-98b0-6ca2eea6eae4" Name="flag">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>8</BitSize>
+      </Scalar>
+    </DataType>
+    <DataType xsi:type="EnumeratedType" Id="3c130f1d-652e-4a24-83bb-7046bf16feff" Name="boot-reason" Endianness="LittleEndian" BitSize="32">
+      <Values>
+        <EnumeratedValue RawValuesDisplay="0">
+          <Name>unknown-reset</Name>
+          <RawValues>
+            <int>0</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="1">
+          <Name>user-reset</Name>
+          <RawValues>
+            <int>1</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="2">
+          <Name>crash</Name>
+          <RawValues>
+            <int>2</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="3">
+          <Name>power</Name>
+          <RawValues>
+            <int>3</int>
+          </RawValues>
+        </EnumeratedValue>
+      </Values>
+    </DataType>
+    <DataType xsi:type="UnsignedIntegerType" Id="0104754e-b3ac-4ebc-a17b-67cd6842f303" Name="address">
+      <Scalar>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>32</BitSize>
+      </Scalar>
+      <Numeric>
+        <Range>
+          <Min>0</Min>
+          <Max>4294967295</Max>
+        </Range>
+      </Numeric>
+    </DataType>
+    <DataType xsi:type="StructureType" Id="7c90a198-c418-449e-a342-a98ed785cf3d" Name="boot-report">
+      <Fields>
+        <StructureField DataTypeRef="3c130f1d-652e-4a24-83bb-7046bf16feff">
+          <Name>reason</Name>
+        </StructureField>
+        <StructureField DataTypeRef="0104754e-b3ac-4ebc-a17b-67cd6842f303">
+          <Name>asw-address</Name>
+        </StructureField>
+        <StructureField DataTypeRef="7c82d57d-bb01-4bf9-98b0-6ca2eea6eae4">
+          <Name>crc-ok</Name>
+        </StructureField>
+        <StructureField DataTypeRef="7c82d57d-bb01-4bf9-98b0-6ca2eea6eae4">
+          <Name>self-tests-ok</Name>
+        </StructureField>
+      </Fields>
+    </DataType>
+    <DataType xsi:type="ArrayType" Id="2fe0ba17-661c-4e12-8ec4-0c59e8de8092" Name="memory-block" ElementTypeRef="db55c095-753b-4a98-bca6-82de6f46ccc1">
+      <ArraySize>
+        <Endianness>LittleEndian</Endianness>
+        <BitSize>16</BitSize>
+        <Range>
+          <Min>0</Min>
+          <Max>65535</Max>
+        </Range>
+      </ArraySize>
+    </DataType>
+    <DataType xsi:type="EnumeratedType" Id="1db93172-9d7d-4742-bcde-c1bc32457dd9" Name="status" Endianness="LittleEndian" BitSize="32">
+      <Values>
+        <EnumeratedValue RawValuesDisplay="0">
+          <Name>unknown</Name>
+          <RawValues>
+            <int>0</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="1">
+          <Name>off</Name>
+          <RawValues>
+            <int>1</int>
+          </RawValues>
+        </EnumeratedValue>
+        <EnumeratedValue RawValuesDisplay="2">
+          <Name>on</Name>
+          <RawValues>
+            <int>2</int>
+          </RawValues>
+        </EnumeratedValue>
+      </Values>
+    </DataType>
+  </DataTypes>
+  <Parameters>
+    <Parameter Id="a956d88f-e211-43aa-b8f2-527d98da3b0b" Name="ADC good" DataTypeRef="7c82d57d-bb01-4bf9-98b0-6ca2eea6eae4" NumericId="0" Mnemonic="ASWADCG" Kind="SoftwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xfff0">
+      <ShortDescription>ADC good status</ShortDescription>
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="9d61032f-a55a-464f-be0c-b14666a5e8e0" Name="Main Power" DataTypeRef="46995367-87c7-4bf3-80c9-a67f1df16653" NumericId="1" Mnemonic="ASWMPWR" Kind="HardwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff08" ValidityParameterRef="a956d88f-e211-43aa-b8f2-527d98da3b0b">
+      <ShortDescription>OBC power supply</ShortDescription>
+      <Formula />
+      <AlarmLow>5</AlarmLow>
+      <AlarmHigh>6</AlarmHigh>
+    </Parameter>
+    <Parameter Id="dcb48586-d67d-49ac-9164-0ee882742ffa" Name="Solar Array" DataTypeRef="46995367-87c7-4bf3-80c9-a67f1df16653" NumericId="2" Mnemonic="ASWSAPWR" Kind="HardwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff00" ValidityParameterRef="a956d88f-e211-43aa-b8f2-527d98da3b0b">
+      <ShortDescription>Voltage from solar array</ShortDescription>
+      <Formula />
+      <AlarmLow>5</AlarmLow>
+      <AlarmHigh>10</AlarmHigh>
+    </Parameter>
+    <Parameter Id="5c9d9f79-0517-4c3b-ba54-af056186c9d9" Name="Analog Reference Voltage" DataTypeRef="46995367-87c7-4bf3-80c9-a67f1df16653" NumericId="3" Mnemonic="ASWARV" Kind="HardwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff04" ValidityParameterRef="a956d88f-e211-43aa-b8f2-527d98da3b0b">
+      <ShortDescription>Regulated reference voltage</ShortDescription>
+      <Formula />
+      <AlarmLow>3.2</AlarmLow>
+      <AlarmHigh>3.4</AlarmHigh>
+    </Parameter>
+    <Parameter Id="54137a84-3691-4269-8499-9ebdfc86bd5f" Name="State" DataTypeRef="c4a9f4a4-bf97-4852-9343-ab3bb4598242" NumericId="4" Mnemonic="ASWSTATE" Kind="SoftwareSetting" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff10">
+      <ShortDescription>ASW state</ShortDescription>
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="68c2ada3-efff-40ae-831f-e6603e5477d1" Name="AOCS Status" DataTypeRef="1db93172-9d7d-4742-bcde-c1bc32457dd9" NumericId="5" Mnemonic="ASWSA" Kind="SoftwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff14">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="5009ed70-afc0-43be-9a5a-3c3900736f13" Name="PDU Status" DataTypeRef="1db93172-9d7d-4742-bcde-c1bc32457dd9" NumericId="6" Mnemonic="ASWSP" Kind="SoftwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff18">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="73d64377-26c6-43c3-82d3-f484d5bddbf3" Name="Solar Status" DataTypeRef="1db93172-9d7d-4742-bcde-c1bc32457dd9" NumericId="7" Mnemonic="ASWSS" Kind="SoftwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff1B">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="ad6c4e7c-3b20-4567-b559-8b83b5e760f2" Name="Boot Image Index" DataTypeRef="db55c095-753b-4a98-bca6-82de6f46ccc1" NumericId="8" Mnemonic="ASWBI" Kind="SoftwareSetting" MemoryRef="7d716998-94ae-4522-98b3-21e1e4ae8cdc" MemoryOffset="0xfff0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="4877347c-9d70-4505-9925-9ab2658ed4e6" Name="Boot Image Address" DataTypeRef="0104754e-b3ac-4ebc-a17b-67cd6842f303" NumericId="9" Mnemonic="ASWBA" Kind="SoftwareSetting" MemoryRef="7d716998-94ae-4522-98b3-21e1e4ae8cdc" MemoryOffset="0xfff4">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="0f43be01-8a60-4f29-8ef9-8265382ef713" Name="Boot Reason" DataTypeRef="3c130f1d-652e-4a24-83bb-7046bf16feff" NumericId="10" Mnemonic="ASWBR" Kind="SoftwareAcquisition" MemoryRef="4b55a7fc-c37a-4671-a6b5-405a55506396" MemoryOffset="0xff20">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="996d97e9-ec75-4db9-b9b7-bbc7c15486d0" Name="Memory CRC" DataTypeRef="1f6e1a41-b379-4682-b48b-e24cc12ee2be" NumericId="11" Mnemonic="XMCRC" Kind="SoftwareSetting" MemoryOffset="0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="fa213508-4818-491d-8ff0-0df57c0f482d" Name="Memory Target Address" DataTypeRef="0104754e-b3ac-4ebc-a17b-67cd6842f303" NumericId="12" Mnemonic="XMTA" Kind="SoftwareSetting" MemoryOffset="0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="bebec136-52c4-4095-b950-93de9bd10bce" Name="Memory Data" DataTypeRef="2fe0ba17-661c-4e12-8ec4-0c59e8de8092" NumericId="13" Mnemonic="XMDT" Kind="SoftwareSetting" MemoryOffset="0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="902cc2f5-57b9-457d-b6e7-62ba9251da50" Name="HK ID" DataTypeRef="9b8cc34c-c5a5-4722-8b72-8f11c8e2c00a" NumericId="14" Mnemonic="XHKID" Kind="SoftwareSetting" MemoryOffset="0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="2b566d4e-ce73-453b-830e-a4f5db6b7322" Name="Last request ID" DataTypeRef="1f6e1a41-b379-4682-b48b-e24cc12ee2be" NumericId="15" Mnemonic="XRID" Kind="SoftwareAcquisition" MemoryOffset="0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="83157871-617a-4c0d-9d71-019c1cf54c62" Name="Last request status" DataTypeRef="1db93172-9d7d-4742-bcde-c1bc32457dd9" NumericId="16" Mnemonic="XRS" Kind="SoftwareAcquisition" MemoryOffset="0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+    <Parameter Id="5e3965db-3eaa-445a-a8d0-25d8e1d509ef" Name="Memory Length" DataTypeRef="1f6e1a41-b379-4682-b48b-e24cc12ee2be" NumericId="17" Mnemonic="XMLE" Kind="SoftwareSetting" MemoryOffset="0">
+      <Formula />
+      <AlarmLow xsi:nil="true" />
+      <AlarmHigh xsi:nil="true" />
+    </Parameter>
+  </Parameters>
+  <PacketTypes>
+    <PacketType Id="e734f2d1-e840-45eb-b815-b5b75a83f9f3" Name="Boot Status" Kind="Telemetry" NumericId="0" Mnemonic="TMBS" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+      <Fields>
+        <PacketField Name="Image Index" ParameterRef="ad6c4e7c-3b20-4567-b559-8b83b5e760f2" IsTypeIndicator="false" />
+        <PacketField Name="Image Address" ParameterRef="4877347c-9d70-4505-9925-9ab2658ed4e6" IsTypeIndicator="false" />
+        <PacketField Name="Reason" ParameterRef="0f43be01-8a60-4f29-8ef9-8265382ef713" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="1" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="2114731b-2a1f-4824-b005-a7fad1b3419e" Name="Voltage Status" Kind="Telemetry" NumericId="1" Mnemonic="TMVS" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+      <Fields>
+        <PacketField Name="Battery Power" ParameterRef="9d61032f-a55a-464f-be0c-b14666a5e8e0" IsTypeIndicator="false" />
+        <PacketField Name="Charge Power" ParameterRef="dcb48586-d67d-49ac-9164-0ee882742ffa" IsTypeIndicator="false" />
+        <PacketField Name="Reference" ParameterRef="5c9d9f79-0517-4c3b-ba54-af056186c9d9" IsTypeIndicator="false">
+          <Description />
+        </PacketField>
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="2" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="cc29d1ed-3689-4d61-9f2c-0a6939a586e2" Name="Subsystem Status 1" Kind="Telemetry" NumericId="2" Mnemonic="TMS1" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+      <Fields>
+        <PacketField Name="HK ID" ParameterRef="902cc2f5-57b9-457d-b6e7-62ba9251da50" IsTypeIndicator="true" IndicatorValue="1">
+          <Description>Status ID</Description>
+        </PacketField>
+        <PacketField Name="State" ParameterRef="54137a84-3691-4269-8499-9ebdfc86bd5f" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="3" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="42624e85-160a-4ec2-b300-078a69ddd402" Name="Subsystem Status 2" Kind="Telemetry" NumericId="3" Mnemonic="TMS2" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+      <Fields>
+        <PacketField Name="HK ID" ParameterRef="902cc2f5-57b9-457d-b6e7-62ba9251da50" IsTypeIndicator="true" IndicatorValue="2">
+          <Description>Status ID</Description>
+        </PacketField>
+        <PacketField Name="Solar Array" ParameterRef="73d64377-26c6-43c3-82d3-f484d5bddbf3" IsTypeIndicator="false" />
+        <PacketField Name="AOCS" ParameterRef="68c2ada3-efff-40ae-831f-e6603e5477d1" IsTypeIndicator="false" />
+        <PacketField Name="PDU" ParameterRef="5009ed70-afc0-43be-9a5a-3c3900736f13" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="3" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="6eefdb6d-af26-4b24-b815-b1ba7363866e" Name="Memory Dump" Kind="Telemetry" NumericId="4" Mnemonic="TMMD" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+      <Fields>
+        <PacketField Name="Source Address" ParameterRef="fa213508-4818-491d-8ff0-0df57c0f482d" IsTypeIndicator="false" />
+        <PacketField Name="Data" ParameterRef="bebec136-52c4-4095-b950-93de9bd10bce" IsTypeIndicator="false" />
+        <PacketField Name="CRC" ParameterRef="996d97e9-ec75-4db9-b9b7-bbc7c15486d0" IsTypeIndicator="false" />
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="4" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="9fb813a7-407a-46c8-b0e4-b638168e2b2c" Name="Acknowledgement" Kind="Telemetry" NumericId="5" Mnemonic="TMAK" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+      <Fields>
+        <PacketField Name="Request ID" ParameterRef="2b566d4e-ce73-453b-830e-a4f5db6b7322" IsTypeIndicator="false">
+          <Description>ID of the relevant request</Description>
+        </PacketField>
+        <PacketField Name="Request status" ParameterRef="83157871-617a-4c0d-9d71-019c1cf54c62" IsTypeIndicator="false">
+          <Description>Status of the relevant request</Description>
+        </PacketField>
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="10" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="64bd388d-5e8a-4b17-ab41-20facaab8ccf" Name="Go To State" Kind="Telecommand" NumericId="6" Mnemonic="TCGS" HeaderTypeRef="0be91aec-ff8f-4d78-99cc-28bea00b5af1">
+      <Description>Command to transition to the selected state</Description>
+      <Fields>
+        <PacketField Name="Request ID" ParameterRef="2b566d4e-ce73-453b-830e-a4f5db6b7322" IsTypeIndicator="false" />
+        <PacketField Name="Target state" ParameterRef="54137a84-3691-4269-8499-9ebdfc86bd5f" IsTypeIndicator="false">
+          <Description>Requested state</Description>
+        </PacketField>
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="45cf934d-398a-4554-8ad7-2ac7b43a3b8e" Value="1" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="27c2bd58-07ed-40e4-8b97-174f0be31458" Name="Dump Memory" Kind="Telecommand" NumericId="7" Mnemonic="TCMD" HeaderTypeRef="0be91aec-ff8f-4d78-99cc-28bea00b5af1">
+      <Description>Request to dump memory</Description>
+      <Fields>
+        <PacketField Name="Request ID" ParameterRef="2b566d4e-ce73-453b-830e-a4f5db6b7322" IsTypeIndicator="false" />
+        <PacketField Name="Address" ParameterRef="fa213508-4818-491d-8ff0-0df57c0f482d" IsTypeIndicator="false">
+          <Description>Requested memory address</Description>
+        </PacketField>
+        <PacketField Name="Size" ParameterRef="5e3965db-3eaa-445a-a8d0-25d8e1d509ef" IsTypeIndicator="false">
+          <Description>Length of the requested block</Description>
+        </PacketField>
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="45cf934d-398a-4554-8ad7-2ac7b43a3b8e" Value="2" />
+      </HeaderIdValues>
+    </PacketType>
+    <PacketType Id="52308b9d-2342-4597-bdbd-412a7775743c" Name="Memory Upload" Kind="Telecommand" NumericId="8" Mnemonic="TCMU" HeaderTypeRef="0be91aec-ff8f-4d78-99cc-28bea00b5af1">
+      <Description>Command to upload a block of memory</Description>
+      <Fields>
+        <PacketField Name="Request ID" ParameterRef="2b566d4e-ce73-453b-830e-a4f5db6b7322" IsTypeIndicator="false" />
+        <PacketField Name="Target Address" ParameterRef="fa213508-4818-491d-8ff0-0df57c0f482d" IsTypeIndicator="false">
+          <Description>Target address to write the data to</Description>
+        </PacketField>
+        <PacketField Name="Data" ParameterRef="bebec136-52c4-4095-b950-93de9bd10bce" IsTypeIndicator="false">
+          <Description>Data to be written</Description>
+        </PacketField>
+        <PacketField Name="CRC" ParameterRef="996d97e9-ec75-4db9-b9b7-bbc7c15486d0" IsTypeIndicator="false">
+          <Description>CRC of the data field</Description>
+        </PacketField>
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="45cf934d-398a-4554-8ad7-2ac7b43a3b8e" Value="3" />
+      </HeaderIdValues>
+    </PacketType>
+  </PacketTypes>
+  <HeaderTypes>
+    <HeaderType Id="0be91aec-ff8f-4d78-99cc-28bea00b5af1" Name="TC">
+      <Description>Basic telecommand header</Description>
+      <Ids>
+        <HeaderTypeId Id="45cf934d-398a-4554-8ad7-2ac7b43a3b8e" Name="Type" DataTypeRef="db55c095-753b-4a98-bca6-82de6f46ccc1">
+          <Description>Telecommand identifier</Description>
+        </HeaderTypeId>
+      </Ids>
+    </HeaderType>
+    <HeaderType Id="5256295a-4c87-480a-96ba-1fac15261f64" Name="TM">
+      <Description>Basic telemetry header</Description>
+      <Ids>
+        <HeaderTypeId Id="7bb26f08-6397-40e0-94e6-83e0482e729d" Name="Type" DataTypeRef="db55c095-753b-4a98-bca6-82de6f46ccc1">
+          <Description>Telemetry identifier</Description>
+        </HeaderTypeId>
+      </Ids>
+    </HeaderType>
+  </HeaderTypes>
+  <Memories>
+    <Memory Id="7d716998-94ae-4522-98b3-21e1e4ae8cdc" Name="Flash" NumericId="0" Mnemonic="MFL" Size="0xFFFF" Address="0x000000" Alignment="1" IsWritable="false" IsReadable="true">
+      <Description>Embedded flash</Description>
+    </Memory>
+    <Memory Id="4b55a7fc-c37a-4671-a6b5-405a55506396" Name="SRAM" NumericId="1" Mnemonic="MSR" Size="0x2000" Address="0x040000" Alignment="1" IsWritable="true" IsReadable="true">
+      <Description>Embedded SRAM</Description>
+    </Memory>
+  </Memories>
+  <Metadata Name="Example ASW ICD" Version="1.0" Date="2026 04 25" Status="Draft">
+    <Description>An example ASW ICD to demonstrate the application</Description>
+    <Fields>
+      <Field Id="af344b4f-5ee4-477a-8dab-a681ea42a611" Name="Device" Value="RS-422" />
+      <Field Id="75eda56f-7e33-4ab3-839d-2709eebf2b24" Name="Device Settings" Value="Baud: 9600; Bits: 8; Parity: Odd; Device: UART0" />
+      <Field Id="f89ed394-50a0-45af-94bf-3bd4fda11524" Name="Encapsulation" Value="CCSDS Space Packet" />
+    </Fields>
+  </Metadata>
+</DataModel>

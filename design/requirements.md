@@ -78,7 +78,7 @@ ICD-DAT-430: Packet Field shall have name.
 ICD-DAT-440: Packet Field shall have optional description.
 ICD-DAT-450: Packet Field shall be associated with Parameter (more than one Packet Field can be associated with the same Parameter).
 ICD-DAT-460: Packet Field can be set as Packet Type indicator.
-ICD-DAT-461: Packet Field set as a Packet Type indicator shall be associated with Parameter of Kind ID.
+ICD-DAT-461: Packet Field set as a Packet Type indicator shall be associated with a Parameter whose Data Type base type is Signed Integer, Unsigned Integer, or Enumerated.
 ICD-DAT-462: Packet Field set as a Packet Type indicator shall have its value defined using hexadecimal string.
 ICD-DAT-600: Template Set shall have a name.
 ICD-DAT-601: Template Set shall have a description.
@@ -90,7 +90,7 @@ ICD-DAT-640: Template shall have a description.
 ICD-DAT-650: Template shall have Output Name Pattern.
 ICD-DAT-710: Header Type shall have a name.
 ICD-DAT-720: Header Type shall have a description.
-ICD-DAT-730: Header Type shall have an odered list of IDs, each with associated name, description and Data Type of kind ID.
+ICD-DAT-730: Header Type shall have an ordered list of IDs, each with associated name, description and Data Type whose base type is Signed Integer, Unsigned Integer, or Enumerated.
 
 # Metadata requirements
 ICD-DAT-810: Data Model shall contain document-level ICD metadata.

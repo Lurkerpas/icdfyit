@@ -105,9 +105,14 @@ public class ModelValidator
     private static void CheckTypeIndicatorKinds(DataModel model, List<ValidationIssue> issues)
     {
         foreach (var pt in model.PacketTypes)
-            foreach (var f in pt.Fields.Where(f => f.IsTypeIndicator && f.Parameter?.Kind != ParameterKind.Id))
-                issues.Add(new ValidationIssue(
-                    $"Type indicator field \"{f.Name}\" in \"{pt.Name}\" must reference a parameter of Kind ID (ICD-DAT-461)"));
+            foreach (var f in pt.Fields.Where(f => f.IsTypeIndicator))
+            {
+                var baseType = f.Parameter?.DataType?.Kind;
+                if (baseType is null || !ValidHeaderIdBaseTypes.Contains(baseType.Value))
+                    issues.Add(new ValidationIssue(
+                        $"Type indicator field \"{f.Name}\" in \"{pt.Name}\" must reference a parameter whose data type " +
+                        $"base type is Signed Integer, Unsigned Integer, or Enumerated (ICD-DAT-461)"));
+            }
     }
 
     private static void CheckTypeIndicatorValues(DataModel model, List<ValidationIssue> issues)
@@ -168,22 +173,21 @@ public class ModelValidator
                     $"Header type \"{ht.Name}\" ID entry \"{id.Name}\" has no data type assigned"));
     }
 
+    private static readonly HashSet<BaseType> ValidHeaderIdBaseTypes = new()
+    {
+        BaseType.SignedInteger,
+        BaseType.UnsignedInteger,
+        BaseType.Enumerated,
+    };
+
     private static void CheckHeaderTypeIdDataTypeKind(DataModel model, List<ValidationIssue> issues)
     {
-        // A data type referenced by a Header Type ID entry must be used by at least one
-        // Parameter of Kind ID — parameters of Kind ID represent identification fields
-        // whose data type is appropriate for use as a header discriminator (ICD-DAT-730).
-        var idKindDataTypeIds = model.Parameters
-            .Where(p => p.Kind == ParameterKind.Id && p.DataType is not null)
-            .Select(p => p.DataType!.Id)
-            .ToHashSet();
-
         foreach (var ht in model.HeaderTypes)
             foreach (var htId in ht.Ids.Where(id => id.DataType is not null))
-                if (!idKindDataTypeIds.Contains(htId.DataType!.Id))
+                if (!ValidHeaderIdBaseTypes.Contains(htId.DataType!.Kind))
                     issues.Add(new ValidationIssue(
                         $"Header type \"{ht.Name}\" ID entry \"{htId.Name}\" references data type \"{htId.DataType!.Name}\" " +
-                        $"which is not used by any parameter of Kind ID (ICD-DAT-730)"));
+                        $"whose base type must be Signed Integer, Unsigned Integer, or Enumerated (ICD-DAT-730)"));
     }
 
     private static void CheckMissingHeaderIdValues(DataModel model, List<ValidationIssue> issues)
