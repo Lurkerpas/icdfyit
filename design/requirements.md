@@ -89,6 +89,7 @@ ICD-DAT-630: Template shall have a name.
 ICD-DAT-640: Template shall have a description.
 ICD-DAT-650: Template shall have Output Name Pattern.
 ICD-DAT-710: Header Type shall have a name.
+ICD-DAT-715: Header Type shall have a mnemonic.
 ICD-DAT-720: Header Type shall have a description.
 ICD-DAT-730: Header Type shall have an ordered list of IDs, each with associated name, description and Data Type whose base type is Signed Integer, Unsigned Integer, or Enumerated.
 

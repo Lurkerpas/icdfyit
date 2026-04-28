@@ -42,7 +42,7 @@ public partial class PacketTypeNodeViewModel : ObservableObject
     public string Name
     {
         get => _packetType.Name;
-        set { _packetType.Name = value; OnPropertyChanged(); OnEdited?.Invoke(); }
+        set { _packetType.Name = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayLabel)); OnEdited?.Invoke(); }
     }
 
     public string? Description
@@ -65,6 +65,28 @@ public partial class PacketTypeNodeViewModel : ObservableObject
 
     public string Kind => _packetType.Kind.ToString();
 
+    /// <summary>
+    /// Label shown in the packet tree: "Mnemonic[val1,val2] Name",
+    /// where Mnemonic is the Header Type mnemonic and the bracketed values are
+    /// the fixed Header ID values in order. Falls back to plain Name when no
+    /// Header Type (or no mnemonic) is set.
+    /// </summary>
+    public string DisplayLabel
+    {
+        get
+        {
+            var ht = _packetType.HeaderType;
+            if (ht is null || string.IsNullOrEmpty(ht.Mnemonic))
+                return _packetType.Name;
+
+            var values = ht.Ids
+                .Select(id => _packetType.HeaderIdValues
+                    .FirstOrDefault(v => v.IdRef == id.Id)?.Value ?? string.Empty);
+
+            return $"{ht.Mnemonic}[{string.Join(",", values)}] {_packetType.Name}";
+        }
+    }
+
     // ── Header Type association ───────────────────────────────────────────────
 
     /// <summary>Display name of the associated Header Type, or "—" when none.</summary>
@@ -84,10 +106,15 @@ public partial class PacketTypeNodeViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HeaderTypeName));
         OnPropertyChanged(nameof(HasHeaderType));
+        OnPropertyChanged(nameof(DisplayLabel));
         HeaderIdValueRows.Clear();
         if (_packetType.HeaderType is null) return;
         foreach (var hid in _packetType.HeaderType.Ids)
-            HeaderIdValueRows.Add(new HeaderIdValueRowViewModel(_packetType, hid) { OnEdited = OnEdited });
+        {
+            var row = new HeaderIdValueRowViewModel(_packetType, hid);
+            row.OnEdited = () => { OnPropertyChanged(nameof(DisplayLabel)); OnEdited?.Invoke(); };
+            HeaderIdValueRows.Add(row);
+        }
     }
 
     // ── Fields collection (detail panel) ─────────────────────────────────────

@@ -142,7 +142,7 @@
                                        Padding="2" />
                         </TreeDataTemplate>
                         <DataTemplate DataType="{x:Type vm:PacketTypeNodeViewModel}">
-                            <TextBlock Text="{Binding Name}" Padding="2" />
+                            <TextBlock Text="{Binding DisplayLabel}" Padding="2" />
                         </DataTemplate>
                     </TreeView.DataTemplates>
 

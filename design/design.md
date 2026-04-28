@@ -127,6 +127,7 @@ A Header Type describes the common header structure shared by Packet Types. It h
 | Field | Type | Notes |
 |---|---|---|
 | Name | string | required, unique within Data Model |
+| Mnemonic | string | optional |
 | Description | string | required |
 | IDs | ordered list | see below |
 
