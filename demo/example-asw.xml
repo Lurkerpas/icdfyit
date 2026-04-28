@@ -313,7 +313,7 @@
         <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="1" />
       </HeaderIdValues>
     </PacketType>
-    <PacketType Id="2114731b-2a1f-4824-b005-a7fad1b3419e" Name="Voltage Status" Kind="Telemetry" NumericId="1" Mnemonic="TMVS" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+    <PacketType Id="2114731b-2a1f-4824-b005-a7fad1b3419e" Name="Voltage Statuss" Kind="Telemetry" NumericId="1" Mnemonic="TMVS" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
       <Fields>
         <PacketField Name="Battery Power" ParameterRef="9d61032f-a55a-464f-be0c-b14666a5e8e0" IsTypeIndicator="false" />
         <PacketField Name="Charge Power" ParameterRef="dcb48586-d67d-49ac-9164-0ee882742ffa" IsTypeIndicator="false" />

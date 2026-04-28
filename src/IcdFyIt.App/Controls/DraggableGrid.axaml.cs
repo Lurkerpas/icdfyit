@@ -107,6 +107,9 @@ public partial class DraggableGrid : UserControl
     /// <summary>Default pixel widths from XAML, used by layout reset.</summary>
     private double[] _defaultColWidths = Array.Empty<double>();
 
+    /// <summary>True for columns whose XAML Width is Star (fill remaining space, no resize gripper).</summary>
+    private bool[] _colIsStar = Array.Empty<bool>();
+
     /// <summary>Maps visible-column index → Columns-list index.</summary>
     private int[] _visibleToAllIdx = Array.Empty<int>();
 
@@ -183,9 +186,11 @@ public partial class DraggableGrid : UserControl
         {
             _colWidths = new double[Columns.Count];
             _defaultColWidths = new double[Columns.Count];
+            _colIsStar = new bool[Columns.Count];
             for (int i = 0; i < Columns.Count; i++)
             {
                 var gl = Columns[i].Width;
+                _colIsStar[i] = gl.GridUnitType == GridUnitType.Star;
                 var width = gl.GridUnitType == GridUnitType.Pixel ? gl.Value : 100.0;
                 _colWidths[i] = width;
                 _defaultColWidths[i] = width;
@@ -259,7 +264,10 @@ public partial class DraggableGrid : UserControl
         _headerColDefs = new ColumnDefinition[visibleCols.Count];
         for (int i = 0; i < visibleCols.Count; i++)
         {
-            var cd = new ColumnDefinition(new GridLength(_colWidths[_visibleToAllIdx[i]], GridUnitType.Pixel));
+            int ai = _visibleToAllIdx[i];
+            var cd = new ColumnDefinition(_colIsStar[ai]
+                ? GridLength.Star
+                : new GridLength(_colWidths[ai], GridUnitType.Pixel));
             _headerColDefs[i] = cd;
             g.ColumnDefinitions.Add(cd);
         }
@@ -269,40 +277,45 @@ public partial class DraggableGrid : UserControl
             var col = visibleCols[i];
             int allIdx = _visibleToAllIdx[i];
             int visIdx = i;
+            bool isStar = _colIsStar[allIdx];
 
-            // Each header cell is a Panel: TextBlock label + right-edge resize gripper.
+            // Each header cell is a Panel: TextBlock label + optional right-edge resize gripper.
             var label = new TextBlock
             {
                 Text              = col.Header,
                 Foreground        = FgDim,
                 FontWeight        = FontWeight.Normal,
-                Margin            = new Thickness(6, 5, 14, 5), // leave room for gripper
+                Margin            = new Thickness(6, 5, isStar ? 6 : 14, 5),
                 VerticalAlignment = VerticalAlignment.Center
-            };
-
-            // Gripper: a thin transparent border on the right edge that responds to drag.
-            var gripper = new Border
-            {
-                Width               = 5,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Background          = GripperBrush,
-                Cursor              = new Cursor(StandardCursorType.SizeWestEast)
-            };
-            ToolTip.SetTip(gripper, "Drag to resize column");
-
-            gripper.PointerPressed  += (_, e) => OnGripperPointerPressed(gripper, allIdx, visIdx, e);
-            gripper.PointerMoved    += (_, e) => OnGripperPointerMoved(e);
-            gripper.PointerReleased += (_, e) => OnGripperPointerReleased(e);
-            gripper.PointerCaptureLost += (_, _) =>
-            {
-                _resizePointer    = null;
-                _resizingAllIdx   = -1;
-                _resizingVisIdx   = -1;
             };
 
             var cell = new Panel();
             cell.Children.Add(label);
-            cell.Children.Add(gripper);
+
+            // Star columns fill remaining space — no resize gripper.
+            if (!isStar)
+            {
+                var gripper = new Border
+                {
+                    Width               = 5,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Background          = GripperBrush,
+                    Cursor              = new Cursor(StandardCursorType.SizeWestEast)
+                };
+                ToolTip.SetTip(gripper, "Drag to resize column");
+
+                gripper.PointerPressed  += (_, e) => OnGripperPointerPressed(gripper, allIdx, visIdx, e);
+                gripper.PointerMoved    += (_, e) => OnGripperPointerMoved(e);
+                gripper.PointerReleased += (_, e) => OnGripperPointerReleased(e);
+                gripper.PointerCaptureLost += (_, _) =>
+                {
+                    _resizePointer    = null;
+                    _resizingAllIdx   = -1;
+                    _resizingVisIdx   = -1;
+                };
+
+                cell.Children.Add(gripper);
+            }
 
             Grid.SetColumn(cell, i);
             g.Children.Add(cell);
@@ -352,7 +365,10 @@ public partial class DraggableGrid : UserControl
         var colDefs = new ColumnDefinition[visibleCols.Count];
         for (int i = 0; i < visibleCols.Count; i++)
         {
-            var cd = new ColumnDefinition(new GridLength(_colWidths[visibleCols[i].allIdx], GridUnitType.Pixel));
+            int ai = visibleCols[i].allIdx;
+            var cd = new ColumnDefinition(_colIsStar[ai]
+                ? GridLength.Star
+                : new GridLength(_colWidths[ai], GridUnitType.Pixel));
             colDefs[i] = cd;
             g.ColumnDefinitions.Add(cd);
         }

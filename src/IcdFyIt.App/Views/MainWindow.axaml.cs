@@ -12,7 +12,9 @@ namespace IcdFyIt.App.Views;
 
 public partial class MainWindow : Window
 {
-    private bool _allowClose = false;
+    private bool _allowClose    = false;
+    private bool _tcCollapsed   = false;
+    private bool _tmCollapsed   = false;
 
     public MainWindow()
     {
@@ -98,7 +100,36 @@ public partial class MainWindow : Window
             e.Above);
     }
 
-    // ── Close guard (ICD-IF-180) ──────────────────────────────────────────────
+    // ── Section collapse (TC / TM) ────────────────────────────────────────────
+
+    private void OnTcToggle(object? sender, RoutedEventArgs e)
+    {
+        _tcCollapsed = !_tcCollapsed;
+        ApplyPacketListLayout();
+    }
+
+    private void OnTmToggle(object? sender, RoutedEventArgs e)
+    {
+        _tmCollapsed = !_tmCollapsed;
+        ApplyPacketListLayout();
+    }
+
+    private void ApplyPacketListLayout()
+    {
+        TelecommandsGrid.IsVisible = !_tcCollapsed;
+        TelemetriesGrid .IsVisible = !_tmCollapsed;
+
+        bool splitterVisible = !_tcCollapsed && !_tmCollapsed;
+        PacketListsSplitter.IsVisible = splitterVisible;
+
+        var rows = PacketListsGrid.RowDefinitions;
+        rows[0].Height = _tcCollapsed ? GridLength.Auto : GridLength.Star;
+        rows[1].Height = splitterVisible ? new GridLength(4) : new GridLength(0);
+        rows[2].Height = _tmCollapsed ? GridLength.Auto : GridLength.Star;
+
+        TcToggleButton.Content = _tcCollapsed ? "\u25b6" : "\u25bc";
+        TmToggleButton.Content = _tmCollapsed ? "\u25b6" : "\u25bc";
+    }
 
     protected override void OnClosing(WindowClosingEventArgs e)
     {

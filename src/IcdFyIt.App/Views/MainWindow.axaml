@@ -94,12 +94,20 @@
         <Grid ColumnDefinitions="220,4,*">
 
             <!-- ── Left: packet-type lists (ICD-IF-60, ICD-IF-61) ──────────── -->
-            <Grid Grid.Column="0" RowDefinitions="*,4,*">
+            <Grid Grid.Column="0" x:Name="PacketListsGrid" RowDefinitions="*,4,*">
 
                 <!-- Telecommands section -->
                 <DockPanel Grid.Row="0">
                     <Border DockPanel.Dock="Top" Background="#3F3F46" Padding="0,2">
                         <DockPanel LastChildFill="True">
+                            <Button DockPanel.Dock="Left"  x:Name="TcToggleButton"
+                                    Content="▼" Width="22" Padding="0" Margin="2,0,0,0"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Background="Transparent" BorderThickness="0"
+                                    Foreground="#CCCCCC" FontSize="10"
+                                    ToolTip.Tip="Collapse / expand"
+                                    Click="OnTcToggle" />
                             <Button DockPanel.Dock="Right" Content="TC+" Margin="2"
                                     Command="{Binding AddTelecommandCommand}"
                                     ToolTip.Tip="Add Telecommand" />
@@ -125,13 +133,13 @@
                         </ctrl:DraggableGrid.ContextMenu>
                         <ctrl:DraggableGrid.Columns>
                             <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
-                            <ctrl:DraggableGridColumn Path="DisplayLabel" Width="180"/>
+                            <ctrl:DraggableGridColumn Path="DisplayLabel"/>
                         </ctrl:DraggableGrid.Columns>
                     </ctrl:DraggableGrid>
                 </DockPanel>
 
                 <!-- Section splitter -->
-                <GridSplitter Grid.Row="1"
+                <GridSplitter Grid.Row="1" x:Name="PacketListsSplitter"
                               ResizeDirection="Rows"
                               HorizontalAlignment="Stretch"
                               Background="#3F3F46"/>
@@ -140,6 +148,14 @@
                 <DockPanel Grid.Row="2">
                     <Border DockPanel.Dock="Top" Background="#3F3F46" Padding="0,2">
                         <DockPanel LastChildFill="True">
+                            <Button DockPanel.Dock="Left"  x:Name="TmToggleButton"
+                                    Content="▼" Width="22" Padding="0" Margin="2,0,0,0"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Background="Transparent" BorderThickness="0"
+                                    Foreground="#CCCCCC" FontSize="10"
+                                    ToolTip.Tip="Collapse / expand"
+                                    Click="OnTmToggle" />
                             <Button DockPanel.Dock="Right" Content="TM+" Margin="2"
                                     Command="{Binding AddTelemetryCommand}"
                                     ToolTip.Tip="Add Telemetry" />
@@ -165,7 +181,7 @@
                         </ctrl:DraggableGrid.ContextMenu>
                         <ctrl:DraggableGrid.Columns>
                             <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
-                            <ctrl:DraggableGridColumn Path="DisplayLabel" Width="180"/>
+                            <ctrl:DraggableGridColumn Path="DisplayLabel"/>
                         </ctrl:DraggableGrid.Columns>
                     </ctrl:DraggableGrid>
                 </DockPanel>
