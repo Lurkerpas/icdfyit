@@ -22,8 +22,9 @@
                     <MenuItem.ItemContainerTheme>
                         <ControlTheme TargetType="MenuItem"
                                       BasedOn="{StaticResource {x:Type MenuItem}}">
-                            <Setter Property="Header"  Value="{Binding Header}" />
-                            <Setter Property="Command" Value="{Binding OpenCommand}" />
+                            <Setter Property="Header"       Value="{Binding Header}" />
+                            <Setter Property="Command"      Value="{Binding OpenCommand}" />
+                            <Setter Property="ToolTip.Tip"  Value="{Binding FullPath}" />
                         </ControlTheme>
                     </MenuItem.ItemContainerTheme>
                 </MenuItem>
