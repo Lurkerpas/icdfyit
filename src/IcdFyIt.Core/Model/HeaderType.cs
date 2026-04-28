@@ -13,6 +13,9 @@ public class HeaderType
     [XmlAttribute]
     public string Name { get; set; } = string.Empty;
 
+    [XmlAttribute]
+    public string? Mnemonic { get; set; }
+
     public string Description { get; set; } = string.Empty;
 
     /// <summary>Ordered list of ID entries defined by this Header Type (ICD-DAT-730).</summary>

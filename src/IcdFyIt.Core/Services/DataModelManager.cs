@@ -246,6 +246,7 @@ public class DataModelManager
         var copy = new HeaderType
         {
             Name        = $"Copy of {source.Name}",
+            Mnemonic    = source.Mnemonic,
             Description = source.Description,
         };
         foreach (var id in source.Ids)

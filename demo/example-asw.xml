@@ -406,7 +406,7 @@
     </PacketType>
   </PacketTypes>
   <HeaderTypes>
-    <HeaderType Id="0be91aec-ff8f-4d78-99cc-28bea00b5af1" Name="TC">
+    <HeaderType Id="0be91aec-ff8f-4d78-99cc-28bea00b5af1" Name="Telecommand" Mnemonic="TC">
       <Description>Basic telecommand header</Description>
       <Ids>
         <HeaderTypeId Id="45cf934d-398a-4554-8ad7-2ac7b43a3b8e" Name="Type" DataTypeRef="db55c095-753b-4a98-bca6-82de6f46ccc1">
@@ -414,7 +414,7 @@
         </HeaderTypeId>
       </Ids>
     </HeaderType>
-    <HeaderType Id="5256295a-4c87-480a-96ba-1fac15261f64" Name="TM">
+    <HeaderType Id="5256295a-4c87-480a-96ba-1fac15261f64" Name="Telemetry" Mnemonic="TM">
       <Description>Basic telemetry header</Description>
       <Ids>
         <HeaderTypeId Id="7bb26f08-6397-40e0-94e6-83e0482e729d" Name="Type" DataTypeRef="db55c095-753b-4a98-bca6-82de6f46ccc1">

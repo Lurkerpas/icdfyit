@@ -28,6 +28,9 @@
                         <MenuItem Header="Name"        x:Name="NameColItem"
                                   ToggleType="CheckBox" IsChecked="True"
                                   Click="OnColumnMenuItemChanged"/>
+                        <MenuItem Header="Mnemonic"    x:Name="MnemonicColItem"
+                                  ToggleType="CheckBox" IsChecked="True"
+                                  Click="OnColumnMenuItemChanged"/>
                         <MenuItem Header="Description" x:Name="DescColItem"
                                   ToggleType="CheckBox" IsChecked="True"
                                   Click="OnColumnMenuItemChanged"/>
@@ -75,12 +78,17 @@
                     <ctrl:DraggableGridColumn Name="Name"
                                               Header="Name"
                                               Path="Name"
-                                              Width="200"
+                                              Width="180"
+                                              IsEditable="True"/>
+                    <ctrl:DraggableGridColumn Name="Mnemonic"
+                                              Header="Mnemonic"
+                                              Path="Mnemonic"
+                                              Width="140"
                                               IsEditable="True"/>
                     <ctrl:DraggableGridColumn Name="Description"
                                               Header="Description"
                                               Path="Description"
-                                              Width="400"
+                                              Width="280"
                                               IsEditable="True"/>
                     <ctrl:DraggableGridColumn Name="IDs"
                                               Header="IDs"

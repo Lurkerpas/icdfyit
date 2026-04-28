@@ -123,9 +123,9 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
         if (path is null) return;
 
         var sb = new StringBuilder();
-        sb.AppendLine("Name,Description");
+        sb.AppendLine("Name,Mnemonic,Description");
         foreach (var row in FilteredRows)
-            sb.AppendLine($"\"{Esc(row.Name)}\",\"{Esc(row.Description)}\"");
+            sb.AppendLine($"\"{Esc(row.Name)}\",\"{Esc(row.Mnemonic)}\",\"{Esc(row.Description)}\"");
         await File.WriteAllTextAsync(path, sb.ToString(), Encoding.UTF8);
     }
 
@@ -147,7 +147,9 @@ public partial class HeaderTypesWindowViewModel : ObservableObject
             var row = _rows.FirstOrDefault(r => r.Model == ht);
             if (row is null) continue;
             if (f.Length > 1 && !string.IsNullOrEmpty(f[1]))
-                row.Description = f[1];
+                row.Mnemonic = f[1];
+            if (f.Length > 2 && !string.IsNullOrEmpty(f[2]))
+                row.Description = f[2];
         }
 
         FilterText = string.Empty;

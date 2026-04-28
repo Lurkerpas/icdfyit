@@ -20,6 +20,12 @@ public partial class HeaderTypeRowViewModel : ObservableObject
         set { Model.Name = value; OnPropertyChanged(); OnEdited?.Invoke(); }
     }
 
+    public string? Mnemonic
+    {
+        get => Model.Mnemonic;
+        set { Model.Mnemonic = value; OnPropertyChanged(); OnEdited?.Invoke(); }
+    }
+
     public string Description
     {
         get => Model.Description;

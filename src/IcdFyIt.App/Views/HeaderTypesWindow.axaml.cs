@@ -53,10 +53,11 @@ public partial class HeaderTypesWindow : Window
         if (sender is not MenuItem mi) return;
         var colName = mi.Name switch
         {
-            "NameColItem" => "Name",
-            "DescColItem" => "Description",
-            "IdsColItem"  => "IDs",
-            _             => null
+            "NameColItem"     => "Name",
+            "MnemonicColItem" => "Mnemonic",
+            "DescColItem"     => "Description",
+            "IdsColItem"      => "IDs",
+            _                 => null
         };
         if (colName is not null)
             HeaderTypesGrid.SetColumnVisible(colName, mi.IsChecked);
