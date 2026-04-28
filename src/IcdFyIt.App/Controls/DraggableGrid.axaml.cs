@@ -60,6 +60,16 @@ public partial class DraggableGrid : UserControl
         set => SetValue(SelectedItemProperty, value);
     }
 
+    public static readonly StyledProperty<bool> ShowHeaderProperty =
+        AvaloniaProperty.Register<DraggableGrid, bool>(nameof(ShowHeader), defaultValue: true);
+
+    /// <summary>Whether to show the column header row. Default is true.</summary>
+    public bool ShowHeader
+    {
+        get => GetValue(ShowHeaderProperty);
+        set => SetValue(ShowHeaderProperty, value);
+    }
+
     // ── Column descriptor collection (populated from XAML before visual-tree attach) ──
 
     public List<DraggableGridColumn> Columns { get; } = new();
@@ -187,6 +197,7 @@ public partial class DraggableGrid : UserControl
         _root.RowDefinitions.Add(new RowDefinition(GridLength.Star)); // 1: scroll area
 
         _headerBorder = MakeHeader();
+        _headerBorder.IsVisible = ShowHeader;
         Grid.SetRow(_headerBorder, 0);
         _root.Children.Add(_headerBorder);
 

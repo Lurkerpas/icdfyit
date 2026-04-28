@@ -290,6 +290,19 @@
     </Parameter>
   </Parameters>
   <PacketTypes>
+    <PacketType Id="9fb813a7-407a-46c8-b0e4-b638168e2b2c" Name="Acknowledgement" Kind="Telemetry" NumericId="5" Mnemonic="TMAK" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
+      <Fields>
+        <PacketField Name="Request ID" ParameterRef="2b566d4e-ce73-453b-830e-a4f5db6b7322" IsTypeIndicator="false">
+          <Description>ID of the relevant request</Description>
+        </PacketField>
+        <PacketField Name="Request status" ParameterRef="83157871-617a-4c0d-9d71-019c1cf54c62" IsTypeIndicator="false">
+          <Description>Status of the relevant request</Description>
+        </PacketField>
+      </Fields>
+      <HeaderIdValues>
+        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="10" />
+      </HeaderIdValues>
+    </PacketType>
     <PacketType Id="e734f2d1-e840-45eb-b815-b5b75a83f9f3" Name="Boot Status" Kind="Telemetry" NumericId="0" Mnemonic="TMBS" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
       <Fields>
         <PacketField Name="Image Index" ParameterRef="ad6c4e7c-3b20-4567-b559-8b83b5e760f2" IsTypeIndicator="false" />
@@ -344,19 +357,6 @@
       </Fields>
       <HeaderIdValues>
         <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="4" />
-      </HeaderIdValues>
-    </PacketType>
-    <PacketType Id="9fb813a7-407a-46c8-b0e4-b638168e2b2c" Name="Acknowledgement" Kind="Telemetry" NumericId="5" Mnemonic="TMAK" HeaderTypeRef="5256295a-4c87-480a-96ba-1fac15261f64">
-      <Fields>
-        <PacketField Name="Request ID" ParameterRef="2b566d4e-ce73-453b-830e-a4f5db6b7322" IsTypeIndicator="false">
-          <Description>ID of the relevant request</Description>
-        </PacketField>
-        <PacketField Name="Request status" ParameterRef="83157871-617a-4c0d-9d71-019c1cf54c62" IsTypeIndicator="false">
-          <Description>Status of the relevant request</Description>
-        </PacketField>
-      </Fields>
-      <HeaderIdValues>
-        <Entry IdRef="7bb26f08-6397-40e0-94e6-83e0482e729d" Value="10" />
       </HeaderIdValues>
     </PacketType>
     <PacketType Id="64bd388d-5e8a-4b17-ab41-20facaab8ccf" Name="Go To State" Kind="Telecommand" NumericId="6" Mnemonic="TCGS" HeaderTypeRef="0be91aec-ff8f-4d78-99cc-28bea00b5af1">

@@ -19,12 +19,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         LayoutPersistenceManager.Register(this);
 
-        // Wire TreeView selection so only packet-type leaf nodes update SelectedPacketType.
-        PacketTypeTree.SelectionChanged += (_, _) =>
-        {
-            if (DataContext is not MainWindowViewModel vm) return;
-            vm.SelectedPacketType = PacketTypeTree.SelectedItem as PacketTypeNodeViewModel;
-        };
+        // Wire drag-to-reorder for the packet-type lists.
+        TelecommandsGrid.ItemMoved += OnPacketTypeMoved;
+        TelemetriesGrid .ItemMoved += OnPacketTypeMoved;
 
         // CellFactory for Parameter column (AutoCompleteBox — safe in DraggableGrid on X11)
         FieldsGrid.Columns.First(c => c.Name == "Parameter").CellFactory = _ =>
@@ -78,6 +75,16 @@ public partial class MainWindow : Window
 
         // Delegate drag-to-reorder to the SelectedPacketType so the underlying model is kept in sync.
         FieldsGrid.ItemMoved += OnFieldMoved;
+    }
+
+    private void OnPacketTypeMoved(object? sender, ItemMovedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        e.Handled = true;
+        vm.MovePacketTypeNode(
+            (PacketTypeNodeViewModel)e.DraggedItem,
+            (PacketTypeNodeViewModel)e.TargetItem,
+            e.Above);
     }
 
     private void OnFieldMoved(object? sender, ItemMovedEventArgs e)

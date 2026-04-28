@@ -443,6 +443,10 @@ public partial class MainWindowViewModel : ObservableObject
                 foreach (var pt in _changeNotifier.PacketTypes)
                     PlaceNode(CreateNode(pt));
                 break;
+
+            case NotifyCollectionChangedAction.Move:
+                RebuildPacketTypeOrder();
+                break;
         }
     }
 
@@ -452,6 +456,57 @@ public partial class MainWindowViewModel : ObservableObject
             Telecommands.Add(node);
         else
             Telemetries.Add(node);
+    }
+
+    /// <summary>
+    /// Reorders Telecommands and Telemetries to match the canonical PacketTypes order.
+    /// Called after undo/redo fires a Move notification on the ChangeNotifier.
+    /// </summary>
+    private void RebuildPacketTypeOrder()
+    {
+        var tcMap = Telecommands.ToDictionary(n => n.Model);
+        var tmMap = Telemetries .ToDictionary(n => n.Model);
+
+        var newTcs = _changeNotifier.PacketTypes
+            .Where(pt => tcMap.ContainsKey(pt)).Select(pt => tcMap[pt]).ToList();
+        var newTms = _changeNotifier.PacketTypes
+            .Where(pt => tmMap.ContainsKey(pt)).Select(pt => tmMap[pt]).ToList();
+
+        for (int i = 0; i < newTcs.Count; i++)
+        {
+            var cur = Telecommands.IndexOf(newTcs[i]);
+            if (cur != i) Telecommands.Move(cur, i);
+        }
+        for (int i = 0; i < newTms.Count; i++)
+        {
+            var cur = Telemetries.IndexOf(newTms[i]);
+            if (cur != i) Telemetries.Move(cur, i);
+        }
+    }
+
+    /// <summary>
+    /// Handles a drag-to-reorder gesture from the packet-type lists.
+    /// Moves the underlying PacketType in the model (with undo support).
+    /// </summary>
+    public void MovePacketTypeNode(PacketTypeNodeViewModel dragged,
+        PacketTypeNodeViewModel target, bool above)
+    {
+        var collection = dragged.Model.Kind == PacketTypeKind.Telecommand
+            ? Telecommands : Telemetries;
+        var fromIdx = collection.IndexOf(dragged);
+        var toIdx   = collection.IndexOf(target);
+        if (fromIdx < 0 || toIdx < 0 || fromIdx == toIdx) return;
+
+        // Compute the target insertion index in the global PacketTypes observable collection.
+        var fromGlobal = _changeNotifier.PacketTypes.IndexOf(dragged.Model);
+        var toGlobal   = _changeNotifier.PacketTypes.IndexOf(target.Model);
+        if (fromGlobal < 0 || toGlobal < 0) return;
+
+        var insertAt = above ? toGlobal : toGlobal + 1;
+        if (insertAt > fromGlobal) insertAt--;
+
+        _dataModelManager.MovePacketType(dragged.Model, insertAt);
+        MarkEdited();
     }
 
     private void RemoveNodeFromCollections(PacketType pt)

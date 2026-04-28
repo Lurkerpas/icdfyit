@@ -93,62 +93,84 @@
         <!-- Main content: tree | splitter | detail -->
         <Grid ColumnDefinitions="220,4,*">
 
-            <!-- ── Left: packet-type tree (ICD-IF-60, ICD-IF-61) ──────────── -->
-            <DockPanel Grid.Column="0">
+            <!-- ── Left: packet-type lists (ICD-IF-60, ICD-IF-61) ──────────── -->
+            <Grid Grid.Column="0" RowDefinitions="*,4,*">
 
-                <!-- Section header with Add TC / Add TM buttons -->
-                <DockPanel DockPanel.Dock="Top" Background="#3F3F46" LastChildFill="True">
-                    <Button DockPanel.Dock="Right" Content="TM+" Margin="2"
-                            Command="{Binding AddTelemetryCommand}"
-                            ToolTip.Tip="Add Telemetry" />
-                    <Button DockPanel.Dock="Right" Content="TC+" Margin="2"
-                            Command="{Binding AddTelecommandCommand}"
-                            ToolTip.Tip="Add Telecommand" />
-                    <TextBlock Text="Packet Types" Padding="6,4"
-                               VerticalAlignment="Center"
-                               Foreground="#CCCCCC" FontWeight="SemiBold" />
+                <!-- Telecommands section -->
+                <DockPanel Grid.Row="0">
+                    <Border DockPanel.Dock="Top" Background="#3F3F46" Padding="0,2">
+                        <DockPanel LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Content="TC+" Margin="2"
+                                    Command="{Binding AddTelecommandCommand}"
+                                    ToolTip.Tip="Add Telecommand" />
+                            <TextBlock Text="Telecommands" Padding="6,2"
+                                       VerticalAlignment="Center"
+                                       Foreground="#CCCCCC" FontWeight="SemiBold" />
+                        </DockPanel>
+                    </Border>
+                    <ctrl:DraggableGrid x:Name="TelecommandsGrid"
+                                        ItemsSource="{Binding Telecommands}"
+                                        SelectedItem="{Binding SelectedPacketType, Mode=TwoWay}"
+                                        ShowHeader="False">
+                        <ctrl:DraggableGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add Telecommand…"
+                                          Command="{Binding AddTelecommandCommand}" />
+                                <MenuItem Header="Duplicate"
+                                          Command="{Binding DuplicatePacketTypeCommand}" />
+                                <Separator />
+                                <MenuItem Header="Remove"
+                                          Command="{Binding RemovePacketTypeCommand}" />
+                            </ContextMenu>
+                        </ctrl:DraggableGrid.ContextMenu>
+                        <ctrl:DraggableGrid.Columns>
+                            <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
+                            <ctrl:DraggableGridColumn Path="DisplayLabel" Width="180"/>
+                        </ctrl:DraggableGrid.Columns>
+                    </ctrl:DraggableGrid>
                 </DockPanel>
 
-                <!-- Packet type TreeView -->
-                <TreeView x:Name="PacketTypeTree"
-                          ItemsSource="{Binding PacketTypeGroups}"
-                          Background="#252526">
+                <!-- Section splitter -->
+                <GridSplitter Grid.Row="1"
+                              ResizeDirection="Rows"
+                              HorizontalAlignment="Stretch"
+                              Background="#3F3F46"/>
 
-                    <TreeView.Styles>
-                        <Style Selector="TreeViewItem">
-                            <Setter Property="IsExpanded" Value="True" />
-                        </Style>
-                    </TreeView.Styles>
+                <!-- Telemetries section -->
+                <DockPanel Grid.Row="2">
+                    <Border DockPanel.Dock="Top" Background="#3F3F46" Padding="0,2">
+                        <DockPanel LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Content="TM+" Margin="2"
+                                    Command="{Binding AddTelemetryCommand}"
+                                    ToolTip.Tip="Add Telemetry" />
+                            <TextBlock Text="Telemetries" Padding="6,2"
+                                       VerticalAlignment="Center"
+                                       Foreground="#CCCCCC" FontWeight="SemiBold" />
+                        </DockPanel>
+                    </Border>
+                    <ctrl:DraggableGrid x:Name="TelemetriesGrid"
+                                        ItemsSource="{Binding Telemetries}"
+                                        SelectedItem="{Binding SelectedPacketType, Mode=TwoWay}"
+                                        ShowHeader="False">
+                        <ctrl:DraggableGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add Telemetry…"
+                                          Command="{Binding AddTelemetryCommand}" />
+                                <MenuItem Header="Duplicate"
+                                          Command="{Binding DuplicatePacketTypeCommand}" />
+                                <Separator />
+                                <MenuItem Header="Remove"
+                                          Command="{Binding RemovePacketTypeCommand}" />
+                            </ContextMenu>
+                        </ctrl:DraggableGrid.ContextMenu>
+                        <ctrl:DraggableGrid.Columns>
+                            <ctrl:DraggableGridColumn ColumnType="DragHandle" Width="24"/>
+                            <ctrl:DraggableGridColumn Path="DisplayLabel" Width="180"/>
+                        </ctrl:DraggableGrid.Columns>
+                    </ctrl:DraggableGrid>
+                </DockPanel>
 
-                    <TreeView.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Add Telecommand…"
-                                      Command="{Binding AddTelecommandCommand}" />
-                            <MenuItem Header="Add Telemetry…"
-                                      Command="{Binding AddTelemetryCommand}" />
-                            <MenuItem Header="Duplicate"
-                                      Command="{Binding DuplicatePacketTypeCommand}" />
-                            <Separator />
-                            <MenuItem Header="Remove"
-                                      Command="{Binding RemovePacketTypeCommand}" />
-                        </ContextMenu>
-                    </TreeView.ContextMenu>
-
-                    <TreeView.DataTemplates>
-                        <TreeDataTemplate DataType="{x:Type vm:PacketTypeGroupNode}"
-                                          ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Name}"
-                                       Foreground="#CCCCCC" FontWeight="SemiBold"
-                                       Padding="2" />
-                        </TreeDataTemplate>
-                        <DataTemplate DataType="{x:Type vm:PacketTypeNodeViewModel}">
-                            <TextBlock Text="{Binding DisplayLabel}" Padding="2" />
-                        </DataTemplate>
-                    </TreeView.DataTemplates>
-
-                </TreeView>
-
-            </DockPanel>
+            </Grid>
 
             <!-- Splitter -->
             <GridSplitter Grid.Column="1"

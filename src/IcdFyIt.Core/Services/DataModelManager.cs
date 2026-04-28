@@ -196,6 +196,16 @@ public class DataModelManager
             packetType, _model.PacketTypes, _changeNotifier.NotifyAdded, _changeNotifier.NotifyRemoved,
             _dirtyTracker) { IsRemove = true });
 
+    public void MovePacketType(PacketType packetType, int newIndex)
+    {
+        var fromIndex = _changeNotifier.PacketTypes.IndexOf(packetType);
+        if (fromIndex < 0) return;
+        var toIndex = Math.Clamp(newIndex, 0, _changeNotifier.PacketTypes.Count - 1);
+        if (fromIndex == toIndex) return;
+        _undoRedoManager.Push(new MovePacketTypeCommand(
+            packetType, fromIndex, toIndex, _changeNotifier, _dirtyTracker));
+    }
+
     public PacketType DuplicatePacketType(PacketType source)
     {
         var nextId = _model.PacketTypes.Count > 0
@@ -843,6 +853,24 @@ public class DataModelManager
             _notify();
             _dirty.MarkDirty();
         }
+    }
+
+    private sealed class MovePacketTypeCommand : IUndoableCommand
+    {
+        private readonly PacketType _packetType;
+        private readonly int _from;
+        private readonly int _to;
+        private readonly ChangeNotifier _notifier;
+        private readonly DirtyTracker _dirty;
+
+        public MovePacketTypeCommand(PacketType packetType, int from, int to,
+            ChangeNotifier notifier, DirtyTracker dirty)
+        {
+            _packetType = packetType; _from = from; _to = to; _notifier = notifier; _dirty = dirty;
+        }
+
+        public void Execute() { _notifier.MovePacketType(_packetType, _to);   _dirty.MarkDirty(); }
+        public void Undo()    { _notifier.MovePacketType(_packetType, _from); _dirty.MarkDirty(); }
     }
 
     /// <summary>

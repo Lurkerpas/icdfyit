@@ -53,6 +53,12 @@ public class ChangeNotifier
 
     public void NotifyAdded(PacketType packetType) => PacketTypes.Add(packetType);
     public void NotifyRemoved(PacketType packetType) => PacketTypes.Remove(packetType);
+    public void MovePacketType(PacketType packetType, int newIndex)
+    {
+        var oldIndex = PacketTypes.IndexOf(packetType);
+        if (oldIndex >= 0 && oldIndex != newIndex)
+            PacketTypes.Move(oldIndex, Math.Clamp(newIndex, 0, PacketTypes.Count - 1));
+    }
 
     public void NotifyAdded(HeaderType headerType) => HeaderTypes.Add(headerType);
     public void NotifyRemoved(HeaderType headerType) => HeaderTypes.Remove(headerType);
