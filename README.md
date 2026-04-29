@@ -11,18 +11,77 @@ For a more mature tool, developed profesionally and in the process of adoption b
 
 # Static demo (what can it do for you)
 
-Consider data in ```demo/example-asw.xml```
+Consider data in `demo/example-asw.xml`
 
-**icdfyit** allows to edit it via GUI with tables. And then, using templates, generate e.g.,:
+**icdfyit** allows to edit it via GUI with tables. And then, using templates, generate various artifacts that are consistent with each other, as they are derived from the same **single source of truth**. E.g.,:
 
 ## markdown ICD
 
+### Boot Status
+
+**Mnemonic:** TMBS  
+**ID:** 0x0  
+**Header:** TM[Type=1] (Telemetry)  
+
+| Parameter | Type | Unit | Size | Offset |
+|-----------|------|------|------|--------|
+| Image Index | uint8 |  | 1 B | byte 0 |
+| Image Address | uint32 |  | 4 B | byte 1 |
+| Reason | boot-reason (enum, 32 bit) |  | 4 B | byte 5 |
 
 ## ASN.1/ACN
 
+```
+-- Packet  : Boot Status
+-- Mnemonic: TMBS
+-- ID      : 0x0
+-- Header  : Telemetry  (Type=1)
+T-Boot-Status ::= SEQUENCE {
+    m-image-Index  INTEGER (0..255),
+    m-image-Address  INTEGER (0..4294967295),
+    m-reason  T-Boot-reason
+}
+```
+
+
+(for more info on ASN.1 and ACN, go to [asn1scc](https://github.com/esa/asn1scc))
+
 ## RAW C transcoders
 
-(for more info on ACN, go to [asn1scc](https://github.com/esa/asn1scc))
+```c
+bool icdt_boot_Status_encode(IcdUF_ByteBuffer* buffer, const IcdT_Boot_Status* value, uint32_t* errorCode)
+{
+    /* Error output is mandatory and is cleared on entry. */
+    if (!icdt_set_success(errorCode))
+    {
+        return false;
+    }
+
+    /* Validate mandatory pointers before touching memory. */
+    if ((buffer == NULL) || (value == NULL))
+    {
+        return icdt_set_error(errorCode, ICDT_ERROR_NULL_ARGUMENT);
+    }
+
+    /* Encode packet fields in wire order from the model. */
+    if (!icdt_uint8_encode(buffer, &value->image_Index, errorCode))
+    {
+        return false;
+    }
+    if (!icdt_address_encode(buffer, &value->image_Address, errorCode))
+    {
+        return false;
+    }
+    if (!icdt_boot_reason_encode(buffer, &value->reason, errorCode))
+    {
+        return false;
+    }
+
+    /* Return success after full packet write and checks. */
+    return true;
+}
+
+```
 
 Please note that the above are illustrative demonstrations that evolve and may be incorrect.
 
