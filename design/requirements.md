@@ -27,6 +27,18 @@ ICD-FUN-110: Software shall allow to define (add, delete, modify) Header Types.
 ICD-FUN-120: Software shall allow to define (add, delete, modify) Memory entities.
 ICD-FUN-121: Software shall allow to define and edit ICD metadata.
 ICD-FUN-130: All numeric input fields (sizes, offsets, IDs, raw values) shall accept both decimal and hexadecimal notation. Hexadecimal values shall be prefixed with "0x" (e.g., "0x400", "0xFF"). If a value is entered in hexadecimal, it shall be displayed in hexadecimal notation after saving and reloading the Data Model.
+ICD-FUN-150: Software shall allow to export a Data Model to YAML format.
+ICD-FUN-151: Software shall allow to import a Data Model from YAML format.
+ICD-FUN-152: The YAML Data Model format shall support splitting the model across multiple files via an include directive, so that different parts of the model (e.g., data types, parameters, packet types) may reside in separate files and be composed at import time.
+ICD-FUN-153: YAML import shall resolve include directives relative to the directory of the file that contains them, supporting nested includes and multiple levels of inclusion.
+ICD-FUN-154: In YAML format, all inter-entity references shall be expressed by entity name, not by GUID or any other internal identifier.
+ICD-FUN-155: In YAML format, for fields where the Data Model holds both a string representation and a numeric representation (e.g., hexadecimal IDs, bit sizes), only the string representation shall be present in the YAML. The numeric value shall be derived from the string on import.
+ICD-FUN-156: YAML export shall produce output that is human-readable and directly editable in a plain-text editor without knowledge of internal model structure.
+ICD-FUN-157: The GUI shall allow to export the current Data Model to a YAML file chosen by the user.
+ICD-FUN-158: The GUI shall allow to import a Data Model from a YAML file chosen by the user, replacing the current Data Model (with the same unsaved-changes guard as for XML open).
+ICD-FUN-160: The CLI shall support exporting a Data Model from XML to YAML.
+ICD-FUN-161: The CLI shall support importing a Data Model from YAML and saving it as XML.
+ICD-FUN-162: The CLI shall support running a template-set export (render) directly from the command line, given a Data Model file (XML or YAML) and a template set definition XML file.
 
 # Data requirements
 ICD-DAT-10: Data Type shall have name. Data Type names shall be unique within the Data Model.
@@ -164,6 +176,25 @@ ICD-IF-260: Metadata Window shall allow to view and edit ICD metadata.
 ICD-IF-261: Metadata in the Metadata Window shall be presented as a grid.
 ICD-IF-262: Metadata Window shall support add, delete, duplicate and reorder operations for user-defined metadata fields.
 ICD-IF-263: Metadata Window shall support CSV import and export.
+ICD-IF-310: The CLI application shall support a command to convert a Data Model from XML to YAML: given an input XML file path and an output YAML file path, it shall write the equivalent YAML representation (ICD-FUN-160).
+ICD-IF-320: The CLI application shall support a command to convert a Data Model from YAML to XML: given a root YAML file path and an output XML file path, it shall resolve includes, merge, and write the XML (ICD-FUN-161).
+ICD-IF-330: The CLI application shall support a command to run a template-set export: given a Data Model file (XML or YAML), a Template Set definition XML file, an output folder, and optionally a Python interpreter path, it shall render all templates in the set to the output folder (ICD-FUN-162).
+ICD-IF-340: The CLI shall report errors to stderr and exit with a non-zero exit code on failure.
+ICD-IF-350: The CLI shall print a usage summary when invoked with no arguments or with --help.
+ICD-IF-410: The YAML Data Model format shall have a version field at the root level. If the file version is older than the current application version, the importer shall migrate the model. If the file version is newer than the current application version, the importer shall present an error and refuse to load.
+ICD-IF-420: The YAML root document shall optionally contain an `includes` list of file paths (relative to the including file's directory). The importer shall merge included files' content into the current model before processing the rest of the root document.
+ICD-IF-421: An include path may itself refer to a file that contains further includes. Circular includes shall be detected and reported as an error.
+ICD-IF-430: The YAML format shall organize model entities in top-level sections: `metadata`, `data_types`, `parameters`, `packet_types`, `header_types`, and `memories`.
+ICD-IF-431: Each section is optional; absent sections are treated as empty.
+ICD-IF-440: Data Type entries in YAML shall be identified by their name. The name acts as the key in the data_types mapping.
+ICD-IF-441: References from Parameters or Packet Fields to Data Types in YAML shall use the Data Type name string.
+ICD-IF-442: References from Parameters to Memories in YAML shall use the Memory name string.
+ICD-IF-443: References from Parameters to validity Parameters in YAML shall use the Parameter name string.
+ICD-IF-444: References from Packet Types to Header Types in YAML shall use the Header Type name string.
+ICD-IF-445: References from Header Type IDs to Data Types in YAML shall use the Data Type name string.
+ICD-IF-450: Fields that have both a string and a numeric representation in the Data Model (e.g., numeric IDs, bit sizes, raw enum values, memory offsets) shall appear in YAML using only their string form (e.g., "0x1A", "32"). The importer shall parse the string to derive the numeric value (ICD-FUN-155).
+ICD-IF-460: GUIDs shall not appear in YAML. On import, new GUIDs shall be generated for all entities.
+
 
 # Design requirements
 ICD-DES-10: Software shall be written in portable .NET C#.

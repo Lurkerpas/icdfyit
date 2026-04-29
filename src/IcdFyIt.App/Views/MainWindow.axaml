@@ -32,6 +32,9 @@
                 <MenuItem Header="_Save"     Command="{Binding SaveDocumentCommand}" />
                 <MenuItem Header="Save _As…" Command="{Binding SaveDocumentAsCommand}" />
                 <Separator />
+                <MenuItem Header="Open from _YAML…"  Command="{Binding ImportFromYamlCommand}" />
+                <MenuItem Header="Save as YAM_L…"    Command="{Binding ExportToYamlCommand}" />
+                <Separator />
                 <MenuItem Header="E_xit"     Command="{Binding ExitCommand}" />
             </MenuItem>
             <MenuItem Header="_Edit">

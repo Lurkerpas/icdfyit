@@ -62,6 +62,12 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Shows a Save-file-dialog; returns the chosen path or null if cancelled.</summary>
     public Func<string?, Task<string?>>? SaveFileDialog { get; set; }
 
+    /// <summary>Shows an Open-file-dialog for YAML files; returns the chosen path or null (ICD-FUN-155).</summary>
+    public Func<Task<string?>>? OpenYamlFileDialog { get; set; }
+
+    /// <summary>Shows a Save-file-dialog for YAML files; returns the chosen path or null (ICD-FUN-154).</summary>
+    public Func<string?, Task<string?>>? SaveYamlFileDialog { get; set; }
+
     /// <summary>Opens (or focuses) the Data Types window.</summary>
     public Action? ShowDataTypesWindow { get; set; }
 
@@ -212,6 +218,40 @@ public partial class MainWindowViewModel : ObservableObject
     private async Task SaveDocumentAs()
     {
         await SaveDocumentAsCore();
+    }
+
+    [RelayCommand]
+    private async Task ImportFromYaml()
+    {
+        if (!await GuardUnsavedChanges()) return;
+        var path = await (OpenYamlFileDialog?.Invoke() ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+        try
+        {
+            _dataModelManager.OpenYaml(path);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Failed to import YAML model from {Path}", path);
+            return;
+        }
+        RefreshTitle();
+    }
+
+    [RelayCommand]
+    private async Task ExportToYaml()
+    {
+        var path = await (SaveYamlFileDialog?.Invoke(_dataModelManager.CurrentFilePath)
+            ?? Task.FromResult<string?>(null));
+        if (path is null) return;
+        try
+        {
+            _dataModelManager.SaveAsYaml(path);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Failed to export model to YAML at {Path}", path);
+        }
     }
 
     public Task<bool> TrySaveForCloseAsync() => SaveDocumentCore();

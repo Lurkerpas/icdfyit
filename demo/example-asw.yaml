@@ -1,0 +1,423 @@
+version: 1
+metadata:
+  name: Example ASW ICD
+  version: 1.0
+  date: 2026 04 25
+  status: Draft
+  description: An example ASW ICD to demonstrate the application
+  fields:
+  - name: Device
+    value: RS-422
+  - name: Device Settings
+    value: 'Baud: 9600; Bits: 8; Parity: Odd; Device: UART0'
+  - name: Encapsulation
+    value: CCSDS Space Packet
+data_types:
+  uint8:
+    type: uint
+    endianness: LittleEndian
+    bit_size: 8
+    range:
+      min: 0
+      max: 255
+  uint16:
+    type: uint
+    endianness: LittleEndian
+    bit_size: 16
+    range:
+      min: 0
+      max: 65535
+  voltage:
+    type: sint
+    endianness: LittleEndian
+    bit_size: 16
+    range:
+      min: -32768
+      max: 32767
+    unit: V
+    calibration: x*0.16-4.3
+  error-code:
+    type: uint
+    endianness: LittleEndian
+    bit_size: 32
+    range:
+      min: 0
+      max: 2147483647
+  ID:
+    type: uint
+    endianness: LittleEndian
+    bit_size: 8
+    range:
+      min: 0
+      max: 255
+  asw-state:
+    type: enum
+    endianness: LittleEndian
+    bit_size: 32
+    values:
+    - name: off
+      raw_values: 0
+    - name: initializing
+      raw_values: 1
+    - name: idle
+      raw_values: 2
+    - name: operational
+      raw_values: 3
+    - name: safe
+      raw_values: 10
+  flag:
+    type: bool
+    endianness: LittleEndian
+    bit_size: 8
+  boot-reason:
+    type: enum
+    endianness: LittleEndian
+    bit_size: 32
+    values:
+    - name: unknown-reset
+      raw_values: 0
+    - name: user-reset
+      raw_values: 1
+    - name: crash
+      raw_values: 2
+    - name: power
+      raw_values: 3
+  address:
+    type: uint
+    endianness: LittleEndian
+    bit_size: 32
+    range:
+      min: 0
+      max: 4294967295
+  boot-report:
+    type: struct
+    fields:
+    - name: reason
+      data_type: boot-reason
+    - name: asw-address
+      data_type: address
+    - name: crc-ok
+      data_type: flag
+    - name: self-tests-ok
+      data_type: flag
+  memory-block:
+    type: array
+    element_type: uint8
+    array_size:
+      endianness: LittleEndian
+      bit_size: 16
+      range:
+        min: 0
+        max: 65535
+  status:
+    type: enum
+    endianness: LittleEndian
+    bit_size: 32
+    values:
+    - name: unknown
+      raw_values: 0
+    - name: off
+      raw_values: 1
+    - name: on
+      raw_values: 2
+parameters:
+  ADC good:
+    numeric_id: 0
+    mnemonic: ASWADCG
+    kind: SoftwareAcquisition
+    data_type: flag
+    short_description: ADC good status
+    memory: SRAM
+    memory_offset: 0xfff0
+  Main Power:
+    numeric_id: 1
+    mnemonic: ASWMPWR
+    kind: HardwareAcquisition
+    data_type: voltage
+    short_description: OBC power supply
+    memory: SRAM
+    memory_offset: 0xff08
+    validity_parameter: ADC good
+    alarm_low: 5
+    alarm_high: 6
+  Solar Array:
+    numeric_id: 2
+    mnemonic: ASWSAPWR
+    kind: HardwareAcquisition
+    data_type: voltage
+    short_description: Voltage from solar array
+    memory: SRAM
+    memory_offset: 0xff00
+    validity_parameter: ADC good
+    alarm_low: 5
+    alarm_high: 10
+  Analog Reference Voltage:
+    numeric_id: 3
+    mnemonic: ASWARV
+    kind: HardwareAcquisition
+    data_type: voltage
+    short_description: Regulated reference voltage
+    memory: SRAM
+    memory_offset: 0xff04
+    validity_parameter: ADC good
+    alarm_low: 3.2
+    alarm_high: 3.4
+  State:
+    numeric_id: 4
+    mnemonic: ASWSTATE
+    kind: SoftwareSetting
+    data_type: asw-state
+    short_description: ASW state
+    memory: SRAM
+    memory_offset: 0xff10
+  AOCS Status:
+    numeric_id: 5
+    mnemonic: ASWSA
+    kind: SoftwareAcquisition
+    data_type: status
+    memory: SRAM
+    memory_offset: 0xff14
+  PDU Status:
+    numeric_id: 6
+    mnemonic: ASWSP
+    kind: SoftwareAcquisition
+    data_type: status
+    memory: SRAM
+    memory_offset: 0xff18
+  Solar Status:
+    numeric_id: 7
+    mnemonic: ASWSS
+    kind: SoftwareAcquisition
+    data_type: status
+    memory: SRAM
+    memory_offset: 0xff1B
+  Boot Image Index:
+    numeric_id: 8
+    mnemonic: ASWBI
+    kind: SoftwareSetting
+    data_type: uint8
+    memory: Flash
+    memory_offset: 0xfff0
+  Boot Image Address:
+    numeric_id: 9
+    mnemonic: ASWBA
+    kind: SoftwareSetting
+    data_type: address
+    memory: Flash
+    memory_offset: 0xfff4
+  Boot Reason:
+    numeric_id: 10
+    mnemonic: ASWBR
+    kind: SoftwareAcquisition
+    data_type: boot-reason
+    memory: SRAM
+    memory_offset: 0xff20
+  Memory CRC:
+    numeric_id: 11
+    mnemonic: XMCRC
+    kind: SoftwareSetting
+    data_type: uint16
+  Memory Target Address:
+    numeric_id: 12
+    mnemonic: XMTA
+    kind: SoftwareSetting
+    data_type: address
+  Memory Data:
+    numeric_id: 13
+    mnemonic: XMDT
+    kind: SoftwareSetting
+    data_type: memory-block
+  HK ID:
+    numeric_id: 14
+    mnemonic: XHKID
+    kind: SoftwareSetting
+    data_type: ID
+  Last request ID:
+    numeric_id: 15
+    mnemonic: XRID
+    kind: SoftwareAcquisition
+    data_type: uint16
+  Last request status:
+    numeric_id: 16
+    mnemonic: XRS
+    kind: SoftwareAcquisition
+    data_type: status
+  Memory Length:
+    numeric_id: 17
+    mnemonic: XMLE
+    kind: SoftwareSetting
+    data_type: uint16
+header_types:
+  Telecommand:
+    mnemonic: TC
+    description: Basic telecommand header
+    ids:
+    - name: Type
+      description: Telecommand identifier
+      data_type: uint8
+  Telemetry:
+    mnemonic: TM
+    description: Basic telemetry header
+    ids:
+    - name: Type
+      description: Telemetry identifier
+      data_type: uint8
+packet_types:
+  Acknowledgement:
+    kind: Telemetry
+    numeric_id: 5
+    mnemonic: TMAK
+    header_type: Telemetry
+    header_id_values:
+      Type: 10
+    fields:
+    - name: Request ID
+      description: ID of the relevant request
+      parameter: Last request ID
+    - name: Request status
+      description: Status of the relevant request
+      parameter: Last request status
+  Boot Status:
+    kind: Telemetry
+    numeric_id: 0
+    mnemonic: TMBS
+    header_type: Telemetry
+    header_id_values:
+      Type: 1
+    fields:
+    - name: Image Index
+      parameter: Boot Image Index
+    - name: Image Address
+      parameter: Boot Image Address
+    - name: Reason
+      parameter: Boot Reason
+  Voltage Statuss:
+    kind: Telemetry
+    numeric_id: 1
+    mnemonic: TMVS
+    header_type: Telemetry
+    header_id_values:
+      Type: 2
+    fields:
+    - name: Battery Power
+      parameter: Main Power
+    - name: Charge Power
+      parameter: Solar Array
+    - name: Reference
+      parameter: Analog Reference Voltage
+  Subsystem Status 1:
+    kind: Telemetry
+    numeric_id: 2
+    mnemonic: TMS1
+    header_type: Telemetry
+    header_id_values:
+      Type: 3
+    fields:
+    - name: HK ID
+      description: Status ID
+      parameter: HK ID
+      is_type_indicator: true
+      indicator_value: 1
+    - name: State
+      parameter: State
+  Subsystem Status 2:
+    kind: Telemetry
+    numeric_id: 3
+    mnemonic: TMS2
+    header_type: Telemetry
+    header_id_values:
+      Type: 3
+    fields:
+    - name: HK ID
+      description: Status ID
+      parameter: HK ID
+      is_type_indicator: true
+      indicator_value: 2
+    - name: Solar Array
+      parameter: Solar Status
+    - name: AOCS
+      parameter: AOCS Status
+    - name: PDU
+      parameter: PDU Status
+  Memory Dump:
+    kind: Telemetry
+    numeric_id: 4
+    mnemonic: TMMD
+    header_type: Telemetry
+    header_id_values:
+      Type: 4
+    fields:
+    - name: Source Address
+      parameter: Memory Target Address
+    - name: Data
+      parameter: Memory Data
+    - name: CRC
+      parameter: Memory CRC
+  Go To State:
+    kind: Telecommand
+    numeric_id: 6
+    mnemonic: TCGS
+    description: Command to transition to the selected state
+    header_type: Telecommand
+    header_id_values:
+      Type: 1
+    fields:
+    - name: Request ID
+      parameter: Last request ID
+    - name: Target state
+      description: Requested state
+      parameter: State
+  Dump Memory:
+    kind: Telecommand
+    numeric_id: 7
+    mnemonic: TCMD
+    description: Request to dump memory
+    header_type: Telecommand
+    header_id_values:
+      Type: 2
+    fields:
+    - name: Request ID
+      parameter: Last request ID
+    - name: Address
+      description: Requested memory address
+      parameter: Memory Target Address
+    - name: Size
+      description: Length of the requested block
+      parameter: Memory Length
+  Memory Upload:
+    kind: Telecommand
+    numeric_id: 8
+    mnemonic: TCMU
+    description: Command to upload a block of memory
+    header_type: Telecommand
+    header_id_values:
+      Type: 3
+    fields:
+    - name: Request ID
+      parameter: Last request ID
+    - name: Target Address
+      description: Target address to write the data to
+      parameter: Memory Target Address
+    - name: Data
+      description: Data to be written
+      parameter: Memory Data
+    - name: CRC
+      description: CRC of the data field
+      parameter: Memory CRC
+memories:
+  Flash:
+    numeric_id: 0
+    mnemonic: MFL
+    size: 0xFFFF
+    address: 0x000000
+    description: Embedded flash
+    is_writable: false
+    is_readable: true
+  SRAM:
+    numeric_id: 1
+    mnemonic: MSR
+    size: 0x2000
+    address: 0x040000
+    description: Embedded SRAM
+    is_writable: true
+    is_readable: true

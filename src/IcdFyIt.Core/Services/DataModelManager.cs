@@ -25,6 +25,7 @@ public class DataModelManager
     private readonly DirtyTracker _dirtyTracker;
     private readonly UndoRedoManager _undoRedoManager;
     private readonly XmlPersistence _persistence = new();
+    private readonly YamlPersistence _yamlPersistence = new();
     private DataModel _model = new();
 
     public DataModelManager(
@@ -88,6 +89,35 @@ public class DataModelManager
         _persistence.Save(_model, filePath);
         CurrentFilePath = filePath;
         _dirtyTracker.MarkClean();
+    }
+
+    /// <summary>Loads a model from a YAML file path (ICD-FUN-155).</summary>
+    public void OpenYaml(string filePath)
+    {
+        _model = _yamlPersistence.Import(filePath);
+        CurrentFilePath = filePath;
+        _changeNotifier.ReloadFrom(_model);
+        _dirtyTracker.MarkClean();
+        _undoRedoManager.Clear();
+    }
+
+    /// <summary>Syncs the model and serialises it to a YAML file (ICD-FUN-154).</summary>
+    public void SaveAsYaml(string filePath)
+    {
+        _model.DataTypes.Clear();
+        _model.DataTypes.AddRange(_changeNotifier.DataTypes);
+        _model.Parameters.Clear();
+        _model.Parameters.AddRange(_changeNotifier.Parameters);
+        _model.PacketTypes.Clear();
+        _model.PacketTypes.AddRange(_changeNotifier.PacketTypes);
+        _model.HeaderTypes.Clear();
+        _model.HeaderTypes.AddRange(_changeNotifier.HeaderTypes);
+        _model.Memories.Clear();
+        _model.Memories.AddRange(_changeNotifier.Memories);
+        _model.Metadata.Fields.Clear();
+        _model.Metadata.Fields.AddRange(_changeNotifier.MetadataFields);
+
+        _yamlPersistence.Export(_model, filePath);
     }
 
     // ── DataType CRUD ──────────────────────────────────────────────────────────

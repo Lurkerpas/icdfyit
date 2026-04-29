@@ -1,6 +1,7 @@
 using System.Xml.Serialization;
 using IcdFyIt.Core.Export;
 using IcdFyIt.Core.Infrastructure;
+using IcdFyIt.Core.Model;
 using IcdFyIt.Core.Persistence;
 using IcdFyIt.Core.Services;
 
@@ -21,8 +22,10 @@ internal static class Program
 
         return verb switch
         {
-            "validate" => HandleValidate(verbArgs),
-            "export" => HandleExport(verbArgs),
+            "validate"   => HandleValidate(verbArgs),
+            "export"     => HandleExport(verbArgs),
+            "yaml-to-xml" => HandleYamlToXml(verbArgs),
+            "xml-to-yaml" => HandleXmlToYaml(verbArgs),
             _ => HandleUnknownVerb(verb),
         };
     }
@@ -51,7 +54,7 @@ internal static class Program
 
         try
         {
-            var model = new XmlPersistence().Load(modelPath);
+            var model = LoadModel(modelPath);
             var issues = new ModelValidator().Validate(model);
 
             if (issues.Count == 0)
@@ -114,7 +117,7 @@ internal static class Program
 
         try
         {
-            var model = new XmlPersistence().Load(modelPath);
+            var model = LoadModel(modelPath);
             var issues = new ModelValidator().Validate(model);
             if (issues.Count > 0)
             {
@@ -155,6 +158,106 @@ internal static class Program
             Console.Error.WriteLine($"Export failed: {ex.Message}");
             return 1;
         }
+    }
+
+    private static int HandleYamlToXml(string[] args)
+    {
+        if (args.Length == 0 || args.Any(IsHelp))
+        {
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  icdfyit-cli yaml-to-xml --model <yaml-path> --output <xml-path>");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine("  -m, --model <path>    Input YAML model path.");
+            Console.WriteLine("  -o, --output <path>   Output XML model path.");
+            Console.WriteLine("  -h, --help            Show this help.");
+            return 0;
+        }
+
+        if (!TryParseOptions(args, out var options, out var error))
+        {
+            Console.Error.WriteLine($"Error: {error}");
+            return 2;
+        }
+
+        if (!TryGetOption(options, "m", "model", out var modelPath))
+        {
+            Console.Error.WriteLine("Error: Missing required option --model (-m).");
+            return 2;
+        }
+
+        if (!TryGetOption(options, "o", "output", out var outputPath))
+        {
+            Console.Error.WriteLine("Error: Missing required option --output (-o).");
+            return 2;
+        }
+
+        try
+        {
+            var model = new YamlPersistence().Import(modelPath);
+            new XmlPersistence().Save(model, outputPath);
+            Console.WriteLine($"Converted YAML → XML: \"{outputPath}\".");
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"yaml-to-xml failed: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private static int HandleXmlToYaml(string[] args)
+    {
+        if (args.Length == 0 || args.Any(IsHelp))
+        {
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  icdfyit-cli xml-to-yaml --model <xml-path> --output <yaml-path>");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine("  -m, --model <path>    Input XML model path.");
+            Console.WriteLine("  -o, --output <path>   Output YAML model path.");
+            Console.WriteLine("  -h, --help            Show this help.");
+            return 0;
+        }
+
+        if (!TryParseOptions(args, out var options, out var error))
+        {
+            Console.Error.WriteLine($"Error: {error}");
+            return 2;
+        }
+
+        if (!TryGetOption(options, "m", "model", out var modelPath))
+        {
+            Console.Error.WriteLine("Error: Missing required option --model (-m).");
+            return 2;
+        }
+
+        if (!TryGetOption(options, "o", "output", out var outputPath))
+        {
+            Console.Error.WriteLine("Error: Missing required option --output (-o).");
+            return 2;
+        }
+
+        try
+        {
+            var model = new XmlPersistence().Load(modelPath);
+            new YamlPersistence().Export(model, outputPath);
+            Console.WriteLine($"Converted XML → YAML: \"{outputPath}\".");
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"xml-to-yaml failed: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private static DataModel LoadModel(string modelPath)
+    {
+        var ext = Path.GetExtension(modelPath).ToLowerInvariant();
+        return ext is ".yaml" or ".yml"
+            ? new YamlPersistence().Import(modelPath)
+            : new XmlPersistence().Load(modelPath);
     }
 
     private static int HandleUnknownVerb(string verb)
@@ -268,12 +371,18 @@ internal static class Program
         Console.WriteLine("icdfyit-cli");
         Console.WriteLine();
         Console.WriteLine("Usage:");
-        Console.WriteLine("  icdfyit-cli validate --model <path>");
-        Console.WriteLine("  icdfyit-cli export --model <path> --output <dir> --template-set <name> [--settings <path>]");
+        Console.WriteLine("  icdfyit-cli validate   --model <path>");
+        Console.WriteLine("  icdfyit-cli export     --model <path> --output <dir> --template-set <name> [--settings <path>]");
+        Console.WriteLine("  icdfyit-cli yaml-to-xml --model <yaml> --output <xml>");
+        Console.WriteLine("  icdfyit-cli xml-to-yaml --model <xml>  --output <yaml>");
         Console.WriteLine();
         Console.WriteLine("Verbs:");
-        Console.WriteLine("  validate   Validate the model and print issues.");
-        Console.WriteLine("  export     Generate files by applying a template set.");
+        Console.WriteLine("  validate     Validate the model and print issues.");
+        Console.WriteLine("  export       Generate files by applying a template set.");
+        Console.WriteLine("  yaml-to-xml  Convert a YAML model file to XML.");
+        Console.WriteLine("  xml-to-yaml  Convert an XML model file to YAML.");
+        Console.WriteLine();
+        Console.WriteLine("Model files may be XML (.xml) or YAML (.yaml / .yml) for the validate and export verbs.");
         Console.WriteLine();
         Console.WriteLine("Use --help with a verb for details, e.g.:");
         Console.WriteLine("  icdfyit-cli validate --help");
@@ -285,7 +394,7 @@ internal static class Program
         Console.WriteLine("  icdfyit-cli validate --model <path>");
         Console.WriteLine();
         Console.WriteLine("Options:");
-        Console.WriteLine("  -m, --model <path>     Input model XML path.");
+        Console.WriteLine("  -m, --model <path>     Input model path (XML or YAML).");
         Console.WriteLine("  -h, --help             Show this help.");
     }
 
@@ -295,7 +404,7 @@ internal static class Program
         Console.WriteLine("  icdfyit-cli export --model <path> --output <dir> --template-set <name> [--settings <path>]");
         Console.WriteLine();
         Console.WriteLine("Options:");
-        Console.WriteLine("  -m, --model <path>           Input model XML path.");
+        Console.WriteLine("  -m, --model <path>           Input model path (XML or YAML).");
         Console.WriteLine("  -o, --output <dir>           Output directory for generated files.");
         Console.WriteLine("  -s, --settings <path>        Optional settings.xml path (defaults to app settings). ");
         Console.WriteLine("  -t, --template-set <name>    Template set name from settings.");

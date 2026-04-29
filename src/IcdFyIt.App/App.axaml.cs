@@ -105,6 +105,40 @@ public partial class App : Application
                 return file?.Path.LocalPath;
             };
 
+            mainVm.OpenYamlFileDialog = async () =>
+            {
+                var files = await mainWindow.StorageProvider.OpenFilePickerAsync(
+                    new FilePickerOpenOptions
+                    {
+                        Title = "Open YAML Model",
+                        AllowMultiple = false,
+                        FileTypeFilter =
+                        [
+                            new FilePickerFileType("YAML Files") { Patterns = ["*.yaml", "*.yml"] },
+                            new FilePickerFileType("All Files")  { Patterns = ["*"] }
+                        ]
+                    });
+                return files.Count > 0 ? files[0].Path.LocalPath : null;
+            };
+
+            mainVm.SaveYamlFileDialog = async suggestedPath =>
+            {
+                var file = await mainWindow.StorageProvider.SaveFilePickerAsync(
+                    new FilePickerSaveOptions
+                    {
+                        Title = "Save Model as YAML",
+                        DefaultExtension = "yaml",
+                        SuggestedFileName = suggestedPath is { } p
+                            ? System.IO.Path.GetFileNameWithoutExtension(p) + ".yaml"
+                            : "untitled.yaml",
+                        FileTypeChoices =
+                        [
+                            new FilePickerFileType("YAML Files") { Patterns = ["*.yaml", "*.yml"] }
+                        ]
+                    });
+                return file?.Path.LocalPath;
+            };
+
             // ── Modal dialog delegates ─────────────────────────────────────────
 
             mainVm.RequestAddPacketTypeName = async () =>
