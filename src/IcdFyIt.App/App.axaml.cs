@@ -342,6 +342,25 @@ public partial class App : Application
                 return files.Count > 0 ? files[0].Path.LocalPath : null;
             };
 
+            optionsVm.RequestImportTemplateSet = async () =>
+            {
+                Window owner = (optionsWindow is { IsVisible: true })
+                    ? (Window)optionsWindow
+                    : (Window)mainWindow;
+                var files = await owner.StorageProvider.OpenFilePickerAsync(
+                    new FilePickerOpenOptions
+                    {
+                        Title = "Import Template Set",
+                        AllowMultiple = false,
+                        FileTypeFilter =
+                        [
+                            new FilePickerFileType("Template Set Definition") { Patterns = ["*.xml"] },
+                            new FilePickerFileType("All Files")               { Patterns = ["*"] }
+                        ]
+                    });
+                return files.Count > 0 ? files[0].Path.LocalPath : null;
+            };
+
             mainVm.ShowOptionsWindow = () =>
             {
                 if (optionsWindow is { IsVisible: true })

@@ -41,4 +41,8 @@ public class AppOptions
     [XmlArray]
     [XmlArrayItem("Grid")]
     public List<GridColumnSizeOption> GridColumnSizes { get; set; } = new();
+
+    /// <summary>Last output folder chosen in the Export window; restored on next open.</summary>
+    [XmlElement]
+    public string? LastExportFolder { get; set; }
 }

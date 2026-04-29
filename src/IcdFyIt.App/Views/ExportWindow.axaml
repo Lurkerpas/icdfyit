@@ -4,7 +4,7 @@
         x:Class="IcdFyIt.App.Views.ExportWindow"
         Icon="avares://IcdFyIt.App/Assets/icon.png"
         Title="Export"
-        Width="560" Height="320"
+        Width="800" Height="400"
         MinWidth="450" MinHeight="260">
 
     <LayoutTransformControl>

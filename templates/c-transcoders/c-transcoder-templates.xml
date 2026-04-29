@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TemplateSetDefinition Version="1" Name="C Transcoders">
+  <Description>C transcoder template set (utility + generated transcoders).</Description>
+  <Templates>
+    <Template Name="utility-header" Description="Static utility transcoder header">
+      <FilePath>icdfyit-transcoders.h</FilePath>
+      <OutputNamePattern>icdfyit-transcoders.h</OutputNamePattern>
+    </Template>
+    <Template Name="utility-source" Description="Static utility transcoder source">
+      <FilePath>icdfyit-transcoders.c</FilePath>
+      <OutputNamePattern>icdfyit-transcoders.c</OutputNamePattern>
+    </Template>
+    <Template Name="model-header" Description="Model-specific transcoder header">
+      <FilePath>transcoders.h.mako</FilePath>
+      <OutputNamePattern>transcoders.h</OutputNamePattern>
+    </Template>
+    <Template Name="model-source" Description="Model-specific transcoder source">
+      <FilePath>transcoders.c.mako</FilePath>
+      <OutputNamePattern>transcoders.c</OutputNamePattern>
+    </Template>
+  </Templates>
+</TemplateSetDefinition>

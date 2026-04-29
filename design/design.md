@@ -160,6 +160,13 @@ Each **Template**:
 
 Template Sets are stored in `settings.xml`, separate from the Data Model XML (ICD-DES-81). The settings file is located in a system-managed per-user application data directory.
 
+**Template file path rules** (ICD-DAT-620, ICD-FUN-142): A template's `FilePath` may be:
+- **Absolute** — used as-is after environment variable expansion.
+- **Relative** — resolved at export time against the settings file directory.
+- **Containing `${VAR_NAME}` references** — expanded at access time (export). References to undefined variables are left unchanged. The unexpanded form is what is stored and displayed in the UI.
+
+**Template Set definition files** (ICD-DAT-660): A standalone XML file (conventionally `*.xml`) that fully describes a Template Set — name, description, and all templates with their metadata and file paths. Its structure mirrors `TemplateSetDefinitionFile` and `TemplateDefinitionEntry` in `IcdFyIt.Core.Infrastructure`. Relative `FilePath` values inside the definition file are resolved to absolute paths anchored at the file's own directory at import time (ICD-FUN-141); paths containing `${…}` are preserved unexpanded (ICD-FUN-142). The root element carries a `version` attribute (ICD-DAT-661); if the file version exceeds `TemplateSetDefinitionFile.CurrentVersion` the import is rejected with an error.
+
 ### 3.6 Memories
 
 A Memory represents a named hardware or software memory region. It carries:
@@ -263,14 +270,19 @@ Orchestrates template rendering (ICD-FUN-90). The Python.NET runtime (pythonnet 
 1. Ensure the Python.NET runtime is initialized (one-time: locate Python via system PATH, import Mako, log an error if not found).
 2. User selects a Template Set and an output folder.
 3. For each Template in the set:
-   a. Inject the `DataModel` as the variable `model` (and any helper utilities) into the Mako template context.
-   b. Render the Output Name Pattern to produce the file name.
-   c. Render the template file content to produce the file body.
-   d. Write the result to `<output folder>/<rendered file name>`.
+   a. Resolve the template `FilePath`: expand `${VAR_NAME}` environment variable references (ICD-FUN-142), then, if the result is still relative, join it with the settings directory (ICD-DAT-620).
+   b. Inject the `DataModel` as the variable `model` (and any helper utilities) into the Mako template context.
+   c. Render the Output Name Pattern to produce the file name.
+   d. Render the template file content to produce the file body.
+   e. Write the result to `<output folder>/<rendered file name>`.
+
+**Environment variable expansion** uses `${VAR_NAME}` syntax and is performed by `ExportEngine.ExpandEnvironmentVariables` via a regex substitution. References to undefined variables are left unchanged in the resolved path.
 
 ### 4.5 Options Manager
 
 Persists user options (e.g., default paths, UI preferences, undo depth) and Template Set definitions (ICD-DES-81) to `settings.xml` in a system-managed per-user application data directory (ICD-FUN-101). Options are loaded at startup. If `settings.xml` is corrupted or cannot be deserialized, the failure is logged and default options are used for that run (ICD-FUN-102). The Options Window provides explicit **Save** and **Cancel** buttons (ICD-FUN-100): Save persists all changes; Cancel discards them. Each option carries a default value and tooltip description.
+
+**Template Set import** (ICD-FUN-140): The static class `TemplateSetImporter` handles importing from a definition XML file. It deserializes a `TemplateSetDefinitionFile`, rejects files whose `version` attribute exceeds `CurrentVersion`, resolves relative `FilePath` values to absolute paths anchored at the XML file's directory (ICD-FUN-141), and returns a ready-to-use `TemplateSetConfig`. Paths containing `${VAR_NAME}` are left unexpanded (ICD-FUN-142).
 
 ### 4.6 Error Handling & Logging (`LogManager`)
 
@@ -339,6 +351,8 @@ All windows use the Avalonia dark theme with title-bar-merged menus and a leadin
 - Every option has a tooltip showing its description and default value.
 - Path options use text field + "..." file/folder picker button.
 - Dedicated **Template Sets** tab for defining (add, delete, modify) Template Sets and their Templates (ICD-IF-73).
+- **Import** button in the Template Sets tab opens a file picker for a Template Set definition XML file; on success the imported set is appended to the list and selected (ICD-IF-74).
+- Template file path fields display the unexpanded `${VAR_NAME}` form so the user can view and edit it directly (ICD-IF-75).
 - Explicit **Save** and **Cancel** buttons (ICD-FUN-100).
 
 ### 5.7 Validation Dialog

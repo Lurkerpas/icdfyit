@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TemplateSetDefinition Version="1" Name="ASN.1/ACN">
+  <Description>ASN.1 and ACN encoding template set.</Description>
+  <Templates>
+    <Template Name="asn1-module" Description="ASN.1 module with data types and packet SEQUENCEs">
+      <FilePath>asn1.mako</FilePath>
+      <OutputNamePattern>icd.asn</OutputNamePattern>
+    </Template>
+    <Template Name="acn-module" Description="ACN encoding companion file">
+      <FilePath>acn.mako</FilePath>
+      <OutputNamePattern>icd.acn</OutputNamePattern>
+    </Template>
+  </Templates>
+</TemplateSetDefinition>

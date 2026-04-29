@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TemplateSetDefinition Version="1" Name="Markdown ICD">
+  <Description>ICD Markdown tables template set.</Description>
+  <Templates>
+    <Template Name="icd-markdown" Description="Markdown ICD with packet tables">
+      <FilePath>md-tables.mako</FilePath>
+      <OutputNamePattern>icd-tables.md</OutputNamePattern>
+    </Template>
+  </Templates>
+</TemplateSetDefinition>

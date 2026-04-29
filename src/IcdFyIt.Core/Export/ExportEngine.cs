@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using IcdFyIt.Core.Infrastructure;
 using IcdFyIt.Core.Model;
 using Python.Runtime;
@@ -167,7 +168,16 @@ public class ExportEngine
 
     private static string ResolveFilePath(string filePath, string? settingsDir)
     {
-        if (Path.IsPathRooted(filePath) || settingsDir is null) return filePath;
-        return Path.Combine(settingsDir, filePath);
+        var expanded = ExpandEnvironmentVariables(filePath);
+        if (Path.IsPathRooted(expanded) || settingsDir is null) return expanded;
+        return Path.Combine(settingsDir, expanded);
     }
+
+    /// <summary>
+    /// Expands <c>${VAR_NAME}</c> environment variable references in <paramref name="path"/>
+    /// (ICD-FUN-142). References to undefined variables are left unchanged.
+    /// </summary>
+    private static string ExpandEnvironmentVariables(string path) =>
+        Regex.Replace(path, @"\$\{([^}]+)\}", static m =>
+            Environment.GetEnvironmentVariable(m.Groups[1].Value) ?? m.Value);
 }

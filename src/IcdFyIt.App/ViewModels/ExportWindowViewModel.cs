@@ -66,6 +66,8 @@ public partial class ExportWindowViewModel : ObservableObject
         foreach (var ts in opts.TemplateSets)
             TemplateSets.Add(ts);
         SelectedTemplateSet = TemplateSets.Count > 0 ? TemplateSets[0] : null;
+        if (!string.IsNullOrWhiteSpace(opts.LastExportFolder))
+            OutputFolder = opts.LastExportFolder;
         StatusMessage       = null;
     }
 
@@ -97,6 +99,10 @@ public partial class ExportWindowViewModel : ObservableObject
 
             await Task.Run(() =>
                 _exportEngine.Export(model, set, settingsDir, folder, pythonPath));
+
+            var opts = _optionsManager.Load();
+            opts.LastExportFolder = folder;
+            _optionsManager.Save(opts);
 
             StatusMessage = $"Export complete — {set.Templates.Count} file(s) written to: {folder}";
         }

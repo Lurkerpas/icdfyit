@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IcdFyIt.Core.Infrastructure;
+using Serilog;
 
 namespace IcdFyIt.App.ViewModels;
 
@@ -15,6 +16,12 @@ public partial class OptionsWindowViewModel : ObservableObject
 
     /// <summary>Injected by App.axaml.cs to open a file-picker for template files.</summary>
     public Func<string?, Task<string?>>? RequestBrowseTemplateFile { get; set; }
+
+    /// <summary>
+    /// Injected by App.axaml.cs to open a file-picker for a Template Set definition XML file.
+    /// Returns the selected path, or null if the user cancelled (ICD-FUN-140, ICD-IF-74).
+    /// </summary>
+    public Func<Task<string?>>? RequestImportTemplateSet { get; set; }
 
     /// <summary>Called after Save with the new UiScale value so the main VM can apply it.</summary>
     public Action<double>? OnScaleSaved { get; set; }
@@ -134,6 +141,33 @@ public partial class OptionsWindowViewModel : ObservableObject
         var row = new TemplateSetRowViewModel(cfg);
         TemplateSets.Add(row);
         SelectedTemplateSet = row;
+    }
+
+    /// <summary>
+    /// Imports a Template Set from a definition XML file chosen by the user (ICD-FUN-140, ICD-IF-74).
+    /// Relative paths inside the XML are resolved to absolute paths anchored at the XML file's
+    /// directory (ICD-FUN-141). Environment variable references are preserved for runtime
+    /// expansion (ICD-FUN-142).
+    /// </summary>
+    [RelayCommand]
+    private async Task ImportTemplateSet()
+    {
+        if (RequestImportTemplateSet is null) return;
+        var path = await RequestImportTemplateSet();
+        if (path is null) return;
+
+        try
+        {
+            var cfg = TemplateSetImporter.Import(path);
+            var row = new TemplateSetRowViewModel(cfg);
+            TemplateSets.Add(row);
+            SelectedTemplateSet = row;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to import template set from '{Path}'", path);
+            throw;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedTemplateSet))]

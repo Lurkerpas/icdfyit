@@ -18,6 +18,9 @@ ICD-FUN-90: When exporting, Software shall render each template in the following
 - File Content shall be rendered using templating engine, from the template content.
 - File Content shall be saved under the File Name located in the user-selected output folder.
 ICD-FUN-100: Options Window shall have Save and Cancel buttons. Save persists options; Cancel discards changes made since the window was opened.
+ICD-FUN-140: Software shall allow the user to import a Template Set definition from a Template Set XML file. Importing shall add the Template Set, with all its Templates, to the current list of Template Sets in options.
+ICD-FUN-141: When importing a Template Set from an XML file, all template file paths that are relative shall be resolved to absolute paths relative to the directory containing the imported XML file, and stored as absolute paths.
+ICD-FUN-142: Template file paths in options shall support environment variable expansion using ${VAR_NAME} syntax (e.g., ${HOME}/templates/mytemplate.mako). Environment variables shall be expanded at the time a template file is accessed (e.g., during export), not at the time of import or save.
 ICD-FUN-101: Options shall be stored in a settings.xml file located in a system-managed per-user, per-application settings directory.
 ICD-FUN-102: If settings.xml is corrupted or cannot be deserialized, Software shall log the error and continue with default options.
 ICD-FUN-110: Software shall allow to define (add, delete, modify) Header Types.
@@ -83,11 +86,14 @@ ICD-DAT-462: Packet Field set as a Packet Type indicator shall have its value de
 ICD-DAT-600: Template Set shall have a name.
 ICD-DAT-601: Template Set shall have a description.
 ICD-DAT-610: Template Set shall consist of a set of Templates.
-ICD-DAT-620: Template shall be defined via path to a file, which can be relative or absolute.
+ICD-DAT-620: Template shall be defined via path to a file, which can be relative or absolute, and may contain environment variable references in ${VAR_NAME} syntax.
 ICD-DAT-621: Template file shall be a mako template to be rendered by Mako templating engine.
 ICD-DAT-630: Template shall have a name.
 ICD-DAT-640: Template shall have a description.
 ICD-DAT-650: Template shall have Output Name Pattern.
+ICD-DAT-660: A Template Set definition file shall be an XML file accompanying a set of template files and fully describing a Template Set (name, description, and all Templates with their metadata and relative or absolute paths).
+ICD-DAT-661: The Template Set definition XML file shall include a format version number to allow future migrations.
+ICD-DAT-662: Template file paths within a Template Set definition XML file may be relative (resolved against the XML file's directory) or absolute, and may contain environment variable references in ${VAR_NAME} syntax.
 ICD-DAT-710: Header Type shall have a name.
 ICD-DAT-715: Header Type shall have a mnemonic.
 ICD-DAT-720: Header Type shall have a description.
@@ -129,6 +135,8 @@ ICD-IF-70: Option Window shall contain all options, divided across tabs.
 ICD-IF-71: It shall be possible to enter filesystem paths both using a text edit and by launching a picker, using a nearby button labelled "...".
 ICD-IF-72: All options shall have a tooltip with short description of the option and the default value.
 ICD-IF-73: Options Window shall have a dedicated tab for defining (add, delete, modify) Template Sets and their Templates.
+ICD-IF-74: The Template Sets tab in Options shall provide an "Import Template Set" action that opens a file picker for selecting a Template Set definition XML file and adds the imported Template Set to the list.
+ICD-IF-75: Template file path fields in Options shall accept and display environment variable references in ${VAR_NAME} syntax without expanding them, so the user can see and edit the unexpanded form.
 ICD-IF-80: Export Window shall allow to select a Template Set, select the output folder, and export the model.
 ICD-IF-90: Parameters Window shall present the parameters with their metadata.
 ICD-IF-91: Parameters Window shall provide the means to filter parameters by various metadata.
