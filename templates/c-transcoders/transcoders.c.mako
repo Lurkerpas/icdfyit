@@ -395,8 +395,9 @@ bool icdt_${F(dt.Name)}_encode(IcdUF_ByteBuffer* buffer, const ${declared_c_type
 <%
 array_min = int(float(dt.ArraySize.Range.Min))
 array_max = int(float(dt.ArraySize.Range.Max))
+count_bits = int(dt.ArraySize.BitSize)
 %>
-    uint32_t lengthOnWire = value->count;
+    uint${count_bits}_t lengthOnWire = (uint${count_bits}_t)value->count;
 
     /* Count must fit static storage and configured min/max limits. */
     if (value->count > ICDT_${C(dt.Name)}_MAX_LENGTH)
@@ -536,31 +537,38 @@ bool icdt_${F(dt.Name)}_decode(IcdUF_ByteBuffer* buffer, ${declared_c_type(dt)}*
 
 % elif kind == 'Array':
 <%
-array_min = int(float(dt.ArraySize.Range.Min))
-array_max = int(float(dt.ArraySize.Range.Max))
+array_min      = int(float(dt.ArraySize.Range.Min))
+array_max      = int(float(dt.ArraySize.Range.Max))
+count_bits     = int(dt.ArraySize.BitSize)
+count_type_max = (1 << count_bits) - 1
+upper_bounded  = array_max < count_type_max
 %>
-    uint32_t lengthOnWire = 0u;
+    uint${count_bits}_t lengthOnWire = 0u;
 
     /* Decode declared element count first using utility primitive. */
-    if (!${utility_unsigned(int(dt.ArraySize.BitSize), dt.ArraySize.Endianness.ToString(), False)}(buffer, &lengthOnWire, &utilErr))
+    if (!${utility_unsigned(count_bits, dt.ArraySize.Endianness.ToString(), False)}(buffer, &lengthOnWire, &utilErr))
     {
         return icdt_fail_from_utility(utilErr, errorCode);
     }
 
-    /* Count must fit static storage and configured min/max limits. */
-    if (lengthOnWire > ICDT_${C(dt.Name)}_MAX_LENGTH)
+    /* Count must fit configured min/max limits. */
+% if upper_bounded and array_min > 0:
+    if ((lengthOnWire < (uint${count_bits}_t)(${array_min})) ||
+        (lengthOnWire > (uint${count_bits}_t)(ICDT_${C(dt.Name)}_MAX_LENGTH)))
     {
         return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
     }
-% if array_min > 0:
-    if ((lengthOnWire < (uint32_t)(${array_min})) ||
-        (lengthOnWire > (uint32_t)(${array_max})))
-% else:
-    if (lengthOnWire > (uint32_t)(${array_max}))
+% elif upper_bounded:
+    if (lengthOnWire > (uint${count_bits}_t)(ICDT_${C(dt.Name)}_MAX_LENGTH))
+    {
+        return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
+    }
+% elif array_min > 0:
+    if (lengthOnWire < (uint${count_bits}_t)(${array_min}))
+    {
+        return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
+    }
 % endif
-    {
-        return icdt_set_error(errorCode, ICDT_ERROR_CONSTRAINT);
-    }
 
     /* Store validated count and decode elements in order. */
     value->count = lengthOnWire;
