@@ -15,7 +15,7 @@ CFLAGS := -std=c17 -Wall -Wextra -pedantic
 .PHONY: all generate-icd generate-asn1 generate-transcoders \
         compile-asn1 compile-transcoders clean
 
-all: compile-transcoders
+all: compile-transcoders generate-icd
 
 # ── Code generation ────────────────────────────────────────────────────────────
 
