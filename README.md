@@ -9,11 +9,31 @@ This tool is an experiment, a demonstration, and to some extent, a fusion of exp
 
 For a more mature tool, developed profesionally and in the process of adoption by the industry, and specialized in ECSS PUS C, go to [OPUS2](https://gitlab.esa.int/PUS-C/opus2)
 
-# Static demo (what can it do for you)
+# Static demo (what it can do for you)
 
 Consider data in `demo/example-asw.xml`
 
-**icdfyit** allows to edit it via GUI with tables. And then, using templates, generate various artifacts that are consistent with each other, as they are derived from the same **single source of truth**. E.g.,:
+**icdfyit** allows to edit it via GUI with tables. Like that:
+![Main GUI window](./web-assets/icdfyit-main-window.png)
+Or, in a programmer friendly way, using YAML (see demo/example-asw.yaml):
+```yaml
+  Boot Status:
+    kind: Telemetry
+    numeric_id: 0
+    mnemonic: TMBS
+    header_type: Telemetry
+    header_id_values:
+      Type: 1
+    fields:
+    - name: Image Index
+      parameter: Boot Image Index
+    - name: Image Address
+      parameter: Boot Image Address
+    - name: Reason
+      parameter: Boot Reason
+```
+
+And then, using templates, generate various artifacts that are consistent with each other, as they are derived from the same **single source of truth**. E.g.,:
 
 ## markdown ICD
 
